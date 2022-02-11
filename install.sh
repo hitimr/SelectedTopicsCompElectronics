@@ -20,7 +20,9 @@ sudo apt-get install -y \
     doxygen \
     libgl1-mesa-dev \
     libglfw3-dev \
-    libopengl-dev
+    libopengl-dev \
+    libjemalloc-dev \ 
+    freeglut3-dev
     
 # Tools
 sudo apt install paraview
@@ -32,11 +34,14 @@ mkdir -p $DIR_OPENVDB_BUILD
 ( \
     cd $DIR_OPENVDB_BUILD \
     && cmake \
+    -D OPENVDB_BUILD_VDB_PRINT=ON \
+    -D OPENVDB_BUILD_VDB_LOD=ON \
+    -D OPENVDB_BUILD_VDB_RENDER=ON \
+    -D OPENVDB_BUILD_VDB_VIEW=ON \
     -D OPENVDB_BUILD_UNITTESTS=ON \
-    -D OPENVDB_BUILD_PYTHON_MODULE=ON \
     -D OPENVDB_BUILD_VDB_RENDER=ON \
     .. \
-    && make -j6 \
+    && make -j4 \
     && sudo make install \
 )
 #make -j8 openvdb
