@@ -11,12 +11,12 @@
 #include <iostream>
 #include <vector>
 
-#define FP_TYPE float;
 
 using namespace openvdb;
+
+typedef float RealT;
 typedef math::Ray<double> RayT;
 typedef RayT::Vec3Type Vec3T;
-//typedef float Real;
 
 
 //std::vector<FP_TYPE> linspace(FP_TYPE )
@@ -26,7 +26,7 @@ int main()
   openvdb::initialize();
   // Create a FloatGrid and populate it with a narrow-band
   // signed distance field of a sphere.
-  const float r = 5;
+  const RealT r = 5;
   const Vec3f c(0, 0, 0);
   const float s = 0.1f;
   const float w = 2;
