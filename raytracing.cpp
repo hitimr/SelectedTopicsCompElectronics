@@ -12,11 +12,14 @@
 #include <vector>
 #include <cassert>
 
-using namespace openvdb;
 
 typedef float RealT;
-typedef math::Ray<double> RayT;
-typedef RayT::Vec3Type Vec3T;
+typedef openvdb::math::Ray<RealT> RayT;
+typedef openvdb::Vec3f Vec3T;
+
+
+
+using namespace openvdb;
 
 
 std::vector<RealT> linspace(RealT start, RealT end, size_t count)
