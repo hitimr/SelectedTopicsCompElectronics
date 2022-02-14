@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <vector>
-
+#include <cassert>
 
 using namespace openvdb;
 
@@ -19,7 +19,18 @@ typedef math::Ray<double> RayT;
 typedef RayT::Vec3Type Vec3T;
 
 
-//std::vector<FP_TYPE> linspace(FP_TYPE )
+std::vector<RealT> linspace(RealT start, RealT end, size_t count)
+{
+  assert(end - start != 0);
+  RealT step = (end - start) / count;
+  std::vector<RealT> ret_vals(count);
+  
+  for(int i = 0; i < count; i++)
+  {
+    ret_vals[i] = start + i*step;
+  }
+  return ret_vals;
+}
 
 int main()
 {
@@ -37,16 +48,22 @@ int main()
   // intersector
   openvdb::tools::LevelSetRayIntersector<FloatGrid> lsri(*ls);
 
-/*
+  // generate a circular range of rays with origin at 0,0,0
   int n_rays = 12;
+  Vec3T origin({0,0,0});  
+  std::vector<RayT> rays(n_rays); 
+
+  std::vector<RealT> alpha_vals = linspace(0, 2*M_PI, n_rays);
   for(int i = 0; i < n_rays; i++)
   {
-    FP_TYPE x 
-  }
-*/
-  Vec3f dir(1.0, 0.0, 0.0);
-  dir = dir / dir.length();
-  Vec3f eye(0.5, 0.5, 0.0);
+    Vec3T direction({
+      math::Cos(alpha_vals[i]),
+      math::Sin(alpha_vals[i]),
+      0
+    });
+    rays[i] = RayT(direction, direction);
+  } 
+/* 
   math::Ray<Real> ray(eye, dir);
 
   Vec3T xyz(0);
@@ -57,4 +74,5 @@ int main()
 
   // Create a VDB file object and write out the grid.
   openvdb::io::File("mygrids.vdb").write({ls});
+  */
 }
