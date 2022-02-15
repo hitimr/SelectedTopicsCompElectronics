@@ -1,19 +1,16 @@
 #pragma once
-#define DEFAULT_NBENCH 10
-#define DEFAULT_NRAYS_START 10
-#define DEFAULT_NRAYS_END 100
 
 // Used Types
 typedef double RealT;
 typedef openvdb::math::Ray<double> RayT;
 typedef RayT::Vec3Type Vec3T;
 typedef openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid> RayIntersectorT;
+typedef boost::program_options::variables_map OptionsT;
 
 // Logging
-#include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Initializers/RollingFileInitializer.h>
-
+#include <plog/Log.h>
 
 class CustomPlogFormatter
 {
@@ -33,3 +30,11 @@ public:
     return ss.str();
   }
 };
+
+// Default CLI Params
+#define DEFAULT_NBENCH 10
+#define DEFAULT_NRAYS_START 10
+#define DEFAULT_NRAYS_END 100
+#define DEFAULT_LOG_LEVEL plog::info
+#define DEFAULT_VOXEL_SIZE 0.05
+#define DEFAULT_RADIUS 5.0
