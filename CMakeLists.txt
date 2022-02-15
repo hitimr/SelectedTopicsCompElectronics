@@ -11,7 +11,7 @@ target_link_libraries(raytracing OpenVDB::openvdb)
 
 add_custom_target(run
     COMMAND raytracing
-    COMMAND vdb_view mygrids.vdb
+    #COMMAND vdb_view mygrids.vdb
     DEPENDS raytracing
     WORKING_DIRECTORY ${CMAKE_PROJECT_DIR} 
 )
