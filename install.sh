@@ -2,11 +2,7 @@
 
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
-export DIR_BUILD=$DIR_PROJECT_ROOT/build
 
-export DIR_OPENVDB=$DIR_PROJECT_ROOT/openvdb
-export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
-export DIR_BOOST=$DIR_PROJECT_ROOT/boost
 
 
 
@@ -30,9 +26,9 @@ sudo apt install paraview
 # build openvdb
 git clone https://github.com/AcademySoftwareFoundation/openvdb
 git pull
-mkdir -p $DIR_OPENVDB_BUILD
+mkdir -p $DIR_PROJECT_ROOT/openvdb/build
 ( \
-    cd $DIR_OPENVDB_BUILD \
+    cd $DIR_PROJECT_ROOT/openvdb/build \
     && cmake \
     -D OPENVDB_BUILD_VDB_PRINT=ON \
     -D OPENVDB_BUILD_VDB_LOD=ON \

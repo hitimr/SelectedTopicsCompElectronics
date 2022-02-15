@@ -11,3 +11,8 @@ boost/
 # temp files and debug files
 ~*
 *playground*
+
+
+
+# Excpetions
+.env
