@@ -11,7 +11,6 @@
 // Boost
 #include <boost/program_options.hpp>
 
-
 // Custom
 #include "common.hpp"
 #include "util/misc.hpp"
@@ -26,15 +25,16 @@
 using namespace openvdb;
 namespace po = boost::program_options;
 
-void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size,
-               RealT radius) {
+void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius)
+{
   // generate a circular range of rays with origin at 0,0,0
   // all rays point along the x-y-Plane. z is kept at 0 for now
   Vec3T eye({0, 0, 0}); // all rays have a common origin
   std::vector<RayT> rays(n_rays);
   std::vector<Vec3T> reference_solutions(n_rays);
   std::vector<RealT> alpha_vals = linspace(0.0, 2.0 * M_PI, n_rays);
-  for (size_t i = 0; i < n_rays; i++) {
+  for (size_t i = 0; i < n_rays; i++)
+  {
     Vec3T direction({
         math::Cos(alpha_vals[i]), // x = Cos(α)
         math::Sin(alpha_vals[i]), // y = Sin(α)
@@ -44,8 +44,7 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size,
     direction.normalize();
     rays[i] = RayT(eye, direction);
 
-    Vec3T solution({radius * math::Cos(alpha_vals[i]),
-                    radius * math::Sin(alpha_vals[i]), 0});
+    Vec3T solution({radius * math::Cos(alpha_vals[i]), radius * math::Sin(alpha_vals[i]), 0});
     reference_solutions[i] = solution;
   }
 
@@ -54,7 +53,8 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size,
   // Run Benchmark
   Timer timer;
   timer.reset();
-  for (size_t i = 0; i < n_rays; i++) {
+  for (size_t i = 0; i < n_rays; i++)
+  {
     lsri.intersectsWS(rays[i], calculated[i]);
   }
   double time = timer.get();
@@ -62,7 +62,8 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size,
   // Verify Solution
   RealT eps = voxel_size / 2;
   Vec3T vec_eps(eps, eps, eps);
-  for (size_t i = 0; i < n_rays; i++) {
+  for (size_t i = 0; i < n_rays; i++)
+  {
     assert(math::isApproxEqual(calculated[i], reference_solutions[i], vec_eps));
   }
 
@@ -72,8 +73,8 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size,
    */
 
   // results for each ray
-  
-  PLOG_INFO<< "Benchmark finished" << std::endl;
+
+  PLOG_INFO << "Benchmark finished" << std::endl;
   /*
   LOG_DEBUG << "Voxel size: " << voxel_size << std::endl;
   LOG_DEBUG << "Calculated | reference" << std::endl;
@@ -90,7 +91,8 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size,
   */
 }
 
-po::variables_map parse_options(int ac, char **av) {
+po::variables_map parse_options(int ac, char **av)
+{
   po::options_description desc("Allowed options");
 
   desc.add_options()("help,h", "produce help message")(
@@ -101,18 +103,20 @@ po::variables_map parse_options(int ac, char **av) {
   po::store(po::parse_command_line(ac, av, desc), vm);
   po::notify(vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help"))
+  {
     std::cout << desc << "\n";
     exit(0);
   }
   return vm;
 }
 
-int main(int ac, char **av) {
+int main(int ac, char **av)
+{
 
-    static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    plog::init(plog::verbose, &consoleAppender);
-  
+  static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
+  plog::init(plog::verbose, &consoleAppender);
+
   po::variables_map options = parse_options(ac, av);
 
   openvdb::initialize();
