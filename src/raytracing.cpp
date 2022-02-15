@@ -1,3 +1,4 @@
+// OpenVDB
 #include <openvdb/Exceptions.h>
 #include <openvdb/Types.h>
 #include <openvdb/math/Ray.h>
@@ -7,20 +8,26 @@
 #include <openvdb/tools/RayIntersector.h>
 #include <openvdb/tools/RayTracer.h> // for Film
 
+// Boost
+#include <boost/program_options.hpp>
+
+// Custom
 #include "util/timer.hpp"
 
+// Standard Library
 #include <cassert>
 #include <iostream>
 #include <vector>
 
+// Used Types
 typedef float RealT;
 typedef openvdb::math::Ray<double> RayT;
 typedef RayT::Vec3Type Vec3T;
 typedef openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid> RayIntersectorT;
 
+// Namespaces
 using namespace openvdb;
-
-
+namespace po = boost::program_options;
 
 std::vector<RealT> linspace(RealT start, RealT end, size_t count)
 {

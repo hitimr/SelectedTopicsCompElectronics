@@ -8,6 +8,7 @@ export DIR_PROJECT_ROOT=$(pwd)
 
 # install dependencies
 sudo apt-get install -y \
+    libboost-all-dev \
     libboost-iostreams-dev \
     libtbb-dev \
     libblosc-dev \
