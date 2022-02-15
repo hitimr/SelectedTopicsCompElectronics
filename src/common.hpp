@@ -32,9 +32,14 @@ public:
 };
 
 // Default CLI Params
-#define DEFAULT_NBENCH 10
-#define DEFAULT_NRAYS_START 10
-#define DEFAULT_NRAYS_END 100
+#define DEFAULT_NBENCH 16
+#define DEFAULT_NRAYS_MIN 1
+#define DEFAULT_NRAYS_MAX 24
 #define DEFAULT_LOG_LEVEL plog::info
 #define DEFAULT_VOXEL_SIZE 0.05
 #define DEFAULT_RADIUS 5.0
+
+
+// MISC
+#define BASE2 2
+#define BASE10 10
