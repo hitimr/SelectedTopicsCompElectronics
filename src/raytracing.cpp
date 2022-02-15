@@ -7,16 +7,20 @@
 #include <openvdb/tools/RayIntersector.h>
 #include <openvdb/tools/RayTracer.h> // for Film
 
+#include "util/timer.hpp"
+
 #include <cassert>
 #include <iostream>
 #include <vector>
 
-
 typedef float RealT;
 typedef openvdb::math::Ray<double> RayT;
 typedef RayT::Vec3Type Vec3T;
+typedef openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid> RayIntersectorT;
 
 using namespace openvdb;
+
+
 
 std::vector<RealT> linspace(RealT start, RealT end, size_t count)
 {
@@ -31,9 +35,72 @@ std::vector<RealT> linspace(RealT start, RealT end, size_t count)
   return ret_vals;
 }
 
+void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius)
+{
+  // generate a circular range of rays with origin at 0,0,0
+  // all rays point along the x-y-Plane. z is kept at 0 for now
+  Vec3T eye({0, 0, 0}); // all rays have a common origin
+  std::vector<RayT> rays(n_rays);
+  std::vector<Vec3T> reference_solutions(n_rays);
+  std::vector<RealT> alpha_vals = linspace(0, 2 * M_PI, n_rays);
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    Vec3T direction({
+        math::Cos(alpha_vals[i]), // x = Cos(α)
+        math::Sin(alpha_vals[i]), // y = Sin(α)
+        0                         // z = 0
+    });
+
+    direction.normalize();
+    rays[i] = RayT(eye, direction);
+
+    Vec3T solution({radius * math::Cos(alpha_vals[i]), radius * math::Sin(alpha_vals[i]), 0});
+    reference_solutions[i] = solution;
+  }
+
+  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
+
+  // Run Benchmark
+  Timer timer;
+  timer.reset();
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    lsri.intersectsWS(rays[i], calculated[i]);
+  }
+  double time = timer.get();
+
+  // Verify Solution
+  RealT eps = voxel_size / 2;
+  Vec3T vec_eps(eps, eps, eps);
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    assert(math::isApproxEqual(calculated[i], reference_solutions[i], vec_eps));
+  }
+
+  /**
+   * Summary
+   *
+   */
+
+  // results for each ray
+  if (true) // TODO: replace with boost logger
+  {
+    std::cout << "Benchmark finished" << std::endl;
+    std::cout << "Voxel size: " << voxel_size << std::endl;
+    std::cout << "Calculated | reference" << std::endl;
+    for (size_t i = 0; i < n_rays; i++)
+    {
+      std::cout << "Ray " << i << std::endl;
+      std::cout << "x: " << calculated[i].x() << "|" << reference_solutions[i].x() << std::endl;
+      std::cout << "y: " << calculated[i].y() << "|" << reference_solutions[i].y() << std::endl;
+      std::cout << "z: " << calculated[i].z() << "|" << reference_solutions[i].z() << std::endl;
+      std::cout << std::endl;
+    }
+  }
+}
+
 int main()
 {
-  bool verbose = true;
   /**
    * Init
    *
@@ -55,68 +122,10 @@ int main()
       );
 
   // intersector
-  openvdb::tools::LevelSetRayIntersector<FloatGrid> lsri(*ls);
+  RayIntersectorT lsri(*ls);
+  benchmark(lsri, 12, voxel_size, radius);
 
-  // generate a circular range of rays with origin at 0,0,0
-  size_t n_rays = 12;
-  Vec3T eye({0, 0, 0}); // all rays have a common origin
-  std::vector<RayT> rays(n_rays);
-  std::vector<Vec3T> reference_solutions(n_rays);
-  std::vector<RealT> alpha_vals = linspace(0, 2 * M_PI, n_rays);
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    Vec3T direction({
-        math::Cos(alpha_vals[i]), // x = Cos(α)
-        math::Sin(alpha_vals[i]), // y = Sin(α)
-        0                         // z = 0
-    });
-
-    direction.normalize();
-    rays[i] = RayT(eye, direction);
-
-    Vec3T solution({radius * math::Cos(alpha_vals[i]), radius * math::Sin(alpha_vals[i]), 0});
-    reference_solutions[i] = solution;
-  }
-
-  /**
-   * Benchmark
-   *
-   */
-  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0));
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    lsri.intersectsWS(rays[i], calculated[i]);
-  }
-
-  /**
-   * Check solution
-   *
-   */
-  RealT eps = voxel_size / 2;
-  Vec3T vec_eps(eps, eps, eps);
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    assert(math::isApproxEqual(calculated[i], reference_solutions[i], vec_eps));
-  }
-
-  /**
-   * Summary
-   *
-   */
-  if (verbose)
-  {
-    std::cout << "Benchmark finished" << std::endl;
-    std::cout << "Voxel size: " << voxel_size << std::endl;
-    std::cout << "Calculated | reference" << std::endl;
-    for (size_t i = 0; i < n_rays; i++)
-    {
-      std::cout << "Ray " << i << std::endl;
-      std::cout << "x: " << calculated[i].x() << "|" << reference_solutions[i].x() << std::endl;
-      std::cout << "y: " << calculated[i].y() << "|" << reference_solutions[i].y() << std::endl;
-      std::cout << "z: " << calculated[i].z() << "|" << reference_solutions[i].z() << std::endl;
-      std::cout << std::endl;
-    }
-  }
+  // Benchmark results
 
   // Create a VDB file object and write out the grid.
   // openvdb::io::File("mygrids.vdb").write({ls});
