@@ -11,7 +11,6 @@
 #include <iostream>
 #include <vector>
 
-#define VERBOSE true
 
 typedef float RealT;
 typedef openvdb::math::Ray<double> RayT;
@@ -34,6 +33,7 @@ std::vector<RealT> linspace(RealT start, RealT end, size_t count)
 
 int main()
 {
+  bool verbose = true;
   /**
    * Init
    *
@@ -45,7 +45,7 @@ int main()
   // https://www.openvdb.org/documentation/doxygen/namespaceopenvdb_1_1v8__0_1_1tools.html#a47e7b3c363d0d3a15b5859c4b06e9d8b
   const RealT radius = 5;
   const Vec3f center(0, 0, 0);
-  const float voxel_size = 0.1f;
+  const float voxel_size = 0.01f;
   const float half_width = 2;
   openvdb::FloatGrid::Ptr ls =
       tools::createLevelSetSphere<FloatGrid>(radius,     // radius of the sphere in world units
@@ -89,17 +89,31 @@ int main()
   }
 
   /**
+   * Check solution
+   *
+   */
+  RealT eps = voxel_size / 2;
+  Vec3T vec_eps(eps, eps, eps);
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    assert(math::isApproxEqual(calculated[i], reference_solutions[i], vec_eps));
+  }
+
+  /**
    * Summary
    *
    */
-  if (VERBOSE)
+  if (verbose)
   {
     std::cout << "Benchmark finished" << std::endl;
+    std::cout << "Voxel size: " << voxel_size << std::endl;
+    std::cout << "Calculated | reference" << std::endl;
     for (size_t i = 0; i < n_rays; i++)
     {
       std::cout << "Ray " << i << std::endl;
       std::cout << "x: " << calculated[i].x() << "|" << reference_solutions[i].x() << std::endl;
       std::cout << "y: " << calculated[i].y() << "|" << reference_solutions[i].y() << std::endl;
+      std::cout << "z: " << calculated[i].z() << "|" << reference_solutions[i].z() << std::endl;
       std::cout << std::endl;
     }
   }
