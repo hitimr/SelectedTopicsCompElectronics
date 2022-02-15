@@ -12,6 +12,7 @@
 #include <boost/program_options.hpp>
 
 // Custom
+#include "common.hpp"
 #include "util/timer.hpp"
 #include "util/misc.hpp"
 
@@ -20,29 +21,10 @@
 #include <iostream>
 #include <vector>
 
-// Used Types
-typedef float RealT;
-typedef openvdb::math::Ray<double> RayT;
-typedef RayT::Vec3Type Vec3T;
-typedef openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid> RayIntersectorT;
-
 // Namespaces
 using namespace openvdb;
 namespace po = boost::program_options;
 
-
-std::vector<RealT> linspace(RealT start, RealT end, size_t count)
-{
-  assert(end - start != 0);
-  RealT step = (end - start) / count;
-  std::vector<RealT> ret_vals(count);
-
-  for (int i = 0; i < count; i++)
-  {
-    ret_vals[i] = start + i * step;
-  }
-  return ret_vals;
-}
 
 void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius)
 {
@@ -51,7 +33,7 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius
   Vec3T eye({0, 0, 0}); // all rays have a common origin
   std::vector<RayT> rays(n_rays);
   std::vector<Vec3T> reference_solutions(n_rays);
-  std::vector<RealT> alpha_vals = linspace(0, 2 * M_PI, n_rays);
+  std::vector<RealT> alpha_vals = linspace(0.0,  2.0 * M_PI, n_rays);
   for (size_t i = 0; i < n_rays; i++)
   {
     Vec3T direction({
@@ -114,7 +96,8 @@ po::variables_map parse_options(int ac, char **av)
 
     desc.add_options()
     ("help,h", "produce help message")
-    ("n_rays,n", po::value<int>()->default_value(12), "number of rays for benchmark");
+    ("nbench,nb", po::value<int>()->default_value(DEFAULT_NBENCH), "number of points for the benchmark")
+    ;
 
     po::variables_map vm;
     po::store(po::parse_command_line(ac, av, desc), vm);
