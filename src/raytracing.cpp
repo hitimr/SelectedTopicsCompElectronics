@@ -13,6 +13,7 @@
 
 // Custom
 #include "util/timer.hpp"
+#include "util/misc.hpp"
 
 // Standard Library
 #include <cassert>
@@ -30,6 +31,18 @@ using namespace openvdb;
 namespace po = boost::program_options;
 
 
+std::vector<RealT> linspace(RealT start, RealT end, size_t count)
+{
+  assert(end - start != 0);
+  RealT step = (end - start) / count;
+  std::vector<RealT> ret_vals(count);
+
+  for (int i = 0; i < count; i++)
+  {
+    ret_vals[i] = start + i * step;
+  }
+  return ret_vals;
+}
 
 void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius)
 {
@@ -95,8 +108,29 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius
   }
 }
 
-int main()
+po::variables_map parse_options(int ac, char **av)
 {
+  po::options_description desc("Allowed options");
+
+    desc.add_options()
+    ("help,h", "produce help message")
+    ("n_rays,n", po::value<int>()->default_value(12), "number of rays for benchmark");
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(ac, av, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help"))
+    {
+      std::cout << desc << "\n";
+      exit(0);
+    }
+    return vm;
+}
+
+int main(int ac, char **av)
+{
+  po::variables_map options = parse_options(ac, av);
   openvdb::initialize();
 
   // Create Level Set sphere
