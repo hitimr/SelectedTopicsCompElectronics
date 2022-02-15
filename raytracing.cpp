@@ -11,6 +11,8 @@
 #include <iostream>
 #include <vector>
 
+#define VERBOSE true
+
 typedef float RealT;
 typedef openvdb::math::Ray<double> RayT;
 typedef RayT::Vec3Type Vec3T;
@@ -34,16 +36,23 @@ int main()
 {
   /**
    * Init
-   * 
+   *
    */
   openvdb::initialize();
 
   // Create Level Set sphere
-  const RealT r = 5;
-  const Vec3f c(0, 0, 0);
-  const float s = 0.1f;
-  const float w = 2;
-  openvdb::FloatGrid::Ptr ls = tools::createLevelSetSphere<FloatGrid>(r, c, s, w);
+  // for details see:
+  // https://www.openvdb.org/documentation/doxygen/namespaceopenvdb_1_1v8__0_1_1tools.html#a47e7b3c363d0d3a15b5859c4b06e9d8b
+  const RealT radius = 5;
+  const Vec3f center(0, 0, 0);
+  const float voxel_size = 0.1f;
+  const float half_width = 2;
+  openvdb::FloatGrid::Ptr ls =
+      tools::createLevelSetSphere<FloatGrid>(radius,     // radius of the sphere in world units
+                                             center,     // center of the sphere in world units
+                                             voxel_size, // voxel size in world units
+                                             half_width  // half the width of the narrow band, in voxel units
+      );
 
   // intersector
   openvdb::tools::LevelSetRayIntersector<FloatGrid> lsri(*ls);
@@ -65,13 +74,13 @@ int main()
     direction.normalize();
     rays[i] = RayT(eye, direction);
 
-    Vec3T solution({r * math::Cos(alpha_vals[i]), r * math::Sin(alpha_vals[i]), 0});
+    Vec3T solution({radius * math::Cos(alpha_vals[i]), radius * math::Sin(alpha_vals[i]), 0});
     reference_solutions[i] = solution;
   }
 
   /**
    * Benchmark
-   * 
+   *
    */
   std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0));
   for (size_t i = 0; i < n_rays; i++)
@@ -79,23 +88,22 @@ int main()
     lsri.intersectsWS(rays[i], calculated[i]);
   }
 
-
   /**
    * Summary
-   * 
+   *
    */
-  std::cout << "Benchmark finished" << std::endl;
-  for (size_t i = 0; i < n_rays; i++)
+  if (VERBOSE)
   {
-    std::cout << "Ray " << i << std::endl;
-    std::cout << "x: " << calculated[i].x() << "|" << reference_solutions[i].x() << std::endl; 
-    std::cout << "y: " << calculated[i].y() << "|" << reference_solutions[i].y() << std::endl; 
-    std::cout << std::endl;
+    std::cout << "Benchmark finished" << std::endl;
+    for (size_t i = 0; i < n_rays; i++)
+    {
+      std::cout << "Ray " << i << std::endl;
+      std::cout << "x: " << calculated[i].x() << "|" << reference_solutions[i].x() << std::endl;
+      std::cout << "y: " << calculated[i].y() << "|" << reference_solutions[i].y() << std::endl;
+      std::cout << std::endl;
+    }
   }
-  
-
-  //
 
   // Create a VDB file object and write out the grid.
-  openvdb::io::File("mygrids.vdb").write({ls});
+  // openvdb::io::File("mygrids.vdb").write({ls});
 }
