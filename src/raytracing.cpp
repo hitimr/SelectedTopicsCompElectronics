@@ -110,7 +110,7 @@ po::variables_map parse_options(int ac, char **av)
 int main(int ac, char **av)
 {
 
-  static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
+  static plog::ColorConsoleAppender<CustomPlogFormatter> consoleAppender;
   plog::init(plog::debug, &consoleAppender);
 
   po::variables_map options = parse_options(ac, av);
