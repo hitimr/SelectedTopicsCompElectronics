@@ -29,18 +29,7 @@ typedef openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid> RayIntersecto
 using namespace openvdb;
 namespace po = boost::program_options;
 
-std::vector<RealT> linspace(RealT start, RealT end, size_t count)
-{
-  assert(end - start != 0);
-  RealT step = (end - start) / count;
-  std::vector<RealT> ret_vals(count);
 
-  for (int i = 0; i < count; i++)
-  {
-    ret_vals[i] = start + i * step;
-  }
-  return ret_vals;
-}
 
 void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius)
 {
@@ -108,10 +97,6 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius
 
 int main()
 {
-  /**
-   * Init
-   *
-   */
   openvdb::initialize();
 
   // Create Level Set sphere
