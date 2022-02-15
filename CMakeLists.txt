@@ -9,7 +9,7 @@ set(ENV{DIR_UTIL}, $ENV{DIR_SRC}/util)
 
 set(MINIMUM_BOOST_VERSION 1.63.0)
 
-
+include_directories(lib)
 add_subdirectory(src)
 
 
