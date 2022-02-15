@@ -6,3 +6,8 @@ boost/
 
 # Hidden Files and Folders
 .*/
+
+
+# temp files and debug files
+~*
+*playground*
