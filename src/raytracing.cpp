@@ -26,13 +26,16 @@ using namespace openvdb;
 
 void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
 {
+  // Extract parameters from optinos
+  RealT voxel_size = options["voxel_size"].as<RealT>();
+  RealT radius = options["radius"].as<RealT>();
+
   // generate a circular range of rays with origin at 0,0,0
   // all rays point along the x-y-Plane. z is kept at 0 for now
   Vec3T eye({0, 0, 0}); // all rays have a common origin
   std::vector<RayT> rays(n_rays);
   std::vector<Vec3T> reference_solutions(n_rays);
   std::vector<RealT> alpha_vals = linspace(0.0, 2.0 * M_PI, n_rays);
-  RealT radius = options["radius"].as<RealT>();
   for (size_t i = 0; i < n_rays; i++)
   {
     Vec3T direction({
@@ -58,9 +61,9 @@ void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
     lsri.intersectsWS(rays[i], calculated[i]);
   }
   double time = timer.get();
+  PLOG_INFO << "Finished in " << time << "s (" << (double) n_rays/(1000*time) <<" kRays/s)" << std::endl;
 
   // Verify Solution
-  RealT voxel_size = options["voxel_size"].as<RealT>();
   RealT eps = voxel_size / 2;
   Vec3T vec_eps(eps, eps, eps);
   for (size_t i = 0; i < n_rays; i++)
@@ -69,7 +72,6 @@ void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
   }
 
   // results for each ray
-
   PLOG_DEBUG << "Voxel size: " << voxel_size << std::endl;
   PLOG_DEBUG << "Calculated | reference" << std::endl;
   for (size_t i = 0; i < n_rays; i++)
@@ -80,6 +82,9 @@ void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
     PLOG_DEBUG << "z: " << calculated[i].z() << "|" << reference_solutions[i].z() << std::endl;
     PLOG_DEBUG << std::endl;
   }
+
+
+
 }
 
 OptionsT parse_options(int ac, char **av)
@@ -90,11 +95,18 @@ OptionsT parse_options(int ac, char **av)
 
   // clang-format off
   desc.add_options()
+    // General
     ("help,h", "produce help message")
-    ("nbench,nb", po::value<int>()->default_value(DEFAULT_NBENCH), "number of points for the benchmark")
-    ("loglevel", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
+    ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
+    
+    // Colume Settings
     ("voxel_size", po::value<RealT>()->default_value(DEFAULT_VOXEL_SIZE), "voxel size in world units")
     ("radius", po::value<RealT>()->default_value(DEFAULT_RADIUS), "sphere radius")
+
+    // Benchmakr settings
+    ("nrays_min", po::value<int>()->default_value(DEFAULT_NRAYS_MIN), "minimum number of rays per benchmark")
+    ("nrays_max", po::value<int>()->default_value(DEFAULT_NRAYS_MAX), "maximum number of rays per benchmark")
+    ("nbench,nb", po::value<int>()->default_value(DEFAULT_NBENCH), "number of points for the benchmark")
     ;
 
   // clang-format on
@@ -107,6 +119,10 @@ OptionsT parse_options(int ac, char **av)
     std::cout << desc << "\n";
     exit(0);
   }
+
+  // check sanity of arguments
+  assert(vm["nrays_min"].as<int>() < vm["nrays_max"].as<int>());
+
   return vm;
 }
 
@@ -127,7 +143,6 @@ int main(int ac, char **av)
   // for details see:
   // https://www.openvdb.org/documentation/doxygen/namespaceopenvdb_1_1v8__0_1_1tools.html#a47e7b3c363d0d3a15b5859c4b06e9d8b
   const Vec3f center(0, 0, 0);
-  const float voxel_size = 0.01f;
   const float half_width = 2;
   openvdb::FloatGrid::Ptr ls = tools::createLevelSetSphere<FloatGrid>(
       options["radius"].as<RealT>(),     // radius of the sphere in world units
@@ -139,8 +154,17 @@ int main(int ac, char **av)
   // intersector
   RayIntersectorT lsri(*ls);
 
+  std::vector<int> ray_vals =
+      logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
+               options["nbench"].as<int>());
+
   // Run Benchmark
-  benchmark(lsri, 12, options);
+  for(int nrays : ray_vals)
+  {
+    PLOG_INFO << "\nRunning benchmark for " << nrays << " Rays" << std::endl;
+    benchmark(lsri, nrays, options);
+  }
+  
 
   PLOG_INFO << "Benchmark finished" << std::endl;
 }
