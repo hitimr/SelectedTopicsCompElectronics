@@ -75,20 +75,16 @@ void benchmark(RayIntersectorT &lsri, int n_rays, RealT voxel_size, RealT radius
   // results for each ray
 
   PLOG_INFO << "Benchmark finished" << std::endl;
-  /*
-  LOG_DEBUG << "Voxel size: " << voxel_size << std::endl;
-  LOG_DEBUG << "Calculated | reference" << std::endl;
-  for (size_t i = 0; i < n_rays; i++) {
-    LOG_DEBUG << "Ray " << i << std::endl;
-    LOG_DEBUG << "x: " << calculated[i].x() << "|" << reference_solutions[i].x()
-              << std::endl;
-    LOG_DEBUG << "y: " << calculated[i].y() << "|" << reference_solutions[i].y()
-              << std::endl;
-    LOG_DEBUG << "z: " << calculated[i].z() << "|" << reference_solutions[i].z()
-              << std::endl;
-    LOG_DEBUG << std::endl;
+  PLOG_DEBUG << "Voxel size: " << voxel_size << std::endl;
+  PLOG_DEBUG << "Calculated | reference" << std::endl;
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    PLOG_DEBUG << "Ray " << i << std::endl;
+    PLOG_DEBUG << "x: " << calculated[i].x() << "|" << reference_solutions[i].x() << std::endl;
+    PLOG_DEBUG << "y: " << calculated[i].y() << "|" << reference_solutions[i].y() << std::endl;
+    PLOG_DEBUG << "z: " << calculated[i].z() << "|" << reference_solutions[i].z() << std::endl;
+    PLOG_DEBUG << std::endl;
   }
-  */
 }
 
 po::variables_map parse_options(int ac, char **av)
@@ -115,7 +111,7 @@ int main(int ac, char **av)
 {
 
   static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-  plog::init(plog::verbose, &consoleAppender);
+  plog::init(plog::debug, &consoleAppender);
 
   po::variables_map options = parse_options(ac, av);
 
