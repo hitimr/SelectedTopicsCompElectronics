@@ -1,6 +1,6 @@
+#pragma once
 #include "../common.hpp"
 
-#include <vector>
 
 template <typename T = RealT> std::vector<T> linspace(T start, T end, size_t count)
 {

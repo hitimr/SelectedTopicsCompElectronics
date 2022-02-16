@@ -116,7 +116,7 @@ OptionsT parse_options(int ac, char **av)
   if (vm.count("help"))
   {
     std::cout << desc << "\n";
-    exit(0);
+    exit(EXIT_SUCCESS);
   }
 
   // check sanity of arguments
@@ -166,4 +166,6 @@ int main(int ac, char **av)
   
 
   PLOG_INFO << "Benchmark finished" << std::endl;
+
+  return EXIT_SUCCESS;
 }
