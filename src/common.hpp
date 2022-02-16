@@ -6,7 +6,7 @@ using RealT = double;
 using RayT = openvdb::math::Ray<RealT>;
 using Vec3T = RayT::Vec3Type;
 using RayIntersectorT = openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid>;
-using OptionsT = boost::program_options::variables_map;
+
 
 // Default CLI Params
 #define DEFAULT_NBENCH 16

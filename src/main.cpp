@@ -25,6 +25,8 @@
 // Namespaces
 using namespace openvdb;
 
+using OptionsT = boost::program_options::variables_map;
+
 void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
 {
   // Extract parameters from optinos
@@ -154,7 +156,7 @@ int main(int ac, char **av)
   // intersector
   RayIntersectorT lsri(*ls);
 
-  Benchmarker benchmarker();
+  Benchmarker benchmarker(ls);
 
   std::vector<int> ray_vals =
       logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
