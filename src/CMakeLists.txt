@@ -8,7 +8,7 @@ find_package(OpenVDB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
 
-add_executable(raytracing main.cpp)
+add_executable(raytracing main.cpp benchmarker.cpp)
 
 
 
