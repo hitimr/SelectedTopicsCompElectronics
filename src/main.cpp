@@ -15,6 +15,7 @@
 #include "common.hpp"
 #include "util/misc.hpp"
 #include "util/timer.hpp"
+#include "benchmarker.hpp"
 
 // Standard Library
 #include <cassert>
@@ -152,6 +153,8 @@ int main(int ac, char **av)
 
   // intersector
   RayIntersectorT lsri(*ls);
+
+  Benchmarker benchmarker();
 
   std::vector<int> ray_vals =
       logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
