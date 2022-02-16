@@ -1,8 +1,11 @@
 #pragma once
 
+
+
 // Used Types
-typedef double RealT;
-typedef openvdb::math::Ray<double> RayT;
+// typedef float RealT;
+using RealT = double;
+typedef openvdb::math::Ray<RealT> RayT;
 typedef RayT::Vec3Type Vec3T;
 typedef openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid> RayIntersectorT;
 typedef boost::program_options::variables_map OptionsT;

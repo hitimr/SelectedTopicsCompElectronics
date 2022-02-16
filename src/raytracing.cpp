@@ -35,7 +35,7 @@ void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
   Vec3T eye({0, 0, 0}); // all rays have a common origin
   std::vector<RayT> rays(n_rays);
   std::vector<Vec3T> reference_solutions(n_rays);
-  std::vector<RealT> alpha_vals = linspace(0.0, 2.0 * M_PI, n_rays);
+  std::vector<RealT> alpha_vals = linspace<RealT>(0.0, 2.0 * M_PI, n_rays);
   for (size_t i = 0; i < n_rays; i++)
   {
     Vec3T direction({
@@ -58,6 +58,7 @@ void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
   timer.reset();
   for (size_t i = 0; i < n_rays; i++)
   {
+    // generate ray
     lsri.intersectsWS(rays[i], calculated[i]);
   }
   double time = timer.get();
@@ -106,9 +107,7 @@ OptionsT parse_options(int ac, char **av)
     // Benchmakr settings
     ("nrays_min", po::value<int>()->default_value(DEFAULT_NRAYS_MIN), "minimum number of rays per benchmark")
     ("nrays_max", po::value<int>()->default_value(DEFAULT_NRAYS_MAX), "maximum number of rays per benchmark")
-    ("nbench,nb", po::value<int>()->default_value(DEFAULT_NBENCH), "number of points for the benchmark")
-    ;
-
+    ("nbench,nb", po::value<int>()->default_value(DEFAULT_NBENCH), "number of points for the benchmark");
   // clang-format on
   po::variables_map vm;
   po::store(po::parse_command_line(ac, av, desc), vm);
