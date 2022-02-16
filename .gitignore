@@ -2,6 +2,9 @@
 build/
 openvdb/
 boost/
+*CMakeFiles/
+*.cmake
+CMakeCache.txt
 
 
 # Hidden Files and Folders
