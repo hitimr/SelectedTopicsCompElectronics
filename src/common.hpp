@@ -1,14 +1,12 @@
 #pragma once
 
-
-
 // Used Types
 // typedef float RealT;
 using RealT = double;
-typedef openvdb::math::Ray<RealT> RayT;
-typedef RayT::Vec3Type Vec3T;
-typedef openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid> RayIntersectorT;
-typedef boost::program_options::variables_map OptionsT;
+using RayT = openvdb::math::Ray<RealT>;
+using Vec3T = RayT::Vec3Type;
+using RayIntersectorT = openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid>;
+using OptionsT = boost::program_options::variables_map;
 
 // Logging
 #include <plog/Appenders/ColorConsoleAppender.h>
@@ -41,7 +39,6 @@ public:
 #define DEFAULT_LOG_LEVEL plog::info
 #define DEFAULT_VOXEL_SIZE 0.05
 #define DEFAULT_RADIUS 5.0
-
 
 // MISC
 #define BASE2 2
