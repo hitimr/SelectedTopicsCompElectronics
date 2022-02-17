@@ -13,16 +13,12 @@
 // Boost
 #include <boost/program_options.hpp>
 
-template <class FP_Type> class Benchmarker
+template <class FP_Type = double> class Benchmarker
 {
-  using Vec3T = openvdb::math::Vec3<FP_Type>;
   using OptionsT = boost::program_options::variables_map;
-  using TreeT = openvdb::tree::Tree4<double, 5, 4, 3>::Type; // For some reason i cant put FP_TYPE here..
-  using GridT = openvdb::Grid <TreeT>; // Taken from openvdb.h
-  using RayIntersectorT = openvdb::tools::LevelSetRayIntersector<GridT>;
 
 private:
-  openvdb::FloatGrid::Ptr level_set;
+  // openvdb::FloatGrid::Ptr level_set;
 
 public:
   ~Benchmarker(){};

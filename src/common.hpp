@@ -2,11 +2,12 @@
 
 // Used Types
 // typedef float RealT;
+/*
 using RealT = double;
 using RayT = openvdb::math::Ray<RealT>;
 using Vec3T = RayT::Vec3Type;
 using RayIntersectorT = openvdb::tools::LevelSetRayIntersector<openvdb::FloatGrid>;
-
+*/
 
 // Default CLI Params
 #define DEFAULT_NBENCH 16

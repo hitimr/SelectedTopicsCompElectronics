@@ -27,6 +27,7 @@ using namespace openvdb;
 
 using OptionsT = boost::program_options::variables_map;
 
+/*
 void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
 {
   // Extract parameters from optinos
@@ -90,6 +91,7 @@ void benchmark(RayIntersectorT &lsri, int n_rays, const OptionsT &options)
 
 
 }
+*/
 
 OptionsT parse_options(int ac, char **av)
 {
@@ -104,8 +106,8 @@ OptionsT parse_options(int ac, char **av)
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
     
     // Colume Settings
-    ("voxel_size", po::value<RealT>()->default_value(DEFAULT_VOXEL_SIZE), "voxel size in world units")
-    ("radius", po::value<RealT>()->default_value(DEFAULT_RADIUS), "sphere radius")
+    ("voxel_size", po::value<double>()->default_value(DEFAULT_VOXEL_SIZE), "voxel size in world units")
+    ("radius", po::value<double>()->default_value(DEFAULT_RADIUS), "sphere radius")
 
     // Benchmakr settings
     ("nrays_min", po::value<int>()->default_value(DEFAULT_NRAYS_MIN), "minimum number of rays per benchmark")
