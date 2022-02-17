@@ -24,7 +24,7 @@ private:
 
 public:
   ~Benchmarker() {};
-  Benchmarker(double options);
+  Benchmarker(OptionsT options);
   Benchmarker() {};
 };
 

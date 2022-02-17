@@ -142,7 +142,7 @@ int main(int ac, char **av)
   openvdb::initialize();
 
 
-  Benchmarker<double> benchmarker(0.0);
+  Benchmarker<double> benchmarker(options);
 /*
   // Create Level Set sphere
   // for details see:
