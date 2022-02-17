@@ -15,7 +15,7 @@
 #include "common.hpp"
 #include "util/misc.hpp"
 #include "util/timer.hpp"
-#include "benchmarker.hpp"
+#include "benchmarker/benchmarker.hpp"
 
 // Standard Library
 #include <cassert>
@@ -141,6 +141,9 @@ int main(int ac, char **av)
   // Init OpenVBD
   openvdb::initialize();
 
+
+  Benchmarker<double> benchmarker();
+/*
   // Create Level Set sphere
   // for details see:
   // https://www.openvdb.org/documentation/doxygen/namespaceopenvdb_1_1v8__0_1_1tools.html#a47e7b3c363d0d3a15b5859c4b06e9d8b
@@ -156,7 +159,6 @@ int main(int ac, char **av)
   // intersector
   RayIntersectorT lsri(*ls);
 
-  Benchmarker benchmarker(ls);
 
   std::vector<int> ray_vals =
       logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
@@ -171,6 +173,7 @@ int main(int ac, char **av)
   
 
   PLOG_INFO << "Benchmark finished" << std::endl;
+  */
 
   return EXIT_SUCCESS;
 }

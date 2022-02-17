@@ -11,17 +11,19 @@
 #include <openvdb/tools/RayTracer.h> // for Film
 
 
+// Boost
+#include <boost/program_options.hpp>
 
-
-#include "common.hpp"
-
-class Benchmarker
+template <class FP_Type> class Benchmarker
 {
+  using Vec3T = openvdb::math::Vec3<FP_Type>;
+  using OptionsT = boost::program_options::variables_map;
+
 private:
-openvdb::FloatGrid::Ptr level_set;
+  openvdb::FloatGrid::Ptr level_set;
 
 public:
-    Benchmarker(openvdb::FloatGrid::Ptr level_set) : level_set(level_set) {}
-    ~Benchmarker();
+  ~Benchmarker() {};
+  Benchmarker(int options);
+  Benchmarker() {};
 };
-
