@@ -144,7 +144,11 @@ int main(int ac, char **av)
   openvdb::initialize();
 
 
-  Benchmarker<double> benchmarker(options);
+  Benchmarker<float> float_benchmarker(options);
+  Benchmarker<double> double_benchmarker(options);
+
+  float_benchmarker.run(10);
+  double_benchmarker.run(10);
 /*
   // Create Level Set sphere
   // for details see:
