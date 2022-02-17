@@ -2,7 +2,7 @@
 #include "../common.hpp"
 
 
-template <typename T = RealT> std::vector<T> linspace(T start, T end, size_t count)
+template <typename T> std::vector<T> linspace(T start, T end, size_t count)
 {
   assert(end - start != 0.0);
   T step = (end - start) / count;
