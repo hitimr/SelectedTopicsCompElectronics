@@ -11,8 +11,9 @@
 #include <openvdb/tools/RayIntersector.h>
 #include <openvdb/tools/RayTracer.h> // for Film
 
-template <class FP_Type> Benchmarker<FP_Type>::Benchmarker(int a)
+template <class FP_Type> Benchmarker<FP_Type>::Benchmarker(double a)
 {
+  a++;
   // Create Level Set sphere
   // for details see:
   // https://www.openvdb.org/documentation/doxygen/namespaceopenvdb_1_1v8__0_1_1tools.html#a47e7b3c363d0d3a15b5859c4b06e9d8b

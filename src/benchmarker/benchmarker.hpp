@@ -24,6 +24,11 @@ private:
 
 public:
   ~Benchmarker() {};
-  Benchmarker(int options);
+  Benchmarker(double options);
   Benchmarker() {};
 };
+
+
+// Valid instantioations
+template class Benchmarker<double>;
+template class Benchmarker<float>;
