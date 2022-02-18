@@ -19,12 +19,6 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   // numbe rof rays used for the benchmark
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
-
-  // Create Level Set sphere
-  // https://www.openvdb.org/documentation/doxygen/namespaceopenvdb_1_1v8__0_1_1tools.html#a47e7b3c363d0d3a15b5859c4b06e9d8b
-  // FP_Type half_width = 2;
-
-  // tools::LevelSetRayIntersector<FloatGrid> lsri(*level_set);
 }
 
 void Benchmarker::run(size_t n_rays)
