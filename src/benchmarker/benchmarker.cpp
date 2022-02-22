@@ -9,9 +9,23 @@
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/LevelSetSphere.h>
 
+// NanoVDB
+#include <nanovdb/util/CudaDeviceBuffer.h>
+#include <nanovdb/util/GridBuilder.h>
+#include <nanovdb/util/HDDA.h>
+#include <nanovdb/util/IO.h>
+#include <nanovdb/util/Primitives.h>
+#include <nanovdb/util/Ray.h>
 #include <cmath>
 
 using namespace openvdb;
+
+
+#if defined(NANOVDB_USE_CUDA)
+using BufferT = nanovdb::CudaDeviceBuffer;
+#else
+using BufferT = nanovdb::HostBuffer;
+#endif
 
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
@@ -57,8 +71,6 @@ void Benchmarker::run(size_t n_rays)
     RayT ray = RayT(eye, direction);
     rays[i] = ray;
 
-    ray_intersector.intersectsWS(ray);
-
     // calculate reference solution
     FP_Type radius = options["radius"].as<FP_Type>();
     Vec3T solution({radius * std::cos(alpha_vals[i]), radius * std::sin(alpha_vals[i]), 0});
@@ -99,4 +111,20 @@ void Benchmarker::run(size_t n_rays)
     PLOG_DEBUG << "z: " << calculated[i].z() << "|" << reference_solutions[i].z() << std::endl;
     PLOG_DEBUG << std::endl;
   }
+}
+
+void Benchmarker::run_nanoVDB(size_t nrays)
+{
+  using GridT = nanovdb::FloatGrid;
+  using CoordT = nanovdb::Coord;
+  using RealT = float;
+  using Vec3T = nanovdb::Vec3<RealT>;
+  using RayT = nanovdb::Ray<RealT>;
+
+
+  nanovdb::GridHandle<BufferT> handle;
+  handle = nanovdb::createLevelSetSphere<float, float, BufferT>(
+      100.0f, nanovdb::Vec3f(-20, 0, 0), 1.0, 3.0, nanovdb::Vec3d(0), "sphere");
+
+  auto *h_grid = handle.grid<float>();
 }
