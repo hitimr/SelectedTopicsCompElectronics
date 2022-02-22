@@ -42,6 +42,10 @@ private:
   GridT::Ptr m_level_set;
   const OptionsT &options;
 
+  FP_Type voxel_size = -1;
+  FP_Type sphere_radius_outer = -1;
+  FP_Type level_set_half_width = -1;
+
   std::vector<int> ray_vals;
   const FP_Type pi = std::acos(-1);
 
