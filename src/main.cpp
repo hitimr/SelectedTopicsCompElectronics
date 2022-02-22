@@ -76,8 +76,8 @@ int main(int ac, char **av)
   openvdb::initialize();
 
   Benchmarker benchmarker(options);
-  benchmarker.run(10);
-  benchmarker.run_nanoVDB(10);
+  benchmarker.run(1000000);
+  benchmarker.run_nanoVDB(1000000);
 
   return EXIT_SUCCESS;
 }

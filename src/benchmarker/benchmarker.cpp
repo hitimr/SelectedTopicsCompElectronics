@@ -125,10 +125,18 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
   for (size_t i = 0; i < n_rays; i++)
   {
     nanovdb::ZeroCrossing(rays[i], acc, ijk, v, t0);
-    calculated[i] = Vec3T(ijk.x() * voxel_size, ijk.y() * voxel_size, ijk.z() * voxel_size);
+
+    // nanovdb only supports raytracing/ intersection in index space
+    // we need to transform results back to word coordinates
+    calculated[i] = Vec3T(ijk.x() * (voxel_size), ijk.y() * voxel_size, ijk.z() * voxel_size);
   }
-  
-  return;
+
+  double time = timer.get();
+  PLOG_INFO << "Finished in " << time << "s (" << (double)n_rays / (1000 * time) << " kRays/s)"
+            << std::endl;
+
+  int err_pos;
+  //assert(verify_results<Vec3T>(calculated, reference_solutions, err_pos));
 }
 
 // TODO: rename to RayT
@@ -155,6 +163,7 @@ template <class T> std::vector<T> Benchmarker::generate_rays(size_t n_rays)
   return rays;
 }
 
+// calculate ray intersections analytically
 template <typename T> std::vector<T> Benchmarker::calculate_reference_solution(size_t n_rays)
 {
   std::vector<T> reference_solution(n_rays);
@@ -167,4 +176,33 @@ template <typename T> std::vector<T> Benchmarker::calculate_reference_solution(s
     reference_solution[i] = solution;
   }
   return reference_solution;
+}
+
+// verify results by comparing them to precomputed reference solutions
+// T must be of Vec3 Type
+template <typename T>
+bool Benchmarker::verify_results(const std::vector<T> &calculated, const std::vector<T> &reference,
+                                 int &err_pos)
+{
+  assert(calculated.size() == reference.size());
+
+  FP_Type eps = voxel_size / 2;
+
+  for (size_t i = 0; i < calculated.size(); i++)
+  {
+    if ((std::abs(calculated[i][0] - reference[i][0]) > eps) ||
+        (std::abs(calculated[i][1] - reference[i][1]) > eps) ||
+        (std::abs(calculated[i][2] - reference[i][2]) > eps))
+    {
+      PLOG_ERROR << "Calculated results does not match at pos " << i << std::endl;
+      PLOG_ERROR << "calculated:\t(" << calculated[i][0] << "|" << calculated[i][1] << "|"
+                 << calculated[i][2] << ")" << std::endl;
+      PLOG_ERROR << "Reference:\t(" << reference[i][0] << "|" << reference[i][1] << "|"
+                 << reference[i][2] << ")" << std::endl;
+      err_pos = i;
+      return false;
+    }
+  }
+
+  return true;
 }
