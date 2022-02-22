@@ -1,5 +1,3 @@
-#undef OPENVDB_NO_DEPRECATION_WARNINGS
-
 #include <openvdb/Types.h>
 #include <openvdb/math/Ray.h>
 #include <openvdb/math/Transform.h>
