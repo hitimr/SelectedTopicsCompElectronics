@@ -77,6 +77,7 @@ int main(int ac, char **av)
 
   Benchmarker benchmarker(options);
   benchmarker.run(10);
+  benchmarker.run_nanoVDB(10);
 
   return EXIT_SUCCESS;
 }

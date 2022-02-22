@@ -10,16 +10,15 @@
 #include <openvdb/tools/LevelSetSphere.h>
 
 // NanoVDB
+#include <cmath>
 #include <nanovdb/util/CudaDeviceBuffer.h>
 #include <nanovdb/util/GridBuilder.h>
 #include <nanovdb/util/HDDA.h>
 #include <nanovdb/util/IO.h>
 #include <nanovdb/util/Primitives.h>
 #include <nanovdb/util/Ray.h>
-#include <cmath>
 
 using namespace openvdb;
-
 
 #if defined(NANOVDB_USE_CUDA)
 using BufferT = nanovdb::CudaDeviceBuffer;
@@ -30,9 +29,13 @@ using BufferT = nanovdb::HostBuffer;
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
-  // numbe rof rays used for the benchmark
+  // set number of rays for the benchmark
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
+
+  // Sphere Parameters
+  sphere_radius_outer = options["radius"].as<FP_Type>();
+  voxel_size = options["voxel_size"].as<FP_Type>();
 }
 
 void Benchmarker::run(size_t n_rays)
@@ -43,10 +46,10 @@ void Benchmarker::run(size_t n_rays)
 
   // generate Sphere
   auto level_set = tools::createLevelSetSphere<GridT>(
-      options["radius"].as<FP_Type>(),     // radius of the sphere in world units
-      {0, 0, 0},                           // center of the sphere in world units
-      options["voxel_size"].as<FP_Type>(), // voxel size in world units
-      2.0                                  // half the width of the narrow band, in voxel units
+      sphere_radius_outer, // radius of the sphere in world units
+      {0, 0, 0},           // center of the sphere in world units
+      voxel_size,          // voxel size in world units
+      level_set_half_width // half the width of the narrow band, in voxel units
   );
 
   // Ray Intersector
@@ -59,6 +62,8 @@ void Benchmarker::run(size_t n_rays)
   std::vector<Vec3T> reference_solutions(n_rays);
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * pi, n_rays);
 
+  // TODO: put in correct radius
+  // TODO: move ray generation to templated function
   for (size_t i = 0; i < n_rays; i++)
   {
     // Generate Rays
@@ -113,18 +118,40 @@ void Benchmarker::run(size_t n_rays)
   }
 }
 
-void Benchmarker::run_nanoVDB(size_t nrays)
+void Benchmarker::run_nanoVDB(size_t n_rays)
 {
   using GridT = nanovdb::FloatGrid;
   using CoordT = nanovdb::Coord;
-  using RealT = float;
-  using Vec3T = nanovdb::Vec3<RealT>;
-  using RayT = nanovdb::Ray<RealT>;
-
+  using FP_type = float;
+  using Vec3T = nanovdb::Vec3<FP_type>;
+  using RayT = nanovdb::Ray<FP_type>;
 
   nanovdb::GridHandle<BufferT> handle;
-  handle = nanovdb::createLevelSetSphere<float, float, BufferT>(
-      100.0f, nanovdb::Vec3f(-20, 0, 0), 1.0, 3.0, nanovdb::Vec3d(0), "sphere");
+  handle = nanovdb::createLevelSetSphere<FP_type, FP_type, BufferT>(
+      sphere_radius_outer, {0, 0, 0}, voxel_size, level_set_half_width);
 
-  auto *h_grid = handle.grid<float>();
+  auto *h_grid = handle.grid<FP_type>();
+
+  std::vector<RayT> rays(n_rays);
+
+  std::vector<Vec3T> reference_solutions(n_rays);
+  std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * pi, n_rays);
+  Vec3T eye(0, 0, 0);
+
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    // Generate Rays
+    Vec3T direction(std::cos(alpha_vals[i]), // x = Cos(α)
+                    std::sin(alpha_vals[i]), // y = Sin(α)
+                    0                        // z = 0
+    );
+    direction.normalize();
+    RayT ray = RayT(eye, direction);
+    rays[i] = ray;
+
+    // calculate reference solution
+    Vec3T solution(sphere_radius_outer * std::cos(alpha_vals[i]),
+                   sphere_radius_outer * std::sin(alpha_vals[i]), 0);
+    reference_solutions[i] = solution;
+  }
 }
