@@ -14,7 +14,7 @@ using RayIntersectorT = openvdb::tools::LevelSetRayIntersector<openvdb::FloatGri
 #define DEFAULT_NRAYS_MIN 1
 #define DEFAULT_NRAYS_MAX 24
 #define DEFAULT_LOG_LEVEL plog::info
-#define DEFAULT_VOXEL_SIZE 0.05
+#define DEFAULT_VOXEL_SIZE 0.01
 #define DEFAULT_RADIUS 5.0
 
 // MISC

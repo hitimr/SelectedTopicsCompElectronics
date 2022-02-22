@@ -55,8 +55,12 @@ public:
 
   void run(size_t nrays);
   void run_nanoVDB(size_t nrays);
-  template<typename T> std::vector<T> generate_rays(size_t n_rays);
-  template<typename T> std::vector<T> calculate_reference_solution(size_t n_rays);
+  template <typename T> std::vector<T> generate_rays(size_t n_rays);
+  template <typename T> std::vector<T> calculate_reference_solution(size_t n_rays);
+
+  template <typename T>
+  bool verify_results(const std::vector<T> &calculated, const std::vector<T> &reference,
+                      int &err_pos = -1);
 };
 
 /*
