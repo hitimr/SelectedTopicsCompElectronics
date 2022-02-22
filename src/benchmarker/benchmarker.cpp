@@ -36,6 +36,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   // Sphere Parameters
   sphere_radius_outer = options["radius"].as<FP_Type>();
   voxel_size = options["voxel_size"].as<FP_Type>();
+  level_set_half_width = 2.0;
 }
 
 void Benchmarker::run(size_t n_rays)
@@ -47,7 +48,7 @@ void Benchmarker::run(size_t n_rays)
   // generate Sphere
   auto level_set = tools::createLevelSetSphere<GridT>(
       sphere_radius_outer, // radius of the sphere in world units
-      {0, 0, 0},           // center of the sphere in world units
+      Vec3T(0,0,0),           // center of the sphere in world units
       voxel_size,          // voxel size in world units
       level_set_half_width // half the width of the narrow band, in voxel units
   );
