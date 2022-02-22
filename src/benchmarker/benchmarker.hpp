@@ -50,6 +50,7 @@ public:
   Benchmarker(const OptionsT &options);
 
   void run(size_t nrays);
+  void run_nanoVDB(size_t nrays);
 };
 
 /*
