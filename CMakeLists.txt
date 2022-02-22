@@ -1,11 +1,14 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14)
 project("OpenVDB_Test")
 
 
-set(ENV{DIR_PROJ_ROOT}, $(pwd))
-set(ENV{DIR_BUILD}, $ENV{DIR_PROJ_ROOT}/build)
-set(ENV{DIR_SRC}, $ENV{DIR_PROJ_ROOT}/src)
-set(ENV{DIR_UTIL}, $ENV{DIR_SRC}/util)
+set(ENV{DIR_PROJ_ROOT} "${CMAKE_CURRENT_SOURCE_DIR}")
+set(ENV{DIR_BUILD} $ENV{DIR_PROJ_ROOT}/build)
+set(ENV{DIR_SRC} $ENV{DIR_PROJ_ROOT}/src)
+set(ENV{DIR_UTIL} $ENV{DIR_SRC}/util)
+set(ENV{DIR_NANO_VDB} $ENV{DIR_PROJ_ROOT}/openvdb/nanovdb/nanovdb/)
+
+set(OpenVDB_DIR $ENV{DIR_PROJ_ROOT}/openvdb/cmake/)
 
 set(MINIMUM_BOOST_VERSION 1.63.0)
 

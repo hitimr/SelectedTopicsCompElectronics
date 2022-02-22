@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12) 
+cmake_minimum_required(VERSION 3.14) 
 
 project(Benchmark)
 
@@ -8,14 +8,26 @@ find_package(OpenVDB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
 
+
+
 # becnhmarker library
 set(LIB_BENCHMARKER_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}") 
 add_library(benchmarker benchmarker/benchmarker.cpp)
 target_include_directories(benchmarker PUBLIC "${LIB_BENCHMARKER_INCLUDE_DIRS}")
 
+# nanoVDB Test
+message(STATUS "foo include dir: $ENV{DIR_NANO_VDB}")
+add_executable(nanoVDB nanovdb.cpp)
+target_include_directories(nanoVDB PUBLIC $ENV{DIR_NANO_VDB} $ENV{DIR_NANO_VDB}/util)
 
-# main
+
+
+
+# main Benchmarker
 add_executable(raytracing main.cpp)
+
+
+
 
 
 target_link_libraries(raytracing 

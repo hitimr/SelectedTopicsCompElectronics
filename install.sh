@@ -37,6 +37,7 @@ mkdir -p $DIR_PROJECT_ROOT/openvdb/build
     -D OPENVDB_BUILD_VDB_VIEW=ON \
     -D OPENVDB_BUILD_UNITTESTS=ON \
     -D OPENVDB_BUILD_VDB_RENDER=ON \
+    -D OPENVDB_BUILD_NANOVDB=ON \
     .. \
     && make -j4 \
     && sudo make install \
