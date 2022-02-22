@@ -58,37 +58,11 @@ void Benchmarker::run(size_t n_rays)
 
   // generate a circular range of rays with origin at 0,0,0
   // all rays point along the x-y-Plane. z is kept at 0 for now
-  Vec3T eye({0, 0, 0});
-  // std::vector<RayT> rays(n_rays);
+  std::vector<RayT> rays = generate_rays<RayT>(n_rays);
   std::vector<Vec3T> reference_solutions = calculate_reference_solution<Vec3T>(n_rays);
 
-  // TODO: put in correct radius
-  // TODO: move ray generation to templated function
-  /*
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    // Generate Rays
-    Vec3T direction({
-        std::cos(alpha_vals[i]), // x = Cos(α)
-        std::sin(alpha_vals[i]), // y = Sin(α)
-        0                        // z = 0
-    });
-    direction.normalize();
-    RayT ray = RayT(eye, direction);
-    rays[i] = ray;
-
-    // calculate reference solution
-    FP_Type radius = options["radius"].as<FP_Type>();
-    Vec3T solution({radius * std::cos(alpha_vals[i]), radius * std::sin(alpha_vals[i]), 0});
-    reference_solutions[i] = solution;
-  }
-  */
-
-  std::vector<RayT> rays = generate_rays<RayT>(n_rays);
-
-  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
-
   // Run Benchmark
+  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
   Timer timer;
   timer.reset();
   for (size_t i = 0; i < n_rays; i++)
@@ -136,28 +110,25 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
 
   auto *h_grid = handle.grid<FP_type>();
 
-  std::vector<RayT> rays(n_rays);
+  std::vector<RayT> rays = generate_rays<RayT>(n_rays);
+  std::vector<Vec3T> reference_solutions = calculate_reference_solution<Vec3T>(n_rays);
 
-  std::vector<Vec3T> reference_solutions(n_rays);
-  std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * pi, n_rays);
-  Vec3T eye(0, 0, 0);
+  // Run Benchmark
+  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
+  auto acc = h_grid->tree().getAccessor();
+  CoordT ijk;
+  float t0; // must be float
+  float v;
+  Timer timer;
 
+  timer.reset();
   for (size_t i = 0; i < n_rays; i++)
   {
-    // Generate Rays
-    Vec3T direction(std::cos(alpha_vals[i]), // x = Cos(α)
-                    std::sin(alpha_vals[i]), // y = Sin(α)
-                    0                        // z = 0
-    );
-    direction.normalize();
-    RayT ray = RayT(eye, direction);
-    rays[i] = ray;
-
-    // calculate reference solution
-    Vec3T solution(sphere_radius_outer * std::cos(alpha_vals[i]),
-                   sphere_radius_outer * std::sin(alpha_vals[i]), 0);
-    reference_solutions[i] = solution;
+    nanovdb::ZeroCrossing(rays[i], acc, ijk, v, t0);
+    calculated[i] = Vec3T(ijk.x() * voxel_size, ijk.y() * voxel_size, ijk.z() * voxel_size);
   }
+  
+  return;
 }
 
 // TODO: rename to RayT
@@ -183,6 +154,7 @@ template <class T> std::vector<T> Benchmarker::generate_rays(size_t n_rays)
 
   return rays;
 }
+
 template <typename T> std::vector<T> Benchmarker::calculate_reference_solution(size_t n_rays)
 {
   std::vector<T> reference_solution(n_rays);
