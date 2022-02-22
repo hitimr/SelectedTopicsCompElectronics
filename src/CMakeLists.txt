@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.14)
 project(Benchmark)
 
 # Dependencies
-list(APPEND CMAKE_MODULE_PATH "/usr/local/lib/cmake/OpenVDB/")
+list(APPEND CMAKE_MODULE_PATH 
+    "/usr/local/lib/cmake/OpenVDB/")
+
 find_package(OpenVDB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
@@ -16,11 +18,11 @@ add_library(benchmarker benchmarker/benchmarker.cpp)
 target_include_directories(benchmarker PUBLIC "${LIB_BENCHMARKER_INCLUDE_DIRS}")
 
 # nanoVDB Test
-message(STATUS "foo include dir: $ENV{DIR_NANO_VDB}")
 add_executable(nanoVDB nanovdb.cpp)
-target_include_directories(nanoVDB PUBLIC $ENV{DIR_NANO_VDB} $ENV{DIR_NANO_VDB}/util)
-
-
+target_include_directories(nanoVDB PUBLIC 
+    $ENV{DIR_NANO_VDB} 
+    $ENV{DIR_NANO_VDB}/util
+    "/usr/local/cuda/include/")
 
 
 # main Benchmarker
