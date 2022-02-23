@@ -53,7 +53,8 @@ public:
   ~Benchmarker(){};
   Benchmarker(const OptionsT &options);
 
-  void run(size_t nrays);
+  void run();
+  void run_openVDB(size_t nrays);
   void run_nanoVDB(size_t nrays);
   template <typename T> std::vector<T> generate_rays(size_t n_rays);
   template <typename T> std::vector<T> calculate_reference_solution(size_t n_rays);
