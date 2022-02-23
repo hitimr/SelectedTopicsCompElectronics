@@ -9,21 +9,9 @@
 
 #include <openvdb/tools/LevelSetSphere.h>
 
-// NanoVDB
 #include <cmath>
-#include <nanovdb/util/CudaDeviceBuffer.h>
-#include <nanovdb/util/GridBuilder.h>
-#include <nanovdb/util/HDDA.h>
-#include <nanovdb/util/IO.h>
-#include <nanovdb/util/Primitives.h>
 
 using namespace openvdb;
-
-#if defined(NANOVDB_USE_CUDA)
-using BufferT = nanovdb::CudaDeviceBuffer;
-#else
-using BufferT = nanovdb::HostBuffer;
-#endif
 
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
@@ -75,23 +63,28 @@ void Benchmarker::run_openVDB(size_t n_rays)
   // verify_results(times, intersections);
 }
 
-
 void Benchmarker::run()
 {
   // set number of rays for the benchmark
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
+  // NanoVDB Level Set
+  nanovdb::GridHandle<BufferT> handle;
+  handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, BufferT>(
+      sphere_radius_outer, {0, 0, 0}, voxel_size,
+      level_set_half_width); // TODO: replace hardcoded center
+
   for (size_t n_rays : ray_vals)
   {
     run_openVDB(n_rays);
-    run_nanoVDB(n_rays);
+    run_nanoVDB(handle, n_rays);
   }
 }
 
-
-void Benchmarker::run_nanoVDB(size_t n_rays)
+void Benchmarker::run_nanoVDB(nanovdb::GridHandle<BufferT> & handle2, size_t n_rays)
 {
+  using NVDB_RayT = nanovdb::Ray<FP_Type>; // TODO: move to header
   nanovdb::GridHandle<BufferT> handle;
   handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, BufferT>(
       sphere_radius_outer, {0, 0, 0}, voxel_size, level_set_half_width);
@@ -105,7 +98,7 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
   std::vector<NVBD_Vec3T> calculated(n_rays, NVBD_Vec3T(0, 0, 0)); // results
   auto acc = h_grid->tree().getAccessor();
   NVBD_CoordT ijk;
-  float t0; 
+  float t0;
   float v;
   Timer timer;
 
@@ -201,4 +194,3 @@ bool Benchmarker::verify_results(const std::vector<FP_Type> &calculated,
 
   return true;
 }
-

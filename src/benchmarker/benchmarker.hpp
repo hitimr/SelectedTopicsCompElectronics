@@ -5,8 +5,15 @@
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/RayIntersector.h>
 
+// NanoVDB
+
 #include <nanovdb/util/Ray.h>
-#include <openvdb/openvdb.h>
+#include <nanovdb/util/CudaDeviceBuffer.h>
+#include <nanovdb/util/GridBuilder.h>
+#include <nanovdb/util/HDDA.h>
+#include <nanovdb/util/IO.h>
+#include <nanovdb/util/Primitives.h>
+
 
 // Boost
 #include <boost/program_options.hpp>
@@ -19,9 +26,15 @@ public:
   using OVBD_RayT = openvdb::math::Ray<FP_Type>;
   using OVBD_GridT = openvdb::FloatGrid;
 
-  using NVDB_RayT = nanovdb::Ray<FP_Type>;
+
   using NVBD_CoordT = nanovdb::Coord;
   using NVBD_Vec3T = nanovdb::Vec3<FP_Type>;
+
+#if defined(NANOVDB_USE_CUDA)
+  using BufferT = nanovdb::CudaDeviceBuffer;
+#else
+  using BufferT = nanovdb::HostBuffer;
+#endif
 
   using OptionsT = boost::program_options::variables_map;
 
@@ -42,7 +55,7 @@ public:
   // Methods
   void run();
   void run_openVDB(size_t nrays);
-  void run_nanoVDB(size_t nrays);
+  void run_nanoVDB(nanovdb::GridHandle<BufferT> &, size_t nrays);
   template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
   template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays);
 
