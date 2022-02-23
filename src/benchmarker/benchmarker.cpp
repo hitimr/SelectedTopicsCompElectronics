@@ -55,7 +55,7 @@ void Benchmarker::run_openVDB(size_t n_rays)
 
   // generate a circular range of rays with origin at 0,0,0
   // all rays point along the x-y-Plane. z is kept at 0 for now
-  std::vector<RayT> rays = generate_rays<RayT>(n_rays);
+  std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
   std::vector<OVBD_Vec3T> reference_solutions = calculate_reference_solution<OVBD_Vec3T>(n_rays);
 
   // Run Benchmark
