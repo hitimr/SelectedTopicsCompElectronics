@@ -36,7 +36,7 @@ public:
   void run();
   void run_openVDB(size_t nrays);
   void run_nanoVDB(size_t nrays);
-  template <typename T> std::vector<T> generate_rays(size_t n_rays);
+  template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
   template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays);
 
   template <typename T>
