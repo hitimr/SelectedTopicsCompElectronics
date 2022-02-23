@@ -1,4 +1,5 @@
 #pragma once
+// OpenVDB
 #include <openvdb/Types.h>
 #include <openvdb/math/Ray.h>
 #include <openvdb/openvdb.h>
@@ -17,18 +18,21 @@ public:
 
   using OptionsT = boost::program_options::variables_map;
 
+  Benchmarker(const OptionsT &options);
+  ~Benchmarker(){};
+
   const OptionsT &options;
 
+  // Benchmark settings
   FP_Type voxel_size = -1;
   FP_Type sphere_radius_outer = -1;
   FP_Type level_set_half_width = -1;
-
   std::vector<int> ray_vals;
+
+  // Constants
   const FP_Type pi = std::acos(-1);
 
-  ~Benchmarker(){};
-  Benchmarker(const OptionsT &options);
-
+  // Methods
   void run();
   void run_openVDB(size_t nrays);
   void run_nanoVDB(size_t nrays);
@@ -39,9 +43,3 @@ public:
   bool verify_results(const std::vector<T> &calculated, const std::vector<T> &reference,
                       int &err_pos = -1);
 };
-
-/*
-// Valid instantiations. Required for Template ClasA
-template class Benchmarker<double>;
-template class Benchmarker<float>;
-*/
