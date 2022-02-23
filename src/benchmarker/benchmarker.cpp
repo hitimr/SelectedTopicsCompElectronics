@@ -50,8 +50,10 @@ void Benchmarker::run_openVDB(size_t n_rays)
       level_set_half_width // half the width of the narrow band, in voxel units
   );
 
-  // Ray Intersector
-  tools::LevelSetRayIntersector<OVBD_GridT> ray_intersector(*level_set);
+  // Ray Intersector. Triple nested types. nice...
+  tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
+                                OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL, OVBD_RayT>
+      ray_intersector(*level_set);
 
   // generate a circular range of rays with origin at 0,0,0
   // all rays point along the x-y-Plane. z is kept at 0 for now
@@ -132,7 +134,7 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
   PLOG_INFO << "NanoVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
-  //int err_pos;
+  // int err_pos;
   // assert(verify_results<Vec3T>(calculated, reference_solutions, err_pos));
 }
 
@@ -161,7 +163,8 @@ template <class T> std::vector<T> Benchmarker::generate_rays(size_t n_rays)
 }
 
 // calculate ray intersections analytically
-template <typename Vec3T> std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays)
+template <typename Vec3T>
+std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays)
 {
   std::vector<Vec3T> reference_solution(n_rays);
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * pi, n_rays);
