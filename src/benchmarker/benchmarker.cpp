@@ -22,19 +22,10 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   level_set_half_width = 2.0;
 }
 
-void Benchmarker::run_openVDB(size_t n_rays)
+void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
 {
   assert(n_rays > 0);
   PLOG_INFO << "\nRunning OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
-
-  // generate Sphere
-  OVBD_Vec3T center(0, 0, 0);
-  auto level_set = tools::createLevelSetSphere<OVBD_GridT>(
-      sphere_radius_outer, // radius of the sphere in world units
-      center,              // center of the sphere in world units
-      voxel_size,          // voxel size in world units
-      level_set_half_width // half the width of the narrow band, in voxel units
-  );
 
   // Ray Intersector: Triple nested types. nice...
   tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
@@ -69,6 +60,14 @@ void Benchmarker::run()
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
+  OVBD_Vec3T center(0, 0, 0);
+  OVBD_GridT::Ptr level_set = tools::createLevelSetSphere<OVBD_GridT>(
+      sphere_radius_outer, // radius of the sphere in world units
+      center,              // center of the sphere in world units
+      voxel_size,          // voxel size in world units
+      level_set_half_width // half the width of the narrow band, in voxel units
+  );
+
   // NanoVDB Level Set
   nanovdb::GridHandle<BufferT> handle;
   handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, BufferT>(
@@ -77,17 +76,15 @@ void Benchmarker::run()
 
   for (size_t n_rays : ray_vals)
   {
-    run_openVDB(n_rays);
+    run_openVDB(level_set, n_rays);
     run_nanoVDB(handle, n_rays);
   }
 }
 
-void Benchmarker::run_nanoVDB(nanovdb::GridHandle<BufferT> & handle2, size_t n_rays)
+void Benchmarker::run_nanoVDB(nanovdb::GridHandle<BufferT> &handle, size_t n_rays)
 {
   using NVDB_RayT = nanovdb::Ray<FP_Type>; // TODO: move to header
-  nanovdb::GridHandle<BufferT> handle;
-  handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, BufferT>(
-      sphere_radius_outer, {0, 0, 0}, voxel_size, level_set_half_width);
+
 
   auto *h_grid = handle.grid<FP_Type>();
 
