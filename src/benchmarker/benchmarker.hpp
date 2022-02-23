@@ -39,7 +39,5 @@ public:
   template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
   template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays);
 
-  template <typename T>
-  bool verify_results(const std::vector<T> &calculated, const std::vector<T> &reference,
-                      int &err_pos = -1);
+  bool verify_results(const std::vector<FP_Type> &calculated);
 };
