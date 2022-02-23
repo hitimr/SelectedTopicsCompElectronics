@@ -30,8 +30,8 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
   // Sphere Parameters
-  sphere_radius_outer = (FP_Type) options["radius"].as<double>();
-  voxel_size = (FP_Type) options["voxel_size"].as<double>();
+  sphere_radius_outer = (FP_Type)options["radius"].as<double>();
+  voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
 }
 
@@ -54,11 +54,11 @@ void Benchmarker::run_openVDB(size_t n_rays)
                                 OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL, OVBD_RayT>
       ray_intersector(*level_set);
 
-
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
   std::vector<OVBD_Vec3T> reference_solutions = calculate_reference_solution<OVBD_Vec3T>(n_rays);
 
   // Run Benchmark
+  // TODO: make multiple repeats with custom wrapper function
   std::vector<FP_Type> calculated_time(n_rays);
   Timer timer;
   timer.reset();
@@ -70,19 +70,6 @@ void Benchmarker::run_openVDB(size_t n_rays)
   double time = timer.get();
   PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
-  /*
-  // results for each ray
-  PLOG_DEBUG << "Voxel size: " << voxel_size << std::endl;
-  PLOG_DEBUG << "Calculated | reference" << std::endl;
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    PLOG_DEBUG << "Ray " << i << std::endl;
-    PLOG_DEBUG << "x: " << calculated[i].x() << "|" << reference_solutions[i].x() << std::endl;
-    PLOG_DEBUG << "y: " << calculated[i].y() << "|" << reference_solutions[i].y() << std::endl;
-    PLOG_DEBUG << "z: " << calculated[i].z() << "|" << reference_solutions[i].z() << std::endl;
-    PLOG_DEBUG << std::endl;
-  }
-  */
 
   // Verify Solution
   FP_Type eps = voxel_size / 2;
@@ -142,7 +129,7 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
  *
  * @tparam RayT either OpenVDB Rays or NanoVDB Rays
  * @param n_rays number of rays that should be generated
- * @return std::vector<RayT> 
+ * @return std::vector<RayT>
  */
 template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays)
 {
@@ -185,27 +172,15 @@ std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays)
 }
 
 // verify results by comparing them to precomputed reference solutions
-// T must be of Vec3 Type
-template <typename T>
-bool Benchmarker::verify_results(const std::vector<T> &calculated, const std::vector<T> &reference,
-                                 int &err_pos)
+bool Benchmarker::verify_results(const std::vector<FP_Type> &calculated)
 {
-  assert(calculated.size() == reference.size());
-
   FP_Type eps = voxel_size / 2;
 
   for (size_t i = 0; i < calculated.size(); i++)
   {
-    if ((std::abs(calculated[i][0] - reference[i][0]) > eps) ||
-        (std::abs(calculated[i][1] - reference[i][1]) > eps) ||
-        (std::abs(calculated[i][2] - reference[i][2]) > eps))
+    if (std::abs(calculated[i] - sphere_radius_outer) > eps)
     {
       PLOG_ERROR << "Calculated results does not match at pos " << i << std::endl;
-      PLOG_ERROR << "calculated:\t(" << calculated[i][0] << "|" << calculated[i][1] << "|"
-                 << calculated[i][2] << ")" << std::endl;
-      PLOG_ERROR << "Reference:\t(" << reference[i][0] << "|" << reference[i][1] << "|"
-                 << reference[i][2] << ")" << std::endl;
-      err_pos = i;
       return false;
     }
   }
