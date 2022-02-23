@@ -75,6 +75,21 @@ void Benchmarker::run_openVDB(size_t n_rays)
   // verify_results(times, intersections);
 }
 
+
+void Benchmarker::run()
+{
+  // set number of rays for the benchmark
+  ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
+                      options["nbench"].as<int>());
+
+  for (size_t n_rays : ray_vals)
+  {
+    run_openVDB(n_rays);
+    run_nanoVDB(n_rays);
+  }
+}
+
+
 void Benchmarker::run_nanoVDB(size_t n_rays)
 {
   nanovdb::GridHandle<BufferT> handle;
@@ -187,15 +202,3 @@ bool Benchmarker::verify_results(const std::vector<FP_Type> &calculated,
   return true;
 }
 
-void Benchmarker::run()
-{
-  // set number of rays for the benchmark
-  ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
-                      options["nbench"].as<int>());
-
-  for (size_t n_rays : ray_vals)
-  {
-    run_openVDB(n_rays);
-    run_nanoVDB(n_rays);
-  }
-}
