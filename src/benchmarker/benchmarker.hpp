@@ -5,6 +5,9 @@
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/RayIntersector.h>
 
+#include <nanovdb/util/Ray.h>
+#include <openvdb/openvdb.h>
+
 // Boost
 #include <boost/program_options.hpp>
 
@@ -15,6 +18,10 @@ public:
   using OVBD_Vec3T = openvdb::math::Vec3<FP_Type>;
   using OVBD_RayT = openvdb::math::Ray<FP_Type>;
   using OVBD_GridT = openvdb::FloatGrid;
+
+  using NVDB_RayT = nanovdb::Ray<FP_Type>;
+  using NVBD_CoordT = nanovdb::Coord;
+  using NVBD_Vec3T = nanovdb::Vec3<FP_Type>;
 
   using OptionsT = boost::program_options::variables_map;
 

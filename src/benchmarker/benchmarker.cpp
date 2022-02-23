@@ -6,7 +6,7 @@
 // OpenVDB
 #include <openvdb/Exceptions.h>
 #include <openvdb/math/Transform.h>
-#include <openvdb/openvdb.h>
+
 #include <openvdb/tools/LevelSetSphere.h>
 
 // NanoVDB
@@ -16,7 +16,6 @@
 #include <nanovdb/util/HDDA.h>
 #include <nanovdb/util/IO.h>
 #include <nanovdb/util/Primitives.h>
-#include <nanovdb/util/Ray.h>
 
 using namespace openvdb;
 
@@ -54,7 +53,6 @@ void Benchmarker::run_openVDB(size_t n_rays)
                                 OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL, OVBD_RayT>
       ray_intersector(*level_set);
 
-
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
   std::vector<OVBD_Vec3T> reference_solutions = calculate_reference_solution<OVBD_Vec3T>(n_rays);
 
@@ -74,31 +72,25 @@ void Benchmarker::run_openVDB(size_t n_rays)
   PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
-  //verify_results(times, intersections);
+  // verify_results(times, intersections);
 }
 
 void Benchmarker::run_nanoVDB(size_t n_rays)
 {
-  using GridT = nanovdb::FloatGrid;
-  using CoordT = nanovdb::Coord;
-  using FP_type = float;
-  using Vec3T = nanovdb::Vec3<FP_type>;
-  using RayT = nanovdb::Ray<FP_type>;
-
   nanovdb::GridHandle<BufferT> handle;
-  handle = nanovdb::createLevelSetSphere<FP_type, FP_type, BufferT>(
+  handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, BufferT>(
       sphere_radius_outer, {0, 0, 0}, voxel_size, level_set_half_width);
 
-  auto *h_grid = handle.grid<FP_type>();
+  auto *h_grid = handle.grid<FP_Type>();
 
-  std::vector<RayT> rays = generate_rays<RayT>(n_rays);
-  std::vector<Vec3T> reference_solutions = calculate_reference_solution<Vec3T>(n_rays);
+  std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
+  std::vector<NVBD_Vec3T> reference_solutions = calculate_reference_solution<NVBD_Vec3T>(n_rays);
 
   // Run Benchmark
-  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
+  std::vector<NVBD_Vec3T> calculated(n_rays, NVBD_Vec3T(0, 0, 0)); // results
   auto acc = h_grid->tree().getAccessor();
-  CoordT ijk;
-  float t0; // must be float
+  NVBD_CoordT ijk;
+  float t0; 
   float v;
   Timer timer;
 
@@ -116,16 +108,16 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
             << " kRays/s)" << std::endl;
 
   // int err_pos;
-  // assert(verify_results<Vec3T>(calculated, reference_solutions, err_pos));
+  // assert(verify_results<NVBD_Vec3T>(calculated, reference_solutions, err_pos));
 }
 
 /**
  * @brief Generate Rays for the benchmark.
  * Currently all Rays start at (0,0,0) and are equally spread in a circular field
  *
- * @tparam RayT either OpenVDB Rays or NanoVDB Rays
+ * @tparam NVDB_RayT either OpenVDB Rays or NanoVDB Rays
  * @param n_rays number of rays that should be generated
- * @return std::vector<RayT>
+ * @return std::vector<NVDB_RayT>
  */
 template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays)
 {
