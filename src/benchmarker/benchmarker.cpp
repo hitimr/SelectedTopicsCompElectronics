@@ -42,9 +42,10 @@ void Benchmarker::run_openVDB(size_t n_rays)
   PLOG_INFO << "\nRunning benchmark for " << n_rays << " Rays" << std::endl;
 
   // generate Sphere
+  OVBD_Vec3T center(0, 0, 0);
   auto level_set = tools::createLevelSetSphere<GridT>(
       sphere_radius_outer, // radius of the sphere in world units
-      Vec3T(0, 0, 0),      // center of the sphere in world units
+      center,              // center of the sphere in world units
       voxel_size,          // voxel size in world units
       level_set_half_width // half the width of the narrow band, in voxel units
   );
@@ -55,10 +56,10 @@ void Benchmarker::run_openVDB(size_t n_rays)
   // generate a circular range of rays with origin at 0,0,0
   // all rays point along the x-y-Plane. z is kept at 0 for now
   std::vector<RayT> rays = generate_rays<RayT>(n_rays);
-  std::vector<Vec3T> reference_solutions = calculate_reference_solution<Vec3T>(n_rays);
+  std::vector<OVBD_Vec3T> reference_solutions = calculate_reference_solution<OVBD_Vec3T>(n_rays);
 
   // Run Benchmark
-  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
+  std::vector<OVBD_Vec3T> calculated(n_rays, OVBD_Vec3T(0, 0, 0)); // results
   Timer timer;
   timer.reset();
   for (size_t i = 0; i < n_rays; i++)
@@ -67,8 +68,8 @@ void Benchmarker::run_openVDB(size_t n_rays)
   }
 
   double time = timer.get();
-  PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time) << " kRays/s)"
-            << std::endl;
+  PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
+            << " kRays/s)" << std::endl;
 
   // results for each ray
   PLOG_DEBUG << "Voxel size: " << voxel_size << std::endl;
@@ -85,10 +86,10 @@ void Benchmarker::run_openVDB(size_t n_rays)
   // Verify Solution
   FP_Type voxel_size = options["voxel_size"].as<FP_Type>();
   FP_Type eps = voxel_size / 2;
-  Vec3T vec_eps(eps, eps, eps);
   for (size_t i = 0; i < n_rays; i++)
   {
-    assert(openvdb::math::isApproxEqual(calculated[i], reference_solutions[i], vec_eps));
+    // replace with custom function
+    // assert(openvdb::math::isApproxEqual(calculated[i], reference_solutions[i], vec_eps));
   }
 }
 
@@ -128,10 +129,10 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
   }
 
   double time = timer.get();
-  PLOG_INFO << "NanoVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time) << " kRays/s)"
-            << std::endl;
+  PLOG_INFO << "NanoVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
+            << " kRays/s)" << std::endl;
 
-  int err_pos;
+  //int err_pos;
   // assert(verify_results<Vec3T>(calculated, reference_solutions, err_pos));
 }
 
@@ -160,9 +161,9 @@ template <class T> std::vector<T> Benchmarker::generate_rays(size_t n_rays)
 }
 
 // calculate ray intersections analytically
-template <typename T> std::vector<T> Benchmarker::calculate_reference_solution(size_t n_rays)
+template <typename Vec3T> std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays)
 {
-  std::vector<T> reference_solution(n_rays);
+  std::vector<Vec3T> reference_solution(n_rays);
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * pi, n_rays);
 
   for (size_t i = 0; i < n_rays; i++)
