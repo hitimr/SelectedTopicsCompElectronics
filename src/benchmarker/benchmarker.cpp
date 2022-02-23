@@ -43,7 +43,7 @@ void Benchmarker::run_openVDB(size_t n_rays)
 
   // generate Sphere
   OVBD_Vec3T center(0, 0, 0);
-  auto level_set = tools::createLevelSetSphere<GridT>(
+  auto level_set = tools::createLevelSetSphere<OVBD_GridT>(
       sphere_radius_outer, // radius of the sphere in world units
       center,              // center of the sphere in world units
       voxel_size,          // voxel size in world units
@@ -51,7 +51,7 @@ void Benchmarker::run_openVDB(size_t n_rays)
   );
 
   // Ray Intersector
-  tools::LevelSetRayIntersector<GridT> ray_intersector(*level_set);
+  tools::LevelSetRayIntersector<OVBD_GridT> ray_intersector(*level_set);
 
   // generate a circular range of rays with origin at 0,0,0
   // all rays point along the x-y-Plane. z is kept at 0 for now

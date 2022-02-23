@@ -13,7 +13,7 @@ public:
   using FP_Type = double;
   using OVBD_Vec3T = openvdb::math::Vec3<FP_Type>;
   using OVBD_RayT = openvdb::math::Ray<FP_Type>;
-  using GridT = openvdb::DoubleGrid;
+  using OVBD_GridT = openvdb::DoubleGrid;
 
   using OptionsT = boost::program_options::variables_map;
 
