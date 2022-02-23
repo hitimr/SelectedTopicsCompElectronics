@@ -54,30 +54,27 @@ void Benchmarker::run_openVDB(size_t n_rays)
                                 OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL, OVBD_RayT>
       ray_intersector(*level_set);
 
+
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
   std::vector<OVBD_Vec3T> reference_solutions = calculate_reference_solution<OVBD_Vec3T>(n_rays);
 
   // Run Benchmark
   // TODO: make multiple repeats with custom wrapper function
-  std::vector<FP_Type> calculated_time(n_rays);
+  std::vector<FP_Type> times(n_rays);
+  std::vector<bool> intersections(n_rays);
+
   Timer timer;
   timer.reset();
   for (size_t i = 0; i < n_rays; i++)
   {
-    ray_intersector.intersectsWS(rays[i], calculated_time[i]);
+    ray_intersector.intersectsIS(rays[i].worldToIndex(*level_set));
   }
 
   double time = timer.get();
   PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
-  // Verify Solution
-  FP_Type eps = voxel_size / 2;
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    // replace with custom function
-    // assert(openvdb::math::isApproxEqual(calculated[i], reference_solutions[i], vec_eps));
-  }
+  //verify_results(times, intersections);
 }
 
 void Benchmarker::run_nanoVDB(size_t n_rays)
@@ -112,7 +109,6 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
 
     // nanovdb only supports raytracing/ intersection in index space
     // we need to transform results back to word coordinates
-    calculated[i] = Vec3T(ijk.x() * (voxel_size), ijk.y() * voxel_size, ijk.z() * voxel_size);
   }
 
   double time = timer.get();
@@ -172,16 +168,27 @@ std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays)
 }
 
 // verify results by comparing them to precomputed reference solutions
-bool Benchmarker::verify_results(const std::vector<FP_Type> &calculated)
+bool Benchmarker::verify_results(const std::vector<FP_Type> &calculated,
+                                 const std::vector<bool> &intersections)
 {
   FP_Type eps = voxel_size / 2;
+  FP_Type corerct_solution = sphere_radius_outer;
 
   for (size_t i = 0; i < calculated.size(); i++)
   {
-    if (std::abs(calculated[i] - sphere_radius_outer) > eps)
+    if (std::abs(calculated[i] - corerct_solution) > eps)
     {
-      PLOG_ERROR << "Calculated results does not match at pos " << i << std::endl;
+      PLOG_ERROR << "Calculated time does not match at pos " << i << std::endl;
+      PLOG_ERROR << "Received:\t" << calculated[i] << std::endl;
+      PLOG_ERROR << "Should be:\t" << corerct_solution << std::endl;
       return false;
+    }
+
+    if (intersections[i] == false)
+    {
+      PLOG_ERROR << "Calculated intersection does not match at pos " << i << std::endl;
+      PLOG_ERROR << "Received:\t" << intersections[i] << std::endl;
+      PLOG_ERROR << "Should be:\t" << true << std::endl;
     }
   }
 
