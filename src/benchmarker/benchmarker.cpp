@@ -29,17 +29,13 @@ using BufferT = nanovdb::HostBuffer;
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
-  // set number of rays for the benchmark
-  ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
-                      options["nbench"].as<int>());
-
   // Sphere Parameters
   sphere_radius_outer = options["radius"].as<FP_Type>();
   voxel_size = options["voxel_size"].as<FP_Type>();
   level_set_half_width = 2.0;
 }
 
-void Benchmarker::run(size_t n_rays)
+void Benchmarker::run_openVDB(size_t n_rays)
 {
 
   assert(n_rays > 0);
@@ -71,7 +67,7 @@ void Benchmarker::run(size_t n_rays)
   }
 
   double time = timer.get();
-  PLOG_INFO << "Finished in " << time << "s (" << (double)n_rays / (1000 * time) << " kRays/s)"
+  PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time) << " kRays/s)"
             << std::endl;
 
   // results for each ray
@@ -132,11 +128,11 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
   }
 
   double time = timer.get();
-  PLOG_INFO << "Finished in " << time << "s (" << (double)n_rays / (1000 * time) << " kRays/s)"
+  PLOG_INFO << "NanoVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time) << " kRays/s)"
             << std::endl;
 
   int err_pos;
-  //assert(verify_results<Vec3T>(calculated, reference_solutions, err_pos));
+  // assert(verify_results<Vec3T>(calculated, reference_solutions, err_pos));
 }
 
 // TODO: rename to RayT
@@ -205,4 +201,17 @@ bool Benchmarker::verify_results(const std::vector<T> &calculated, const std::ve
   }
 
   return true;
+}
+
+void Benchmarker::run()
+{
+  // set number of rays for the benchmark
+  ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
+                      options["nbench"].as<int>());
+
+  for (size_t n_rays : ray_vals)
+  {
+    run_openVDB(n_rays);
+    run_nanoVDB(n_rays);
+  }
 }
