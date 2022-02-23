@@ -138,13 +138,21 @@ void Benchmarker::run_nanoVDB(size_t n_rays)
   // assert(verify_results<Vec3T>(calculated, reference_solutions, err_pos));
 }
 
-// TODO: rename to RayT
-template <class T> std::vector<T> Benchmarker::generate_rays(size_t n_rays)
+/**
+ * @brief Generate Rays for the benchmark.
+ * Currently all Rays start at (0,0,0) and are equally spread in a circular field
+ *
+ * @tparam RayT either OpenVDB Rays or NanoVDB Rays
+ * @param n_rays number of rays that should be generated
+ * @return std::vector<RayT> 
+ */
+template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays)
 {
-  using Vec3T = typename T::Vec3T;
+  using Vec3T = typename RayT::Vec3T;
+  using RealT = typename Vec3T::ValueType;
 
-  std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * pi, n_rays);
-  std::vector<T> rays(n_rays);
+  std::vector<RealT> alpha_vals = linspace<RealT>(0.0, 2.0 * pi, n_rays);
+  std::vector<RayT> rays(n_rays);
   Vec3T eye(0, 0, 0);
 
   for (size_t i = 0; i < n_rays; i++)
@@ -155,7 +163,7 @@ template <class T> std::vector<T> Benchmarker::generate_rays(size_t n_rays)
                     0                        // z = 0
     );
     direction.normalize();
-    T ray(eye, direction);
+    RayT ray(eye, direction);
     rays[i] = ray;
   }
 
