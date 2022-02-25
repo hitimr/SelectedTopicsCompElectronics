@@ -77,14 +77,13 @@ void Benchmarker::run()
   for (size_t n_rays : ray_vals)
   {
     run_openVDB(level_set, n_rays);
-    run_nanoVDB(handle, n_rays);
+    run_nanoVDB_CPU(handle, n_rays);
   }
 }
 
-void Benchmarker::run_nanoVDB(nanovdb::GridHandle<BufferT> &handle, size_t n_rays)
+void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_rays)
 {
   using NVDB_RayT = nanovdb::Ray<FP_Type>; // TODO: move to header
-
 
   auto *h_grid = handle.grid<FP_Type>();
 
