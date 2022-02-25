@@ -30,11 +30,7 @@ public:
   using NVBD_CoordT = nanovdb::Coord;
   using NVBD_Vec3T = nanovdb::Vec3<FP_Type>;
 
-#if defined(NANOVDB_USE_CUDA)
-  using BufferT = nanovdb::CudaDeviceBuffer;
-#else
-  using BufferT = nanovdb::HostBuffer;
-#endif
+  //using BufferT = nanovdb::CudaDeviceBuffer;
 
   using OptionsT = boost::program_options::variables_map;
 
@@ -55,7 +51,7 @@ public:
   // Methods
   void run();
   void run_openVDB(const OVBD_GridT::Ptr & level_set2, size_t nrays);
-  void run_nanoVDB(nanovdb::GridHandle<BufferT> &, size_t nrays);
+  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &, size_t nrays);
 
   template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
   template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays);
