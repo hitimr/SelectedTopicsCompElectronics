@@ -69,8 +69,7 @@ void Benchmarker::run()
   );
 
   // NanoVDB Level Set
-  nanovdb::GridHandle<BufferT> handle;
-  handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, BufferT>(
+  auto handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::HostBuffer>(
       sphere_radius_outer, {0, 0, 0}, voxel_size,
       level_set_half_width); // TODO: replace hardcoded center
 
