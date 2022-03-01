@@ -8,7 +8,14 @@ export DIR_PROJECT_ROOT=$(pwd)
 
 # install dependencies
 sudo apt-get install -y \
+    pkg-config \
     libboost-all-dev \
+    build-essential \
+    libgl1-mesa-dev \
+    glfw3 \
+    libglfw3-dev \
+    libgtest-dev \
+    freeglut3-dev \
     libboost-iostreams-dev \
     libtbb-dev \
     libblosc-dev \
@@ -19,13 +26,15 @@ sudo apt-get install -y \
     libglfw3-dev \
     libopengl-dev \
     libjemalloc-dev \ 
-    freeglut3-dev
+    libtbb-dev \
+    freeglut3-dev \
+    clang-format
     
 # Tools
 sudo apt install paraview
 
 # build openvdb
-git clone https://github.com/AcademySoftwareFoundation/openvdb
+git -C  openvdb pull || git clone https://github.com/AcademySoftwareFoundation/openvdb openvdb
 git pull
 mkdir -p $DIR_PROJECT_ROOT/openvdb/build
 ( \
