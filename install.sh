@@ -19,7 +19,9 @@ sudo apt-get install -y \
     libglfw3-dev \
     libopengl-dev \
     libjemalloc-dev \ 
-    freeglut3-dev
+    freeglut3-dev \
+    nvidia-cuda-dev \
+    libboost-program-options-dev
     
 # Tools
 sudo apt install paraview
