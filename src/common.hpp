@@ -29,7 +29,15 @@ using RayIntersectorT = openvdb::tools::LevelSetRayIntersector<openvdb::FloatGri
 #include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Log.h>
 
+#include <cmath>
 #include <vector>
+
+// Constants
+#ifdef M_PI
+#undef M_PI
+#endif // M_PI
+
+const double M_PI = std::acos(-1); // TODO: replace with FP_type
 
 class CustomPlogFormatter
 {
