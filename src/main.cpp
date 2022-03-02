@@ -18,12 +18,15 @@
 // Standard Library
 #include <cassert>
 #include <iostream>
+#include <time.h>
 #include <vector>
 
 // Namespaces
 using namespace openvdb;
 
 using OptionsT = boost::program_options::variables_map;
+
+Timer global_timer;
 
 OptionsT parse_options(int ac, char **av)
 {
@@ -64,6 +67,8 @@ OptionsT parse_options(int ac, char **av)
 
 int main(int ac, char **av)
 {
+  global_timer = Timer();
+
   // Parse CLI options
   OptionsT options = parse_options(ac, av);
 
