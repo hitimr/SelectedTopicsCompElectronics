@@ -113,8 +113,9 @@ void Benchmarker::run()
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
+  // OpenVDB Level Set
   OVBD_Vec3T center(0, 0, 0);
-  OVBD_GridT::Ptr level_set = tools::createLevelSetSphere<OVBD_GridT>(
+  OVBD_GridT::Ptr level_set_ovbd = tools::createLevelSetSphere<OVBD_GridT>(
       sphere_radius_outer, // radius of the sphere in world units
       center,              // center of the sphere in world units
       voxel_size,          // voxel size in world units
@@ -122,7 +123,7 @@ void Benchmarker::run()
   );
 
   // NanoVDB CPU Level Set
-  auto handle = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::HostBuffer>(
+  auto level_set_cpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::HostBuffer>(
       sphere_radius_outer, {0, 0, 0}, voxel_size,
       level_set_half_width); // TODO: replace hardcoded center
 
@@ -133,18 +134,19 @@ void Benchmarker::run()
 
   for (size_t n_rays : ray_vals)
   {
-    run_openVDB(level_set, n_rays);
-    run_nanoVDB_CPU(handle, n_rays);
-    run_nanoVDB_GPU(level_set_gpu, n_rays); // TODO: rename to levelset or something
+    run_openVDB(level_set_ovbd, n_rays);
+    run_nanoVDB_CPU(level_set_cpu, n_rays);
+    run_nanoVDB_GPU(level_set_gpu, n_rays);
   }
 }
 
 // TODO: move to separate File
-void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_rays)
+void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
+                                  size_t n_rays)
 {
   using NVDB_RayT = nanovdb::Ray<FP_Type>;
 
-  auto *h_grid = handle.grid<FP_Type>();
+  auto *h_grid = level_set.grid<FP_Type>();
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
   std::vector<NVBD_Vec3T> reference_solutions =
