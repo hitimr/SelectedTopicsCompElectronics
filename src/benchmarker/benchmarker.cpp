@@ -77,7 +77,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
 {
   assert(n_rays > 0);
-  PLOG_INFO << "\nRunning OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
+  PLOG_INFO << "Running OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
 
   // Ray Intersector: Triple nested types. nice...
   tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
@@ -113,31 +113,36 @@ void Benchmarker::run()
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
-  PLOG_INFO << "Generating Level sets" << std::endl;
+  // required because OpenVDB and NanoVDB require different Classes for Vec3
+  FP_Type center_x = 0;
+  FP_Type center_y = 0;
+  FP_Type center_z = 0;
+
   // OpenVDB Level Set
-  OVBD_Vec3T center(0, 0, 0);
+  PLOG_INFO << "Generating Level set for OpenVDB" << std::endl;
   OVBD_GridT::Ptr level_set_ovbd = tools::createLevelSetSphere<OVBD_GridT>(
-      sphere_radius_outer, // radius of the sphere in world units
-      center,              // center of the sphere in world units
-      voxel_size,          // voxel size in world units
-      level_set_half_width // half the width of the narrow band, in voxel units
+      sphere_radius_outer,            // radius of the sphere in world units
+      {center_x, center_y, center_z}, // center of the sphere in world units
+      voxel_size,                     // voxel size in world units
+      level_set_half_width            // half the width of the narrow band, in voxel units
   );
 
   // NanoVDB CPU Level Set
+  PLOG_INFO << "Generating Level set for NanoVDB on CPU" << std::endl;
   auto level_set_cpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::HostBuffer>(
-      sphere_radius_outer, {0, 0, 0}, voxel_size,
-      level_set_half_width); // TODO: replace hardcoded center
+      sphere_radius_outer, {center_x, center_y, center_z}, voxel_size, level_set_half_width);
 
   // NanoVDB GPU Level Set
+  PLOG_INFO << "Generating Level set for NanoVDB on GPU" << std::endl;
   auto level_set_gpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::CudaDeviceBuffer>(
-      sphere_radius_outer, {0, 0, 0}, voxel_size,
-      level_set_half_width); // TODO: replace hardcoded center
+      sphere_radius_outer, {center_x, center_y, 0}, voxel_size, level_set_half_width);
 
   for (size_t n_rays : ray_vals)
   {
     run_openVDB(level_set_ovbd, n_rays);
     run_nanoVDB_CPU(level_set_cpu, n_rays);
     run_nanoVDB_GPU(level_set_gpu, n_rays);
+    PLOG_INFO << "Done" << std::endl << std::endl;
   }
 }
 
