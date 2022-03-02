@@ -14,6 +14,42 @@
 
 using namespace openvdb;
 
+
+
+
+/**
+ * @brief Generate Rays for the benchmark.
+ * Currently all Rays start at (0,0,0) and are equally spread in a circular field
+ *
+ * @tparam NVDB_RayT either OpenVDB Rays or NanoVDB Rays
+ * @param n_rays number of rays that should be generated
+ * @return std::vector<NVDB_RayT>
+ */
+template <class RayT> std::vector<RayT>generate_rays(size_t n_rays)
+{
+  using Vec3T = typename RayT::Vec3T;
+  using RealT = typename Vec3T::ValueType;
+
+  std::vector<RealT> alpha_vals = linspace<RealT>(0.0, 2.0 * M_PI, n_rays);
+  std::vector<RayT> rays(n_rays);
+  Vec3T eye(0, 0, 0);
+
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    // Generate Rays
+    Vec3T direction(std::cos(alpha_vals[i]), // x = Cos(α)
+                    std::sin(alpha_vals[i]), // y = Sin(α)
+                    0                        // z = 0
+    );
+    direction.normalize();
+    RayT ray(eye, direction);
+    rays[i] = ray;
+  }
+
+  return rays;
+}
+
+
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
@@ -114,38 +150,6 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &hand
 
   // int err_pos;
   // assert(verify_results<NVBD_Vec3T>(calculated, reference_solutions, err_pos));
-}
-
-/**
- * @brief Generate Rays for the benchmark.
- * Currently all Rays start at (0,0,0) and are equally spread in a circular field
- *
- * @tparam NVDB_RayT either OpenVDB Rays or NanoVDB Rays
- * @param n_rays number of rays that should be generated
- * @return std::vector<NVDB_RayT>
- */
-template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays)
-{
-  using Vec3T = typename RayT::Vec3T;
-  using RealT = typename Vec3T::ValueType;
-
-  std::vector<RealT> alpha_vals = linspace<RealT>(0.0, 2.0 * pi, n_rays);
-  std::vector<RayT> rays(n_rays);
-  Vec3T eye(0, 0, 0);
-
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    // Generate Rays
-    Vec3T direction(std::cos(alpha_vals[i]), // x = Cos(α)
-                    std::sin(alpha_vals[i]), // y = Sin(α)
-                    0                        // z = 0
-    );
-    direction.normalize();
-    RayT ray(eye, direction);
-    rays[i] = ray;
-  }
-
-  return rays;
 }
 
 // calculate ray intersections analytically
