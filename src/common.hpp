@@ -17,12 +17,15 @@ using FP_Type = float;
 // Exit Codes
 #define EXIT_SUCCESS 0
 
+#include "util/timer.hpp"
+
 // Logging
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Log.h>
 
 #include <cmath>
+#include <iomanip>
 #include <vector>
 
 // Constants
@@ -31,6 +34,9 @@ using FP_Type = float;
 #endif // M_PI
 
 const double M_PI = std::acos(-1); // TODO: replace with FP_type
+
+// Globals
+extern Timer global_timer;
 
 class CustomPlogFormatter
 {
@@ -45,7 +51,8 @@ public:
   format(const plog::Record &record) // This method returns a string from a record.
   {
     plog::util::nostringstream ss;
-    ss << record.getMessage(); // Produce a simple string with a log message.
+    ss << std::fixed << std::setprecision(3) << global_timer.get() << ": "
+       << record.getMessage();
 
     return ss.str();
   }
