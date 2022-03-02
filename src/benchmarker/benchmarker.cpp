@@ -16,6 +16,9 @@
 
 using namespace openvdb;
 
+
+// TODO: reintroduce result verification for all variants
+
 /**
  * @brief Generate Rays for the benchmark.
  * Currently all Rays start at (0,0,0) and are equally spread in a circular field
@@ -176,7 +179,7 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   }
 
   double time = timer.get();
-  PLOG_INFO << "NanoVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
+  PLOG_INFO << "NanoVDB on CPU Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
   // int err_pos;
