@@ -1,7 +1,6 @@
 #pragma once
 #include "../common.hpp"
 
-
 template <typename T> std::vector<T> linspace(T start, T end, size_t count)
 {
   assert(end - start != 0.0);
@@ -15,6 +14,7 @@ template <typename T> std::vector<T> linspace(T start, T end, size_t count)
   return ret_vals;
 }
 
+// TODO: this function is probably buggy -> fix asap
 std::vector<int> logspace(int start, int end, int base, size_t sample_cnt)
 {
   std::vector<int> n_vals;
