@@ -29,8 +29,6 @@ public:
   using NVBD_CoordT = nanovdb::Coord;
   using NVBD_Vec3T = nanovdb::Vec3<FP_Type>;
 
-  // using BufferT = nanovdb::CudaDeviceBuffer;
-
   using OptionsT = boost::program_options::variables_map;
 
   Benchmarker(const OptionsT &options);
