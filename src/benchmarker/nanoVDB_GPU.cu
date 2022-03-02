@@ -13,6 +13,6 @@ void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_
   assert(n_rays > 0);
   PLOG_INFO << "Running NanoVDP on GPU benchmark for " << n_rays << " Rays" << std::endl;
 
-  //std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
+  std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
   // std::vector<NVBD_Vec3T> reference_solutions = calculate_reference_solution<NVBD_Vec3T>(n_rays);
 }
