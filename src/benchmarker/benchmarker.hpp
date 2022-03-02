@@ -7,16 +7,17 @@
 
 // NanoVDB
 #include <nanovdb/NanoVDB.h>
-#include <nanovdb/util/Ray.h>
 #include <nanovdb/util/CudaDeviceBuffer.h>
 #include <nanovdb/util/GridBuilder.h>
 #include <nanovdb/util/HDDA.h>
 #include <nanovdb/util/IO.h>
 #include <nanovdb/util/Primitives.h>
-
+#include <nanovdb/util/Ray.h>
 
 // Boost
 #include <boost/program_options.hpp>
+
+template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
 
 class Benchmarker
 {
@@ -26,11 +27,10 @@ public:
   using OVBD_RayT = openvdb::math::Ray<FP_Type>;
   using OVBD_GridT = openvdb::FloatGrid;
 
-
   using NVBD_CoordT = nanovdb::Coord;
   using NVBD_Vec3T = nanovdb::Vec3<FP_Type>;
 
-  //using BufferT = nanovdb::CudaDeviceBuffer;
+  // using BufferT = nanovdb::CudaDeviceBuffer;
 
   using OptionsT = boost::program_options::variables_map;
 
@@ -45,15 +45,12 @@ public:
   FP_Type level_set_half_width = -1;
   std::vector<int> ray_vals;
 
-  // Constants
-  const FP_Type pi = std::acos(-1);
 
   // Methods
   void run();
-  void run_openVDB(const OVBD_GridT::Ptr & level_set2, size_t nrays);
+  void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t nrays);
 
-  template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
   template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays);
 
   bool verify_results(const std::vector<FP_Type> &calculated,
