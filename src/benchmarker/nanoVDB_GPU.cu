@@ -21,7 +21,7 @@ void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &level_set, 
       calculate_reference_solution<Vec3T>(n_rays, sphere_radius_outer);
 
   // Send data to GPU
-  level_set.deviceUpload();
+  level_set.deviceUpload(); // TODO: move outside so it wont be called every time
 
   // Run Benchmark
   std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
