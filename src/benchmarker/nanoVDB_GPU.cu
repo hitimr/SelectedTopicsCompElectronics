@@ -10,7 +10,6 @@
 
 void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_rays)
 {
-  using FP_Type = float; // TODO: merge this with project wide type
   using NVDB_RayT = nanovdb::Ray<FP_Type>;
   assert(n_rays > 0);
   PLOG_INFO << "Running NanoVDP on GPU benchmark for " << n_rays << " Rays" << std::endl;

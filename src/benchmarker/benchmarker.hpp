@@ -1,4 +1,7 @@
 #pragma once
+
+#include "common.hpp"
+
 // OpenVDB
 #include <openvdb/Types.h>
 #include <openvdb/math/Ray.h>
@@ -21,7 +24,6 @@ template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
 class Benchmarker
 {
 public:
-  using FP_Type = float;
   using OVBD_Vec3T = openvdb::math::Vec3<FP_Type>;
   using OVBD_RayT = openvdb::math::Ray<FP_Type>;
   using OVBD_GridT = openvdb::FloatGrid;
@@ -36,13 +38,11 @@ public:
 
   const OptionsT &options;
 
-
   // Benchmark settings
   FP_Type voxel_size = -1;
   FP_Type sphere_radius_outer = -1;
   FP_Type level_set_half_width = -1;
   std::vector<int> ray_vals;
-
 
   // Methods
   void run();

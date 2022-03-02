@@ -1,5 +1,5 @@
-#include "benchmarker.hpp"
 #include "common.hpp"
+#include "benchmarker.hpp"
 #include "nanoVDB_GPU.hpp"
 #include "util/misc.hpp"
 #include "util/timer.hpp"
@@ -128,8 +128,8 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &hand
   std::vector<NVBD_Vec3T> calculated(n_rays, NVBD_Vec3T(0, 0, 0)); // results
   auto acc = h_grid->tree().getAccessor();
   NVBD_CoordT ijk;
-  float t0;
-  float v;
+  FP_Type t0;
+  FP_Type v;
   Timer timer;
 
   timer.reset();
