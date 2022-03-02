@@ -1,4 +1,6 @@
 #pragma once
+#include <common.hpp>
+
 #include <nanovdb/util/GridHandle.h>
 #include <nanovdb/util/HostBuffer.h>
 
