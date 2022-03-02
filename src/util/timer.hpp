@@ -6,7 +6,9 @@
 class Timer
 {
 public:
-  Timer() : ts(0) {}
+  Timer() {
+    reset();
+  }
 
   void reset() { chrono_ts = std::chrono::high_resolution_clock::now(); }
 
