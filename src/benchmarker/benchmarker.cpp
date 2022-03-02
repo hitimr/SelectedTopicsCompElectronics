@@ -12,6 +12,7 @@
 #include <openvdb/tools/LevelSetSphere.h>
 
 #include <cmath>
+#include <vector>
 
 using namespace openvdb;
 

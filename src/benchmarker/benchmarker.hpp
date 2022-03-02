@@ -20,7 +20,8 @@
 #include <boost/program_options.hpp>
 
 template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
-template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays, double sphere_radius_outer);
+template <typename Vec3T>
+std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
 
 class Benchmarker
 {
