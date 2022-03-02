@@ -1,5 +1,6 @@
 #include "benchmarker.hpp"
 #include "common.hpp"
+#include "nanoVDB_GPU.hpp"
 #include "util/misc.hpp"
 #include "util/timer.hpp"
 
@@ -77,6 +78,7 @@ void Benchmarker::run()
   {
     run_openVDB(level_set, n_rays);
     run_nanoVDB_CPU(handle, n_rays);
+    run_nanoVDB_GPU(handle, n_rays); // TODO: rename to levelset or something
   }
 }
 
