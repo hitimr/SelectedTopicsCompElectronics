@@ -26,6 +26,7 @@ std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_ra
 class Benchmarker
 {
 public:
+  // TODO: change to better names
   using OVBD_Vec3T = openvdb::math::Vec3<FP_Type>;
   using OVBD_RayT = openvdb::math::Ray<FP_Type>;
   using OVBD_GridT = openvdb::FloatGrid;

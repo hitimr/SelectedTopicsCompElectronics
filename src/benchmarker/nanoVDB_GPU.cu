@@ -19,4 +19,7 @@ void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_
   std::vector<RayT> rays = generate_rays<RayT>(n_rays);
   std::vector<Vec3T> reference_solutions =
       calculate_reference_solution<Vec3T>(n_rays, sphere_radius_outer);
+
+  // Run Benchmark
+  // std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
 }

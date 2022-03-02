@@ -133,6 +133,7 @@ void Benchmarker::run()
   }
 }
 
+// TODO: move to separate File
 void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_rays)
 {
   using NVDB_RayT = nanovdb::Ray<FP_Type>;
