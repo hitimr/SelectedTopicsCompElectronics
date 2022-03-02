@@ -7,6 +7,7 @@
 // OpenVDB
 #include <openvdb/Exceptions.h>
 #include <openvdb/math/Transform.h>
+#include <openvdb/tools/RayIntersector.h>
 
 #include <openvdb/tools/LevelSetSphere.h>
 
