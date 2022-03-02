@@ -38,7 +38,6 @@ public:
 
   const OptionsT &options;
 
-  FP_Type pi = std::acos(-1.0);
 
   // Benchmark settings
   FP_Type voxel_size = -1;

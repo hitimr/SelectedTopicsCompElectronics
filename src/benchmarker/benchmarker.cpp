@@ -15,9 +15,6 @@
 
 using namespace openvdb;
 
-
-
-
 /**
  * @brief Generate Rays for the benchmark.
  * Currently all Rays start at (0,0,0) and are equally spread in a circular field
@@ -26,7 +23,7 @@ using namespace openvdb;
  * @param n_rays number of rays that should be generated
  * @return std::vector<NVDB_RayT>
  */
-template <class RayT> std::vector<RayT>generate_rays(size_t n_rays)
+template <class RayT> std::vector<RayT> generate_rays(size_t n_rays)
 {
   using Vec3T = typename RayT::Vec3T;
   using RealT = typename Vec3T::ValueType;
@@ -49,7 +46,6 @@ template <class RayT> std::vector<RayT>generate_rays(size_t n_rays)
 
   return rays;
 }
-
 
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
@@ -158,7 +154,7 @@ template <typename Vec3T>
 std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays)
 {
   std::vector<Vec3T> reference_solution(n_rays);
-  std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * pi, n_rays);
+  std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
 
   for (size_t i = 0; i < n_rays; i++)
   {
