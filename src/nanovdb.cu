@@ -1,7 +1,6 @@
 #include "common.hpp"
 #include <algorithm>
 #include <iostream>
-#include <nanovdb/util/CudaDeviceBuffer.h>
 #include <nanovdb/util/GridBuilder.h>
 #include <nanovdb/util/HDDA.h>
 #include <nanovdb/util/IO.h>
