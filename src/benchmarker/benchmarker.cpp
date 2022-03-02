@@ -113,6 +113,7 @@ void Benchmarker::run()
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
+  PLOG_INFO << "Generating Level sets" << std::endl;
   // OpenVDB Level Set
   OVBD_Vec3T center(0, 0, 0);
   OVBD_GridT::Ptr level_set_ovbd = tools::createLevelSetSphere<OVBD_GridT>(
