@@ -23,7 +23,6 @@ cuda_add_executable(raytracing main.cpp)
 target_link_libraries(raytracing OpenVDB::openvdb Boost::program_options
                       benchmarker)
 
-target_link_libraries(nanoVDB OpenVDB::openvdb Boost::program_options)
 
 # Targets
 add_custom_target(
