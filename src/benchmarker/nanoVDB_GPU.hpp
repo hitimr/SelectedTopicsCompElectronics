@@ -1,3 +1,4 @@
+#pragma once
 #include <nanovdb/util/GridHandle.h>
 #include <nanovdb/util/HostBuffer.h>
 

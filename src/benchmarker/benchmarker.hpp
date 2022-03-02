@@ -3,7 +3,6 @@
 #include <openvdb/Types.h>
 #include <openvdb/math/Ray.h>
 #include <openvdb/openvdb.h>
-#include <openvdb/tools/RayIntersector.h>
 
 // NanoVDB
 #include <nanovdb/NanoVDB.h>
