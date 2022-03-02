@@ -70,8 +70,8 @@ void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle
   cudaDeviceSynchronize();
 
   double time = timer.get();
-  PLOG_INFO << "NanoVDB on GPU Finished in " << time << "s (" << (double)n_rays / (1000 * time)
-            << " kRays/s)" << std::endl;
+  PLOG_INFO << "NanoVDB on GPU Finished in " << time << "s (" << (double)n_rays / (1e6 * time)
+            << " MRays/s)" << std::endl;
 
   cudaFree(d_rays);
 }
