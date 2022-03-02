@@ -50,7 +50,7 @@ public:
   // Methods
   void run();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
-  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t nrays); // TODO: rename handle to level_set
+  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays); 
 
   bool verify_results(const std::vector<FP_Type> &calculated,
                       const std::vector<bool> &intersections);
