@@ -5,7 +5,7 @@
 
 #include <vector>
 
-void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_rays)
+void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &level_set, size_t n_rays)
 {
   using FP_Type = float;
   using RayT = nanovdb::Ray<FP_Type>;
@@ -20,6 +20,9 @@ void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t n_
   std::vector<Vec3T> reference_solutions =
       calculate_reference_solution<Vec3T>(n_rays, sphere_radius_outer);
 
+  // Send data to GPU
+  level_set.deviceUpload();
+
   // Run Benchmark
-  // std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
+  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
 }
