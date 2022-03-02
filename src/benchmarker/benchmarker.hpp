@@ -20,6 +20,7 @@
 #include <boost/program_options.hpp>
 
 template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
+template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays, double sphere_radius_outer);
 
 class Benchmarker
 {
@@ -48,8 +49,6 @@ public:
   void run();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &handle, size_t nrays);
-
-  template <typename Vec3T> std::vector<Vec3T> calculate_reference_solution(size_t n_rays);
 
   bool verify_results(const std::vector<FP_Type> &calculated,
                       const std::vector<bool> &intersections);

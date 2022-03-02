@@ -1,5 +1,5 @@
-#include "common.hpp"
 #include "benchmarker.hpp"
+#include "common.hpp"
 #include "nanoVDB_GPU.hpp"
 #include "util/misc.hpp"
 #include "util/timer.hpp"
@@ -47,6 +47,23 @@ template <class RayT> std::vector<RayT> generate_rays(size_t n_rays)
   return rays;
 }
 
+// calculate ray intersections analytically
+// TODO: Docstring
+template <typename Vec3T>
+std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer)
+{
+  std::vector<Vec3T> reference_solution(n_rays);
+  std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
+
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    Vec3T solution(sphere_radius_outer * std::cos(alpha_vals[i]),
+                   sphere_radius_outer * std::sin(alpha_vals[i]), 0);
+    reference_solution[i] = solution;
+  }
+  return reference_solution;
+}
+
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
@@ -67,7 +84,7 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
       ray_intersector(*level_set);
 
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
-  std::vector<OVBD_Vec3T> reference_solutions = calculate_reference_solution<OVBD_Vec3T>(n_rays);
+  std::vector<OVBD_Vec3T> reference_solutions = calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_outer);
 
   // Run Benchmark
   // TODO: make multiple repeats with custom wrapper function
@@ -122,7 +139,7 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &hand
   auto *h_grid = handle.grid<FP_Type>();
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
-  std::vector<NVBD_Vec3T> reference_solutions = calculate_reference_solution<NVBD_Vec3T>(n_rays);
+  std::vector<NVBD_Vec3T> reference_solutions = calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_outer);
 
   // Run Benchmark
   std::vector<NVBD_Vec3T> calculated(n_rays, NVBD_Vec3T(0, 0, 0)); // results
@@ -147,22 +164,6 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &hand
 
   // int err_pos;
   // assert(verify_results<NVBD_Vec3T>(calculated, reference_solutions, err_pos));
-}
-
-// calculate ray intersections analytically
-template <typename Vec3T>
-std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays)
-{
-  std::vector<Vec3T> reference_solution(n_rays);
-  std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
-
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    Vec3T solution(sphere_radius_outer * std::cos(alpha_vals[i]),
-                   sphere_radius_outer * std::sin(alpha_vals[i]), 0);
-    reference_solution[i] = solution;
-  }
-  return reference_solution;
 }
 
 // verify results by comparing them to precomputed reference solutions
