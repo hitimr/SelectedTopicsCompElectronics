@@ -48,9 +48,11 @@ public:
   std::vector<int> ray_vals;
 
   // Methods
+  template <class CALLABLE, class... Arg>
+  double measureTime(CALLABLE &&callable, Arg &&... args);
   void run();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
-  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays); 
+  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
 
   bool verify_results(const std::vector<FP_Type> &calculated,
                       const std::vector<bool> &intersections);

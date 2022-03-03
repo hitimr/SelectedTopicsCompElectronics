@@ -16,7 +16,6 @@
 
 using namespace openvdb;
 
-
 // TODO: reintroduce result verification for all variants
 
 /**
@@ -75,6 +74,28 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   sphere_radius_outer = (FP_Type)options["radius"].as<double>();
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
+}
+
+/**
+ * @brief Wrapper for measuring runtimes of functions
+ *
+ * @tparam CALLABLE
+ * @tparam Arg
+ * @param callable
+ * @param args
+ * @return double
+ */
+template <class CALLABLE, class... Arg>
+double Benchmarker::measureTime(CALLABLE &&callable, Arg &&... args)
+{
+  using Clock = std::chrono::high_resolution_clock;
+  auto start = Clock::now(); // start time measurement
+
+  // forward the two arguments to the callable `call`
+  callable(std::forward<Arg>(args)...);
+
+  auto stop = Clock::now(); // stop time measurement
+  return std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
 }
 
 void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
