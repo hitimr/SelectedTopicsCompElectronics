@@ -1,5 +1,4 @@
 #include "benchmarker.hpp"
-#include "nanoVDB_GPU.hpp"
 
 #include <nanovdb/util/Ray.h>
 
