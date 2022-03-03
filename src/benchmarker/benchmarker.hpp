@@ -52,8 +52,12 @@ public:
   FP_Type level_set_half_width = -1;
   std::vector<int> ray_vals;
 
-  // Methods
+  // Wrappers
   template <class CALLABLE, class... Arg> double measureTime(CALLABLE &&callable, Arg &&... args);
+  template <class CALLABLE, class... Arg>
+  void launch_kernel(size_t grid_size, size_t bock_size, CALLABLE &&callable, Arg &&... args);
+
+  // Methods
   void run();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
