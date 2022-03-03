@@ -10,8 +10,8 @@ using RayT = nanovdb::Ray<FP_Type>;
 using Vec3T = nanovdb::Vec3<FP_Type>;
 
 // TODO: rename fucntion
-__global__ void run(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set, RayT *rays,
-                    size_t n_rays)
+__global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
+                                      RayT *rays, size_t n_rays)
 {
 
   unsigned int n_threads = blockDim.x * gridDim.x;
@@ -24,13 +24,13 @@ __global__ void run(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set, RayT
 
   for (unsigned int i = thread_id; i < n_rays; i += n_threads)
   {
-        nanovdb::ZeroCrossing(rays[i], acc, ijk, v, t0);
-        assert(t0 > 0); // TODO: replace with proper result verification
-
+    nanovdb::ZeroCrossing(rays[i], acc, ijk, v, t0);
+    assert(t0 > 0); // TODO: replace with proper result verification
   }
 }
 
-void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays)
+void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle,
+                                  size_t n_rays)
 {
   using FP_Type = float;
   using RayT = nanovdb::Ray<FP_Type>;
@@ -65,7 +65,7 @@ void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle
 
   Timer timer;
   timer.reset();
-  run<<<grid_size, block_size>>>(d_grid_handle, d_rays, n_rays);
+  run_cuda<<<grid_size, block_size>>>(d_grid_handle, d_rays, n_rays);
   cudaDeviceSynchronize();
 
   double time = timer.get();

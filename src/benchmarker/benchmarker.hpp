@@ -24,7 +24,9 @@ template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
 template <typename Vec3T>
 std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
 
-void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &handle, size_t n_rays);
+// CUDA Kernels
+__global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
+                         nanovdb::Ray<FP_Type> *rays, size_t n_rays);
 
 class Benchmarker
 {
@@ -55,6 +57,7 @@ public:
   void run();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
+  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
 
   bool verify_results(const std::vector<FP_Type> &calculated,
                       const std::vector<bool> &intersections);
