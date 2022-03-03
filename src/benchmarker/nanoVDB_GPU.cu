@@ -83,7 +83,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
 
   Timer timer;
   timer.reset();
-  run_cuda<<<grid_size, block_size>>>(d_grid_handle, d_rays, n_rays);
+  launch_kernel(grid_size, block_size, run_cuda, d_grid_handle, d_rays, n_rays);
   cudaDeviceSynchronize();
 
   double time = timer.get();
