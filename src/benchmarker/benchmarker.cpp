@@ -1,6 +1,5 @@
 #include "benchmarker.hpp"
 #include "common.hpp"
-#include "nanoVDB_GPU.hpp"
 #include "util/misc.hpp"
 #include "util/timer.hpp"
 

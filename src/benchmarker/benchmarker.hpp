@@ -12,6 +12,7 @@
 #include <nanovdb/util/CudaDeviceBuffer.h>
 #include <nanovdb/util/GridBuilder.h>
 #include <nanovdb/util/HDDA.h>
+#include <nanovdb/util/HostBuffer.h>
 #include <nanovdb/util/IO.h>
 #include <nanovdb/util/Primitives.h>
 #include <nanovdb/util/Ray.h>
@@ -22,6 +23,8 @@
 template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
 template <typename Vec3T>
 std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
+
+void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &handle, size_t n_rays);
 
 class Benchmarker
 {
@@ -48,8 +51,7 @@ public:
   std::vector<int> ray_vals;
 
   // Methods
-  template <class CALLABLE, class... Arg>
-  double measureTime(CALLABLE &&callable, Arg &&... args);
+  template <class CALLABLE, class... Arg> double measureTime(CALLABLE &&callable, Arg &&... args);
   void run();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
