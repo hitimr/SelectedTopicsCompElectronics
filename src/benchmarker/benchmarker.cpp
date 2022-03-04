@@ -25,7 +25,7 @@ using namespace openvdb;
  * @param n_rays number of rays that should be generated
  * @return std::vector<NVDB_RayT>
  */
-template <class RayT> std::vector<RayT> generate_rays(size_t n_rays)
+template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays)
 {
   using Vec3T = typename RayT::Vec3T;
   using RealT = typename Vec3T::ValueType;
@@ -52,7 +52,7 @@ template <class RayT> std::vector<RayT> generate_rays(size_t n_rays)
 // calculate ray intersections analytically
 // TODO: Docstring
 template <typename Vec3T>
-std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer)
+std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer)
 {
   std::vector<Vec3T> reference_solution(n_rays);
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
