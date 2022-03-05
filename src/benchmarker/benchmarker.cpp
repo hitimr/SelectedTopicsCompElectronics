@@ -138,7 +138,7 @@ void Benchmarker::run()
   // NanoVDB GPU Level Set
   PLOG_INFO << "Generating Level set for NanoVDB on GPU" << std::endl;
   auto level_set_gpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::CudaDeviceBuffer>(
-      sphere_radius_outer, {center_x, center_y, 0}, voxel_size, level_set_half_width);
+      sphere_radius_outer, {center_x, center_y, 0}, voxel_size, level_set_half_width, nanovdb::Vec3R(0));
 
   for (size_t n_rays : ray_vals)
   {

@@ -105,6 +105,13 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaMemcpy(result_coords.data(), d_result_coords, sizeof(result_coords[0]) * n_rays,
              cudaMemcpyDeviceToHost);
 
+  auto *h_grid = grid_handle.grid<float>();
+  std::vector<nanovdb::Vec3<FP_Type>> result_intersections(n_rays);
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    result_intersections[i] = h_grid->indexToWorldF<Vec3T>(result_coords[i].asVec3s());
+  }
+
   cudaFree(d_rays);
   cudaFree(d_result_coords);
   cudaFree(d_result_times);
