@@ -47,7 +47,7 @@ public:
   FP_Type sphere_radius_outer = -1;
   FP_Type level_set_half_width = -1;
   std::vector<int> ray_vals;
-
+  FP_Type eps = -1;
 
   // Methods
   void run();
@@ -59,6 +59,10 @@ public:
   template <typename Vec3T>
   std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
 
-  bool verify_results(const std::vector<FP_Type> &calculated,
-                      const std::vector<bool> &intersections);
+  template <typename Vec3T>
+  bool verify_results(const std::vector<Vec3T> &result_intersections,
+                      const std::vector<Vec3T> &reference_intersections);
+
+  template <typename Vec3T>
+  bool isClose_vec3(const Vec3T & a, const Vec3T & b);
 };
