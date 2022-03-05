@@ -58,7 +58,6 @@ public:
     return sqrt(sigma2) / (double)m_timings.size();
   }
 
-  double m_ts;
   bool m_store_timings;
   std::vector<double> m_timings;
   std::chrono::time_point<std::chrono::high_resolution_clock> chrono_ts;

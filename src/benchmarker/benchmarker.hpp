@@ -63,6 +63,9 @@ public:
   bool verify_results(const std::vector<Vec3T> &result_intersections,
                       const std::vector<Vec3T> &reference_intersections);
 
-  template <typename Vec3T>
-  bool isClose_vec3(const Vec3T & a, const Vec3T & b);
+  template <typename Vec3T> bool isClose_vec3(const Vec3T &a, const Vec3T &b);
 };
+
+// template <>
+// std::vector<nanovdb::Vec3<FP_Type>>
+//     Benchmarker::calculate_reference_solution<nanovdb::Vec3<FP_Type>>(size_t, FP_Type);
