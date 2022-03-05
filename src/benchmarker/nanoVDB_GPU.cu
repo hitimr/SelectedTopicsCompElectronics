@@ -42,8 +42,8 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
 
   assert(n_rays > 0);
 
-  std::vector<Vec3T> reference_intersections =
-      calculate_reference_solution<Vec3T>(n_rays, sphere_radius_outer);
+  // std::vector<Vec3T> reference_intersections =
+  //     calculate_reference_solution<Vec3T>(n_rays, sphere_radius_outer);
 
   // Init Grid on GPU
   grid_handle.deviceUpload(); // TODO: move outside so it wont be called every time
@@ -97,7 +97,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   }
 
 
-  verify_results(result_intersections, reference_intersections);
+  // verify_results(result_intersections, reference_intersections);
 
   cudaFree(d_rays);
   cudaFree(d_result_coords);
