@@ -88,26 +88,24 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
       ray_intersector(*level_set);
 
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
-  std::vector<OVBD_Vec3T> reference_solutions =
+  std::vector<OVBD_Vec3T> reference_intersections =
       calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_outer);
 
   // Run Benchmark
-  // TODO: make multiple repeats with custom wrapper function
-  std::vector<FP_Type> times(n_rays);
-  std::vector<bool> intersections(n_rays);
+  std::vector<OVBD_Vec3T> result_intersections(n_rays);
 
   Timer timer;
   timer.reset();
+  // TODO: make multiple repeats with custom wrapper function
   for (size_t i = 0; i < n_rays; i++)
   {
-    ray_intersector.intersectsIS(rays[i].worldToIndex(*level_set));
+    ray_intersector.intersectsWS(rays[i], result_intersections[i]);
   }
-
   double time = timer.get();
   PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
-  // verify_results(times, intersections);
+  verify_results(result_intersections, reference_intersections);
 }
 
 void Benchmarker::run()
@@ -198,7 +196,7 @@ bool Benchmarker::verify_results(const std::vector<Vec3T> &result_intersections,
 
   for (size_t i = 0; i < result_intersections.size(); i++)
   {
-    if(!isClose_vec3(result_intersections[i], reference_intersections[i]))
+    if (!isClose_vec3(result_intersections[i], reference_intersections[i]))
     {
       PLOG_ERROR << "Calculated time does not match at pos " << i << std::endl;
       // TODO: Vec3 printf/cout
