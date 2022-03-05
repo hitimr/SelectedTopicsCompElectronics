@@ -194,6 +194,7 @@ bool Benchmarker::verify_results(const std::vector<Vec3T> &result_intersections,
                                  const std::vector<Vec3T> &reference_intersections)
 {
   assert(result_intersections.size() == reference_intersections.size());
+  bool err_flag = false;
 
   for (size_t i = 0; i < result_intersections.size(); i++)
   {
@@ -203,10 +204,10 @@ bool Benchmarker::verify_results(const std::vector<Vec3T> &result_intersections,
       // TODO: Vec3 printf/cout
       // PLOG_ERROR << "Received:\t" << result_intersections[i] << std::endl;
       // PLOG_ERROR << "Should be:\t" << reference_intersections[i] << std::endl;
-      return false;
+      err_flag = true;
     }
   }
-  return true;
+  return err_flag;
 }
 
 template <typename Vec3T> bool Benchmarker::isClose_vec3(const Vec3T &a, const Vec3T &b)
