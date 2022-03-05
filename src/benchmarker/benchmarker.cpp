@@ -52,7 +52,8 @@ template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays
 // calculate ray intersections analytically
 // TODO: Docstring
 template <typename Vec3T>
-std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer)
+std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays,
+                                                             FP_Type sphere_radius_outer)
 {
   std::vector<Vec3T> reference_solution(n_rays);
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
@@ -74,8 +75,6 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
 }
-
-
 
 void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
 {
@@ -138,7 +137,8 @@ void Benchmarker::run()
   // NanoVDB GPU Level Set
   PLOG_INFO << "Generating Level set for NanoVDB on GPU" << std::endl;
   auto level_set_gpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::CudaDeviceBuffer>(
-      sphere_radius_outer, {center_x, center_y, 0}, voxel_size, level_set_half_width, nanovdb::Vec3R(0));
+      sphere_radius_outer, {center_x, center_y, 0}, voxel_size, level_set_half_width,
+      nanovdb::Vec3R(0));
 
   for (size_t n_rays : ray_vals)
   {
@@ -161,24 +161,26 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   std::vector<NVBD_Vec3T> reference_solutions =
       calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_outer);
 
-  // Run Benchmark
-  std::vector<NVBD_Vec3T> calculated(n_rays, NVBD_Vec3T(0, 0, 0)); // results
   auto acc = h_grid->tree().getAccessor();
-  NVBD_CoordT ijk;
+  std::vector<NVBD_CoordT> result_coords(n_rays);
   FP_Type t0;
   FP_Type v;
   Timer timer;
 
+  // Run Benchmark
   timer.reset();
   for (size_t i = 0; i < n_rays; i++)
   {
-    nanovdb::ZeroCrossing(rays[i], acc, ijk, v, t0);
+    nanovdb::ZeroCrossing(rays[i], acc, result_coords[i], v, t0);
+  }
+  double time = timer.get();
 
-    // nanovdb only supports raytracing/ intersection in index space
-    // we need to transform results back to word coordinates
+  std::vector<nanovdb::Vec3<FP_Type>> result_intersections(n_rays);
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    result_intersections[i] = h_grid->indexToWorldF<NVBD_Vec3T>(result_coords[i].asVec3s());
   }
 
-  double time = timer.get();
   PLOG_INFO << "NanoVDB on CPU Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 

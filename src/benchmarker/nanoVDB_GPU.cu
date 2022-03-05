@@ -27,24 +27,6 @@ __global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
   }
 }
 
-/**
- * @brief Wrapper for launching CUDA Kernels.
- *
- *
- * @tparam CALLABLE
- * @tparam Arg
- * @param grid_size
- * @param bock_size
- * @param callable
- * @param args
- */
-template <class CALLABLE, class... Arg>
-void Benchmarker::launch_kernel(size_t grid_size, size_t bock_size, CALLABLE &&callable,
-                                Arg &&... args)
-{
-  callable<<<grid_size, bock_size>>>(std::forward<Arg>(args)...);
-}
-
 void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle,
                                   size_t n_rays)
 {
@@ -105,7 +87,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaMemcpy(result_coords.data(), d_result_coords, sizeof(result_coords[0]) * n_rays,
              cudaMemcpyDeviceToHost);
 
-  auto *h_grid = grid_handle.grid<float>();
+  auto *h_grid = grid_handle.grid<FP_Type>();
   std::vector<nanovdb::Vec3<FP_Type>> result_intersections(n_rays);
   for (size_t i = 0; i < n_rays; i++)
   {
