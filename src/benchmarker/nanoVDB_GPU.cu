@@ -11,7 +11,7 @@ using Vec3T = nanovdb::Vec3<FP_Type>;
 
 // TODO: rename fucntion
 __global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set, RayT *rays,
-                         size_t n_rays)
+                         FP_Type *time_results, nanovdb::Coord *result_coords, size_t n_rays)
 {
 
   unsigned int n_threads = blockDim.x * gridDim.x;
@@ -19,26 +19,24 @@ __global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
 
   auto acc = d_level_set->tree().getAccessor();
   nanovdb::Coord ijk;
-  FP_Type t0 = 0;
-  FP_Type v;
+  FP_Type value;
 
   for (unsigned int i = thread_id; i < n_rays; i += n_threads)
   {
-    nanovdb::ZeroCrossing(rays[i], acc, ijk, v, t0);
-    assert(t0 > 0); // TODO: replace with proper result verification
+    nanovdb::ZeroCrossing(rays[i], acc, result_coords[i], value, time_results[i]);
   }
 }
 
 /**
  * @brief Wrapper for launching CUDA Kernels.
- *  
- * 
- * @tparam CALLABLE 
- * @tparam Arg 
- * @param grid_size 
- * @param bock_size 
- * @param callable 
- * @param args 
+ *
+ *
+ * @tparam CALLABLE
+ * @tparam Arg
+ * @param grid_size
+ * @param bock_size
+ * @param callable
+ * @param args
  */
 template <class CALLABLE, class... Arg>
 void Benchmarker::launch_kernel(size_t grid_size, size_t bock_size, CALLABLE &&callable,
@@ -78,17 +76,36 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaMalloc(&d_rays, bytes);
   cudaMemcpy(d_rays, rays.data(), bytes, cudaMemcpyHostToDevice);
 
-  // Run Benchmark
-  std::vector<Vec3T> calculated(n_rays, Vec3T(0, 0, 0)); // results
+  // Allocate Results on GPU
+  bytes = sizeof(Vec3T) * n_rays;
+  std::vector<FP_Type> result_times(n_rays);
+  FP_Type *d_result_times;
+  cudaMalloc(&d_result_times, bytes);
 
+  bytes = sizeof(nanovdb::Coord) * n_rays;
+  std::vector<nanovdb::Coord> result_coords(n_rays);
+  nanovdb::Coord *d_result_coords;
+  cudaMalloc(&d_result_coords, bytes);
+
+  // Start Bennchmark
   Timer timer;
   timer.reset();
-  launch_kernel(grid_size, block_size, run_cuda, d_grid_handle, d_rays, n_rays);
+  run_cuda<<<grid_size, block_size>>>(d_grid_handle, d_rays, d_result_times, d_result_coords,
+                                      n_rays);
   cudaDeviceSynchronize();
-
   double time = timer.get();
+
   PLOG_INFO << "NanoVDB on GPU Finished in " << time << "s (" << (double)n_rays / (1e6 * time)
             << " MRays/s)" << std::endl;
 
+  // Transfer results back to CPU
+  cudaMemcpy(result_times.data(), d_result_times, sizeof(result_times[0]) * n_rays,
+             cudaMemcpyDeviceToHost);
+
+  cudaMemcpy(result_coords.data(), d_result_coords, sizeof(result_coords[0]) * n_rays,
+             cudaMemcpyDeviceToHost);
+
   cudaFree(d_rays);
+  cudaFree(d_result_coords);
+  cudaFree(d_result_times);
 }
