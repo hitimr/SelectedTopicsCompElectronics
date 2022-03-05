@@ -48,10 +48,6 @@ public:
   FP_Type level_set_half_width = -1;
   std::vector<int> ray_vals;
 
-  // Wrappers
-  template <class CALLABLE, class... Arg> double measureTime(CALLABLE &&callable, Arg &&... args);
-  template <class CALLABLE, class... Arg>
-  void launch_kernel(size_t grid_size, size_t bock_size, CALLABLE &&callable, Arg &&... args);
 
   // Methods
   void run();
