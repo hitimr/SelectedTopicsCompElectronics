@@ -74,6 +74,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   sphere_radius_outer = (FP_Type)options["radius"].as<double>();
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
+  eps = voxel_size * math::Sqrt(3.);
 }
 
 void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
@@ -158,7 +159,7 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   auto *h_grid = level_set.grid<FP_Type>();
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
-  std::vector<NVBD_Vec3T> reference_solutions =
+  std::vector<NVBD_Vec3T> reference_intersections =
       calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_outer);
 
   auto acc = h_grid->tree().getAccessor();
@@ -175,43 +176,45 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   }
   double time = timer.get();
 
-  std::vector<nanovdb::Vec3<FP_Type>> result_intersections(n_rays);
+  PLOG_INFO << "NanoVDB on CPU Finished in " << time << "s (" << (double)n_rays / (1000 * time)
+            << " kRays/s)" << std::endl;
+
+  std::vector<NVBD_Vec3T> result_intersections(n_rays);
   for (size_t i = 0; i < n_rays; i++)
   {
     result_intersections[i] = h_grid->indexToWorldF<NVBD_Vec3T>(result_coords[i].asVec3s());
   }
 
-  PLOG_INFO << "NanoVDB on CPU Finished in " << time << "s (" << (double)n_rays / (1000 * time)
-            << " kRays/s)" << std::endl;
-
-  // int err_pos;
-  // assert(verify_results<NVBD_Vec3T>(calculated, reference_solutions, err_pos));
+  verify_results<NVBD_Vec3T>(result_intersections, reference_intersections);
 }
 
 // verify results by comparing them to precomputed reference solutions
-bool Benchmarker::verify_results(const std::vector<FP_Type> &calculated,
-                                 const std::vector<bool> &intersections)
+template <typename Vec3T>
+bool Benchmarker::verify_results(const std::vector<Vec3T> &result_intersections,
+                                 const std::vector<Vec3T> &reference_intersections)
 {
-  FP_Type eps = voxel_size / 2;
-  FP_Type corerct_solution = sphere_radius_outer;
+  assert(result_intersections.size() == reference_intersections.size());
 
-  for (size_t i = 0; i < calculated.size(); i++)
+  for (size_t i = 0; i < result_intersections.size(); i++)
   {
-    if (std::abs(calculated[i] - corerct_solution) > eps)
+    if(!isClose_vec3(result_intersections[i], reference_intersections[i]))
     {
       PLOG_ERROR << "Calculated time does not match at pos " << i << std::endl;
-      PLOG_ERROR << "Received:\t" << calculated[i] << std::endl;
-      PLOG_ERROR << "Should be:\t" << corerct_solution << std::endl;
+      // TODO: Vec3 printf/cout
+      // PLOG_ERROR << "Received:\t" << result_intersections[i] << std::endl;
+      // PLOG_ERROR << "Should be:\t" << reference_intersections[i] << std::endl;
       return false;
     }
-
-    if (intersections[i] == false)
-    {
-      PLOG_ERROR << "Calculated intersection does not match at pos " << i << std::endl;
-      PLOG_ERROR << "Received:\t" << intersections[i] << std::endl;
-      PLOG_ERROR << "Should be:\t" << true << std::endl;
-    }
   }
+  return true;
+}
 
+template <typename Vec3T> bool Benchmarker::isClose_vec3(const Vec3T &a, const Vec3T &b)
+{
+  if ((std::abs(a[0] - b[0]) > eps) || (std::abs(a[1] - b[1]) > eps) ||
+      (std::abs(a[2] - b[2]) > eps))
+  {
+    return false;
+  }
   return true;
 }
