@@ -42,7 +42,7 @@ const double M_PI = std::acos(-1); // TODO: replace with FP_type
 
 // Globals
 extern Timer global_timer;
-extern json global_settings;
+extern json global_settings;  //  uses https://github.com/nlohmann/json
 
 class CustomPlogFormatter
 {
