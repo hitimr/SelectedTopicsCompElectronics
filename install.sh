@@ -31,7 +31,8 @@ sudo apt-get install -y \
     libboost-program-options-dev
     libtbb-dev \
     freeglut3-dev \
-    clang-format
+    clang-format \
+    nlohmann-json3-dev
     
 # Tools
 sudo apt install paraview
