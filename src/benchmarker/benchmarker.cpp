@@ -4,6 +4,7 @@
 #include "util/timer.hpp"
 
 // OpenVDB
+#include <nanovdb/util/OpenToNanoVDB.h>
 #include <openvdb/Exceptions.h>
 #include <openvdb/math/Transform.h>
 #include <openvdb/tools/RayIntersector.h>
@@ -128,16 +129,19 @@ void Benchmarker::run()
       level_set_half_width            // half the width of the narrow band, in voxel units
   );
 
-  // NanoVDB CPU Level Set
-  PLOG_INFO << "Generating Level set for NanoVDB on CPU" << std::endl;
-  auto level_set_cpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::HostBuffer>(
-      sphere_radius_outer, {center_x, center_y, center_z}, voxel_size, level_set_half_width);
+  // Convert to nanoVDBV
+  // Note: it is possible to create Level sets directly in NanoVDB as well bus this is slower
+  auto level_set_cpu = nanovdb::openToNanoVDB(*level_set_ovbd);
+  auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(*level_set_ovbd);
 
+  /*
+  Old way of creating the level set
   // NanoVDB GPU Level Set
   PLOG_INFO << "Generating Level set for NanoVDB on GPU" << std::endl;
   auto level_set_gpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::CudaDeviceBuffer>(
       sphere_radius_outer, {center_x, center_y, center_z}, voxel_size, level_set_half_width,
       nanovdb::Vec3R(0));
+  */
 
   for (size_t n_rays : ray_vals)
   {
