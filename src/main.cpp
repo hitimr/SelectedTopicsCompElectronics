@@ -70,6 +70,8 @@ int main(int ac, char **av)
 {
   global_timer = Timer();
 
+  get_proj_root_dir();
+
   // parse global json file
   std::ifstream infile("../../globals.json");
   json g_settings;
