@@ -143,7 +143,7 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
   openvdb::tools::csgDifference(*grid, *sphere_1);
 
   // insert inner sphere
-  openvdb::tools::csgUnion(*grid, *sphere_0);
+  //openvdb::tools::csgUnion(*grid, *sphere_0);
 
   // Meta data
   grid->setGridClass(openvdb::GRID_LEVEL_SET);
