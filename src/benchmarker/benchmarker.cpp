@@ -134,9 +134,12 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
   auto grid = generate_sphere(sphere_radius_1);
   auto sphere_0 = generate_sphere(sphere_radius_0);
 
-  // cut out empty space within sphere
+  // use geometric difference to generate a sphere with an empty core
   openvdb::tools::csgDifference(*grid, *sphere_0);
 
+  // invert entire grid to generate 2 concentric spheres
+  // taken from https://academysoftwarefoundation.github.io/openvdb/codeExamples.html
+  // -> Value transformation
   struct Local
   {
     static inline void op(const openvdb::FloatGrid::ValueAllIter &iter)
