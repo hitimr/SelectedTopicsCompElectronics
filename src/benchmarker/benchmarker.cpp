@@ -71,15 +71,18 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
   // Sphere Parameters
-  sphere_radius_0 = 1.0; //  TODO: replace with CLI arg
-  sphere_radius_1 = 4.0; //  TODO: replace with CLI arg
-  sphere_radius_2 = (FP_Type)options["radius"].as<double>();
+  sphere_radius_0 = (FP_Type)options["r0"].as<double>();
+  sphere_radius_1 = (FP_Type)options["r1"].as<double>();
+  sphere_radius_2 = (FP_Type)options["r2"].as<double>();
 
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
   eps = voxel_size * math::Sqrt(3.);
 
-  // TODO check argument values
+  assert(0 <= sphere_radius_0);
+  assert(sphere_radius_0 < sphere_radius_1);
+  assert(sphere_radius_1 < sphere_radius_2);
+  assert(0 < voxel_size);
 }
 
 void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
@@ -151,17 +154,6 @@ void Benchmarker::run_singleSphere()
   // set number of rays for the benchmark
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
-
-  /*
-  // OpenVDB Level Set
-  PLOG_INFO << "Generating Level set for OpenVDB" << std::endl;
-  OVBD_GridT::Ptr level_set_ovbd = tools::createLevelSetSphere<OVBD_GridT>(
-      sphere_radius_outer,            // radius of the sphere in world units
-      {center_x, center_y, center_z}, // center of the sphere in world units
-      voxel_size,                     // voxel size in world units
-      level_set_half_width            // half the width of the narrow band, in voxel units
-  );
-  */
 
   auto level_set_ovbd = generate_doubleSphere();
 
@@ -238,7 +230,7 @@ bool Benchmarker::verify_results(const std::vector<Vec3T> &result_intersections,
   {
     if (!isClose_vec3(result_intersections[i], reference_intersections[i]))
     {
-      PLOG_ERROR << "Calculated time does not match at pos " << i << std::endl;
+      PLOG_ERROR << "Calculated value does not match at pos " << i << std::endl;
       // TODO: Vec3 printf/cout
       // PLOG_ERROR << "Received:\t" << result_intersections[i] << std::endl;
       // PLOG_ERROR << "Should be:\t" << reference_intersections[i] << std::endl;
