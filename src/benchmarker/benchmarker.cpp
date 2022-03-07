@@ -7,8 +7,8 @@
 #include <nanovdb/util/OpenToNanoVDB.h>
 #include <openvdb/Exceptions.h>
 #include <openvdb/math/Transform.h>
-#include <openvdb/tools/RayIntersector.h>
 #include <openvdb/tools/Composite.h>
+#include <openvdb/tools/RayIntersector.h>
 
 #include <openvdb/tools/LevelSetSphere.h>
 
@@ -54,16 +54,14 @@ template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays
 // calculate ray intersections analytically
 // TODO: Docstring
 template <typename Vec3T>
-std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays,
-                                                             FP_Type sphere_radius_outer)
+std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_Type radius)
 {
   std::vector<Vec3T> reference_solution(n_rays);
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
 
   for (size_t i = 0; i < n_rays; i++)
   {
-    Vec3T solution(sphere_radius_outer * std::cos(alpha_vals[i]),
-                   sphere_radius_outer * std::sin(alpha_vals[i]), 0);
+    Vec3T solution(radius * std::cos(alpha_vals[i]), radius * std::sin(alpha_vals[i]), 0);
     reference_solution[i] = solution;
   }
   return reference_solution;
@@ -73,11 +71,15 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
   // Sphere Parameters
-  sphere_radius_outer = (FP_Type)options["radius"].as<double>();
-  sphere_radius_inner = 1.0; //  TODO: replace with CLI arg
+  sphere_radius_0 = 1.0; //  TODO: replace with CLI arg
+  sphere_radius_1 = 4.0; //  TODO: replace with CLI arg
+  sphere_radius_2 = (FP_Type)options["radius"].as<double>();
+
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
   eps = voxel_size * math::Sqrt(3.);
+
+  // TODO check argument values
 }
 
 void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
@@ -92,7 +94,7 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
 
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
   std::vector<OVBD_Vec3T> reference_intersections =
-      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_outer);
+      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_1);
 
   // Run Benchmark
   std::vector<OVBD_Vec3T> result_intersections(n_rays);
@@ -117,27 +119,31 @@ void Benchmarker::run_all()
   generate_doubleSphere();
 }
 
+// convenience funtion
+Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_sphere(FP_Type radius)
+{
+  return tools::createLevelSetSphere<OVBD_GridT>(
+      radius,                         // radius of the sphere in world units
+      {center_x, center_y, center_z}, // center of the sphere in world units
+      voxel_size,                     // voxel size in world units
+      level_set_half_width            // half the width of the narrow band, in voxel units
+  );
+}
+
 Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
 {
 
-  OVBD_GridT::Ptr  sphere_a = tools::createLevelSetSphere<OVBD_GridT>(
-      sphere_radius_inner,            // radius of the sphere in world units
-      {center_x, center_y, center_z}, // center of the sphere in world units
-      voxel_size,                     // voxel size in world units
-      level_set_half_width            // half the width of the narrow band, in voxel units
-  );
+  auto sphere_0 = generate_sphere(sphere_radius_0);
+  auto sphere_1 = generate_sphere(sphere_radius_1);
+  auto sphere_2 = generate_sphere(sphere_radius_2);
 
-  OVBD_GridT::Ptr sphere_b = tools::createLevelSetSphere<OVBD_GridT>(
-      sphere_radius_outer,            // radius of the sphere in world units
-      {center_x, center_y, center_z}, // center of the sphere in world units
-      voxel_size,                     // voxel size in world units
-      level_set_half_width            // half the width of the narrow band, in voxel units
-  );
+  // cut out empty space within sphere
+  openvdb::tools::csgDifference(*sphere_2, *sphere_1);
 
+  // insert inner sphere
+  openvdb::tools::csgUnion(*sphere_2, *sphere_0);
 
-  openvdb::tools::csgUnion(*sphere_a, *sphere_b);
-
-  return sphere_a;
+  return sphere_2;
 }
 
 void Benchmarker::run_singleSphere()
@@ -146,7 +152,7 @@ void Benchmarker::run_singleSphere()
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
-
+  /*
   // OpenVDB Level Set
   PLOG_INFO << "Generating Level set for OpenVDB" << std::endl;
   OVBD_GridT::Ptr level_set_ovbd = tools::createLevelSetSphere<OVBD_GridT>(
@@ -155,6 +161,9 @@ void Benchmarker::run_singleSphere()
       voxel_size,                     // voxel size in world units
       level_set_half_width            // half the width of the narrow band, in voxel units
   );
+  */
+
+  auto level_set_ovbd = generate_doubleSphere();
 
   // Convert to nanoVDBV
   // Note: it is possible to create Level sets directly in NanoVDB as well bus this is slower
@@ -189,7 +198,7 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
   std::vector<NVBD_Vec3T> reference_intersections =
-      calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_outer);
+      calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_1);
 
   auto acc = h_grid->tree().getAccessor();
   std::vector<NVBD_CoordT> result_coords(n_rays);
