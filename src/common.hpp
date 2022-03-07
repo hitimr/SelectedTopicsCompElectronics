@@ -13,6 +13,7 @@ using FP_Type = float;
 // MISC
 #define BASE2 2
 #define BASE10 10
+#define PROJ_ROOT_FOLDER_NAME "SelectedTopicsCompElectronics"
 
 // Exit Codes
 #define EXIT_SUCCESS 0
