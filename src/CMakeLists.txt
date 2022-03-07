@@ -10,6 +10,10 @@ find_package(Threads REQUIRED)
 find_package(CUDA 11.6 REQUIRED)
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
 
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # becnhmarker library
 set(LIB_BENCHMARKER_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 cuda_add_library(benchmarker benchmarker/benchmarker.cpp
