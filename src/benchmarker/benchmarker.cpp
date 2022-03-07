@@ -8,6 +8,7 @@
 #include <openvdb/Exceptions.h>
 #include <openvdb/math/Transform.h>
 #include <openvdb/tools/RayIntersector.h>
+#include <openvdb/tools/Composite.h>
 
 #include <openvdb/tools/LevelSetSphere.h>
 
@@ -73,6 +74,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 
   // Sphere Parameters
   sphere_radius_outer = (FP_Type)options["radius"].as<double>();
+  sphere_radius_inner = 1.0; //  TODO: replace with CLI arg
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
   eps = voxel_size * math::Sqrt(3.);
@@ -112,6 +114,30 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
 void Benchmarker::run_all()
 {
   run_singleSphere();
+  generate_doubleSphere();
+}
+
+Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
+{
+
+  OVBD_GridT::Ptr  sphere_a = tools::createLevelSetSphere<OVBD_GridT>(
+      sphere_radius_inner,            // radius of the sphere in world units
+      {center_x, center_y, center_z}, // center of the sphere in world units
+      voxel_size,                     // voxel size in world units
+      level_set_half_width            // half the width of the narrow band, in voxel units
+  );
+
+  OVBD_GridT::Ptr sphere_b = tools::createLevelSetSphere<OVBD_GridT>(
+      sphere_radius_outer,            // radius of the sphere in world units
+      {center_x, center_y, center_z}, // center of the sphere in world units
+      voxel_size,                     // voxel size in world units
+      level_set_half_width            // half the width of the narrow band, in voxel units
+  );
+
+
+  openvdb::tools::csgUnion(*sphere_a, *sphere_b);
+
+  return sphere_a;
 }
 
 void Benchmarker::run_singleSphere()
@@ -120,10 +146,6 @@ void Benchmarker::run_singleSphere()
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
-  // required because OpenVDB and NanoVDB require different Classes for Vec3
-  FP_Type center_x = 0;
-  FP_Type center_y = 0;
-  FP_Type center_z = 0;
 
   // OpenVDB Level Set
   PLOG_INFO << "Generating Level set for OpenVDB" << std::endl;
