@@ -17,7 +17,6 @@
 
 using namespace openvdb;
 
-// TODO: reintroduce result verification for all variants
 
 /**
  * @brief Generate Rays for the benchmark.
@@ -73,7 +72,6 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   // Sphere Parameters
   sphere_radius_0 = (FP_Type)options["r0"].as<double>();
   sphere_radius_1 = (FP_Type)options["r1"].as<double>();
-  sphere_radius_2 = (FP_Type)options["r2"].as<double>();
 
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = 2.0;
@@ -81,7 +79,6 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 
   assert(0 <= sphere_radius_0);
   assert(sphere_radius_0 < sphere_radius_1);
-  assert(sphere_radius_1 < sphere_radius_2);
   assert(0 < voxel_size);
 }
 
@@ -136,11 +133,10 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
 {
 
   auto sphere_0 = generate_sphere(sphere_radius_0);
-  auto sphere_1 = generate_sphere(sphere_radius_1);
-  auto grid = generate_sphere(sphere_radius_2);
+  auto grid = generate_sphere(sphere_radius_1);
 
   // cut out empty space within sphere
-  openvdb::tools::csgDifference(*grid, *sphere_1);
+  openvdb::tools::csgDifference(*grid, *sphere_0);
 
   // insert inner sphere
   //openvdb::tools::csgUnion(*grid, *sphere_0);
