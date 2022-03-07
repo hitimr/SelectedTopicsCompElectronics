@@ -28,6 +28,7 @@ using namespace openvdb;
 using OptionsT = boost::program_options::variables_map;
 
 Timer global_timer;
+json global_settings;
 
 OptionsT parse_options(int ac, char **av)
 {
@@ -66,17 +67,24 @@ OptionsT parse_options(int ac, char **av)
   return vm;
 }
 
+json parse_globals()
+{
+  std::string proj_root = get_proj_root_dir();
+
+  // parse global json file
+  std::ifstream infile(proj_root + "globals.json");
+  json j;
+  infile >> j;
+
+  j["proj_root"] = proj_root;
+
+  return j;
+}
+
 int main(int ac, char **av)
 {
   global_timer = Timer();
-
-  get_proj_root_dir();
-
-  // parse global json file
-  std::ifstream infile("../../globals.json");
-  json g_settings;
-  infile >> g_settings;
-  std::cout << g_settings["out_dir"] << std::endl;
+  global_settings = parse_globals();
 
   // Parse CLI options
   OptionsT options = parse_options(ac, av);
