@@ -45,6 +45,13 @@ public:
   // Benchmark settings
   FP_Type voxel_size = -1;
   FP_Type sphere_radius_outer = -1;
+  FP_Type sphere_radius_inner = -1;
+ 
+  // required because OpenVDB and NanoVDB require different Classes for Vec3
+  FP_Type center_x = 0;
+  FP_Type center_y = 0;
+  FP_Type center_z = 0;
+
   FP_Type level_set_half_width = -1;
   std::vector<int> ray_vals;
   FP_Type eps = -1;
@@ -52,6 +59,7 @@ public:
   // Methods
   void run_all();
   void run_singleSphere();
+  OVBD_GridT::Ptr generate_doubleSphere();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
   void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
