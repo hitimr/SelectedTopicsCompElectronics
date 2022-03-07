@@ -18,6 +18,7 @@
 // Standard Library
 #include <cassert>
 #include <iostream>
+#include <fstream>
 #include <time.h>
 #include <vector>
 
@@ -68,6 +69,12 @@ OptionsT parse_options(int ac, char **av)
 int main(int ac, char **av)
 {
   global_timer = Timer();
+
+  // parse global json file
+  std::ifstream i("../../globals.json");
+  json j;
+  i >> j;
+  std::cout << j["out_dir"] << std::endl;
 
   // Parse CLI options
   OptionsT options = parse_options(ac, av);
