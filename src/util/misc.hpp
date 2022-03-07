@@ -10,6 +10,7 @@
 #error Platform not supported
 #endif // linux
 
+#include <array>
 #include <stdexcept>
 
 std::string get_proj_root_dir()
@@ -38,6 +39,44 @@ std::string get_proj_root_dir()
   path = path.erase(pos + root_folder_name.size()) + "/";
 
   return path;
+}
+
+
+/**
+ * @brief execute a shell command
+ * taken from https://dev.to/aggsol/calling-shell-commands-from-c-8ej
+ * 
+ * @param cmd shell command
+ * @param out_exitStatus return status of 
+ * @return std::string output of shell command
+ */
+std::string execCommand(const std::string cmd, int &out_exitStatus)
+{
+  out_exitStatus = 0;
+  auto pPipe = ::popen(cmd.c_str(), "r");
+  if (pPipe == nullptr)
+  {
+    throw std::runtime_error("Cannot open pipe");
+  }
+
+  std::array<char, 256> buffer;
+
+  std::string output;
+
+  while (not std::feof(pPipe))
+  {
+    auto bytes = std::fread(buffer.data(), 1, buffer.size(), pPipe);
+    output.append(buffer.data(), bytes);
+  }
+
+  auto rc = ::pclose(pPipe);
+
+  if (WIFEXITED(rc))
+  {
+    out_exitStatus = WEXITSTATUS(rc);
+  }
+
+  return output;
 }
 
 template <typename T> std::vector<T> linspace(T start, T end, size_t count)
