@@ -109,7 +109,12 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
   verify_results(result_intersections, reference_intersections);
 }
 
-void Benchmarker::run()
+void Benchmarker::run_all()
+{
+  run_singleSphere();
+}
+
+void Benchmarker::run_singleSphere()
 {
   // set number of rays for the benchmark
   ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,

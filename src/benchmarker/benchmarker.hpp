@@ -50,7 +50,8 @@ public:
   FP_Type eps = -1;
 
   // Methods
-  void run();
+  void run_all();
+  void run_singleSphere();
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
   void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
