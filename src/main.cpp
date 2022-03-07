@@ -71,10 +71,10 @@ int main(int ac, char **av)
   global_timer = Timer();
 
   // parse global json file
-  std::ifstream i("../../globals.json");
-  json j;
-  i >> j;
-  std::cout << j["out_dir"] << std::endl;
+  std::ifstream infile("../../globals.json");
+  json g_settings;
+  infile >> g_settings;
+  std::cout << g_settings["out_dir"] << std::endl;
 
   // Parse CLI options
   OptionsT options = parse_options(ac, av);
