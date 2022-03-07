@@ -46,7 +46,6 @@ OptionsT parse_options(int ac, char **av)
     ("voxel_size", po::value<double>()->default_value(DEFAULT_VOXEL_SIZE), "voxel size in world units")
     ("r0", po::value<double>()->default_value(global_settings["default_sphere_radius_0"]), "sphere radius r0")
     ("r1", po::value<double>()->default_value(global_settings["default_sphere_radius_1"]), "sphere radius r1")
-    ("r2", po::value<double>()->default_value(global_settings["default_sphere_radius_2"]), "sphere radius r2")
 
     // Benchmakr settings
     ("nrays_min", po::value<int>()->default_value(DEFAULT_NRAYS_MIN), "minimum number of rays per benchmark")
