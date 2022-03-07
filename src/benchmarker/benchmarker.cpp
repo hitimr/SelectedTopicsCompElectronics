@@ -118,8 +118,7 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
 
 void Benchmarker::run_all()
 {
-  run_singleSphere();
-  generate_doubleSphere();
+  run_singleSphere(); // TODO: rename
 }
 
 // convenience funtion
@@ -138,15 +137,29 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
 
   auto sphere_0 = generate_sphere(sphere_radius_0);
   auto sphere_1 = generate_sphere(sphere_radius_1);
-  auto sphere_2 = generate_sphere(sphere_radius_2);
+  auto grid = generate_sphere(sphere_radius_2);
 
   // cut out empty space within sphere
-  openvdb::tools::csgDifference(*sphere_2, *sphere_1);
+  openvdb::tools::csgDifference(*grid, *sphere_1);
 
   // insert inner sphere
-  openvdb::tools::csgUnion(*sphere_2, *sphere_0);
+  openvdb::tools::csgUnion(*grid, *sphere_0);
 
-  return sphere_2;
+  // Meta data
+  grid->setGridClass(openvdb::GRID_LEVEL_SET);
+  grid->setName("LevelSetSphere");
+
+  // save to file (see:
+  // https://academysoftwarefoundation.github.io/openvdb/codeExamples.html#sHelloWorld)
+  std::string outfile(global_settings["out_dir"]);
+  outfile += std::string(global_settings["grid_file_name"]);
+  openvdb::io::File vdb_file(outfile);
+  openvdb::GridPtrVec grids;
+  grids.push_back(grid);
+  vdb_file.write(grids);
+  vdb_file.close();
+
+  return grid;
 }
 
 void Benchmarker::run_singleSphere()
