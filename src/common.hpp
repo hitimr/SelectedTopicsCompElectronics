@@ -24,6 +24,10 @@ using FP_Type = float;
 #include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Log.h>
 
+// JSON
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 #include <cmath>
 #include <iomanip>
 #include <vector>
