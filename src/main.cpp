@@ -17,8 +17,8 @@
 
 // Standard Library
 #include <cassert>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <time.h>
 #include <vector>
 
@@ -43,9 +43,10 @@ OptionsT parse_options(int ac, char **av)
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
     
     // Colume Settings
-    ("voxel_size", po::value<double>()->default_value(DEFAULT_VOXEL_SIZE), "voxel size in world units")
+    ("voxel_size", po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), "voxel size in world units")
     ("r0", po::value<double>()->default_value(global_settings["default_sphere_radius_0"]), "sphere radius r0")
     ("r1", po::value<double>()->default_value(global_settings["default_sphere_radius_1"]), "sphere radius r1")
+    ("half_width", po::value<double>()->default_value(global_settings["defaults"]["half_width"]), "level set half width in voxel units")
 
     // Benchmakr settings
     ("nrays_min", po::value<int>()->default_value(DEFAULT_NRAYS_MIN), "minimum number of rays per benchmark")

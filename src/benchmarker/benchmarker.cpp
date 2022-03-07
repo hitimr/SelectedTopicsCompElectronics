@@ -8,15 +8,14 @@
 #include <openvdb/Exceptions.h>
 #include <openvdb/math/Transform.h>
 #include <openvdb/tools/Composite.h>
-#include <openvdb/tools/RayIntersector.h>
-
 #include <openvdb/tools/LevelSetSphere.h>
+#include <openvdb/tools/RayIntersector.h>
+#include <openvdb/tools/ValueTransformer.h>
 
 #include <cmath>
 #include <vector>
 
 using namespace openvdb;
-
 
 /**
  * @brief Generate Rays for the benchmark.
@@ -74,12 +73,13 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   sphere_radius_1 = (FP_Type)options["r1"].as<double>();
 
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
-  level_set_half_width = 2.0;
+  level_set_half_width = (FP_Type)options["half_width"].as<double>();
   eps = voxel_size * math::Sqrt(3.);
 
   assert(0 <= sphere_radius_0);
   assert(sphere_radius_0 < sphere_radius_1);
   assert(0 < voxel_size);
+  assert(0 < level_set_half_width);
 }
 
 void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
@@ -131,15 +131,20 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_sphere(FP_Type radius)
 
 Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
 {
-
-  auto sphere_0 = generate_sphere(sphere_radius_0);
   auto grid = generate_sphere(sphere_radius_1);
+  auto sphere_0 = generate_sphere(sphere_radius_0);
 
   // cut out empty space within sphere
   openvdb::tools::csgDifference(*grid, *sphere_0);
 
-  // insert inner sphere
-  //openvdb::tools::csgUnion(*grid, *sphere_0);
+  struct Local
+  {
+    static inline void op(const openvdb::FloatGrid::ValueAllIter &iter)
+    {
+      iter.setValue(*iter * -1.0);
+    }
+  };
+  openvdb::tools::foreach (grid->beginValueAll(), Local::op);
 
   // Meta data
   grid->setGridClass(openvdb::GRID_LEVEL_SET);
