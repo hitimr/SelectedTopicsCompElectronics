@@ -1,6 +1,7 @@
 {
-    "out_dir": "out/",
-    "default_sphere_radius_0": 1,
-    "default_sphere_radius_1": 4,
-    "default_sphere_radius_2": 5
+  "out_dir": "out/",
+  "grid_file_name": "grid.vdb",
+  "default_sphere_radius_0": 1,
+  "default_sphere_radius_1": 4,
+  "default_sphere_radius_2": 5
 }
