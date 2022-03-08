@@ -93,15 +93,16 @@ template <typename T> std::vector<T> linspace(T start, T end, size_t count)
 }
 
 // TODO: this function is probably buggy -> fix asap
-std::vector<int> logspace(int start, int end, int base, size_t sample_cnt)
+template<typename T = int>
+std::vector<T> logspace(double start, double end, double base, size_t sample_cnt)
 {
-  std::vector<int> n_vals;
-  double spacing = (end - start) / sample_cnt;
+  std::vector<T> vals;
+  double spacing = (end - start) / (double) sample_cnt;
   for (size_t i = 0; i < sample_cnt; i++)
   {
     double exp = start + i * spacing;
-    int n = (int)pow(base, exp);
-    n_vals.push_back(n);
+    T n = (T)pow(base, exp);
+    vals.push_back(n);
   }
-  return n_vals;
+  return vals;
 }
