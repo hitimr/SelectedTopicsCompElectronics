@@ -81,7 +81,7 @@ public:
   template <typename Vec3T>
   std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
   template <class GridT, class Vec3T>
-  std::vector<Vec3T> indexToWorld(GridT &grid, std::vector<Vec3T> &iPoints);
+  std::vector<OVBD_Vec3T> indexToWorld(GridT &grid, std::vector<Vec3T> &iPoints);
 
   template <typename Vec3T>
   bool verify_results(const std::vector<Vec3T> &result_intersections,

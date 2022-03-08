@@ -58,16 +58,17 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
   return rays;
 }
 
-
 template <class GridT, class Vec3T>
-std::vector<Vec3T> Benchmarker::indexToWorld(GridT &grid, std::vector<Vec3T> & iPoints)
+std::vector<Benchmarker::OVBD_Vec3T> Benchmarker::indexToWorld(GridT &grid,
+                                                               std::vector<Vec3T> &iPoints)
 {
-  std::vector<Vec3T>  wPoints(iPoints.size());
+  std::vector<OVBD_Vec3T> wPoints(iPoints.size());
   for (size_t i = 0; i < iPoints.size(); i++)
   {
-    wPoints[i] = grid.indexToWorld(iPoints[i]);
+    wPoints[i] = grid.indexToWorld(
+        OVBD_Vec3T((FP_Type)iPoints[i][0], (FP_Type)iPoints[i][1], (FP_Type)iPoints[i][2]));
   }
-  return wPoints;  
+  return wPoints;
 }
 
 // calculate ray intersections analytically
@@ -120,7 +121,6 @@ void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
   // Run Benchmark
   std::vector<OVBD_Vec3T> iResults(n_rays);
 
-
   Timer timer;
   timer.reset();
   // TODO: make multiple repeats with custom wrapper function
@@ -132,7 +132,7 @@ void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
   PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
-  auto wResults = indexToWorld(level_set, iResults); 
+  auto wResults = indexToWorld(level_set, iResults);
   verify_results(wResults, reference_intersections);
 }
 
@@ -181,7 +181,7 @@ Benchmarker::OVBD_GridT Benchmarker::generate_doubleSphere()
   return grid;
 }
 
-void Benchmarker::save_grid(std::string filename, OVBD_GridT & grid)
+void Benchmarker::save_grid(std::string filename, OVBD_GridT &grid)
 {
   // generate absolute file path
   std::string outfile(global_settings["out_dir"]);
@@ -226,18 +226,16 @@ void Benchmarker::run_singleSphere()
 // TODO: move to separate File
 void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
                                   size_t n_rays)
-{ 
-
+{
 
   nanovdb::FloatGrid *h_grid = level_set.grid<FP_Type>();
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_GridT, NVDB_RayT>(*h_grid, n_rays);
-  /*
   std::vector<NVBD_Vec3T> reference_intersections =
       calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_1);
 
   auto acc = h_grid->tree().getAccessor();
-  std::vector<NVBD_CoordT> result_coords(n_rays);
+  std::vector<NVBD_CoordT> iResults(n_rays);
   FP_Type t0;
   FP_Type v;
   Timer timer;
@@ -246,21 +244,23 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   timer.reset();
   for (size_t i = 0; i < n_rays; i++)
   {
-    nanovdb::ZeroCrossing(rays[i], acc, result_coords[i], v, t0);
+    nanovdb::ZeroCrossing(rays[i], acc, iResults[i], v, t0);
   }
   double time = timer.get();
 
   PLOG_INFO << "NanoVDB on CPU Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
+  /*
   std::vector<NVBD_Vec3T> result_intersections(n_rays);
   for (size_t i = 0; i < n_rays; i++)
   {
     result_intersections[i] = h_grid->indexToWorldF<NVBD_Vec3T>(result_coords[i].asVec3s());
   }
-
-  verify_results<NVBD_Vec3T>(result_intersections, reference_intersections);
   */
+
+  // auto wResults = indexToWorld(*h_grid, iResults);
+  // verify_results<NVBD_Vec3T>(wResults, reference_intersections);
 }
 
 // verify results by comparing them to precomputed reference solutions
@@ -277,13 +277,11 @@ bool Benchmarker::verify_results(const std::vector<Vec3T> &wResults,
     if (!isClose_vec3(wResults[i], wReference[i]))
     {
       PLOG_ERROR << "Calculated value does not match at pos " << i << std::endl;
-      PLOG_ERROR << "Received:\t(" << wResults[i][0] << "|"
-                 << wResults[i][1] << "|" << wResults[i][2] << ")"
-                 << std::endl;
+      PLOG_ERROR << "Received:\t(" << wResults[i][0] << "|" << wResults[i][1] << "|"
+                 << wResults[i][2] << ")" << std::endl;
 
-      PLOG_ERROR << "Should be:\t(" << wReference[i][0] << "|"
-                 << wReference[i][1] << "|" << wReference[i][2] << ")"
-                 << std::endl;
+      PLOG_ERROR << "Should be:\t(" << wReference[i][0] << "|" << wReference[i][1] << "|"
+                 << wReference[i][2] << ")" << std::endl;
       err_flag = true;
     }
   }
