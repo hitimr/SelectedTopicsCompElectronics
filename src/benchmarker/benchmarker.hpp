@@ -73,6 +73,8 @@ public:
   void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
   void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
+  void save_grid(std::string fileName, const openvdb::GridBase::Ptr grid);
+
 
   template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
   template <typename Vec3T>
