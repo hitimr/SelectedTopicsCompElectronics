@@ -4,7 +4,10 @@
 #include "util/timer.hpp"
 
 // OpenVDB
+#include <nanovdb/util/IO.h>
+#include <nanovdb/util/NanoToOpenVDB.h>
 #include <nanovdb/util/OpenToNanoVDB.h>
+#include <nanovdb/util/Primitives.h>
 #include <openvdb/Exceptions.h>
 #include <openvdb/math/Transform.h>
 #include <openvdb/tools/Composite.h>
@@ -32,7 +35,6 @@ template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays
 
   std::vector<RealT> alpha_vals = linspace<RealT>(0.0, 2.0 * M_PI, n_rays);
   std::vector<RayT> rays(n_rays);
-  Vec3T eye(0, 0, 0);
 
   for (size_t i = 0; i < n_rays; i++)
   {
@@ -41,7 +43,9 @@ template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays
                     std::sin(alpha_vals[i]), // y = Sin(α)
                     0                        // z = 0
     );
+
     direction.normalize();
+    Vec3T eye(direction * (sphere_radius_0 + 5));
     RayT ray(eye, direction);
     rays[i] = ray;
   }
@@ -153,17 +157,24 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
   grid->setGridClass(openvdb::GRID_LEVEL_SET);
   grid->setName("LevelSetSphere");
 
+  save_grid("nano_grid.vdb", grid);
+
+  return grid;
+}
+
+void Benchmarker::save_grid(std::string filename, const openvdb::GridBase::Ptr grid)
+{
+  // generate absolute file path
+  std::string outfile(global_settings["out_dir"]);
+  outfile += filename;
+
   // save to file (see:
   // https://academysoftwarefoundation.github.io/openvdb/codeExamples.html#sHelloWorld)
-  std::string outfile(global_settings["out_dir"]);
-  outfile += std::string(global_settings["grid_file_name"]);
   openvdb::io::File vdb_file(outfile);
   openvdb::GridPtrVec grids;
   grids.push_back(grid);
   vdb_file.write(grids);
   vdb_file.close();
-
-  return grid;
 }
 
 void Benchmarker::run_singleSphere()
@@ -176,18 +187,14 @@ void Benchmarker::run_singleSphere()
 
   // Convert to nanoVDBV
   // Note: it is possible to create Level sets directly in NanoVDB as well bus this is slower
-  auto level_set_cpu = nanovdb::openToNanoVDB(*level_set_ovbd);
+  auto level_set_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(*level_set_ovbd);
   auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(*level_set_ovbd);
 
-  /*
-  Old way of creating the level set
-  // NanoVDB GPU Level Set
-  PLOG_INFO << "Generating Level set for NanoVDB on GPU" << std::endl;
-  auto level_set_gpu = nanovdb::createLevelSetSphere<FP_Type, FP_Type, nanovdb::CudaDeviceBuffer>(
-      sphere_radius_outer, {center_x, center_y, center_z}, voxel_size, level_set_half_width,
-      nanovdb::Vec3R(0));
-  */
+  // convert grid back to open_vdb and save it.
+  // mainly for debugging and checking if the grid is correctly converted
+  save_grid("nano_grid.vdb", nanovdb::nanoToOpenVDB(level_set_cpu));
 
+  // Run Benchmarks
   for (size_t n_rays : ray_vals)
   {
     run_openVDB(level_set_ovbd, n_rays);
@@ -248,9 +255,13 @@ bool Benchmarker::verify_results(const std::vector<Vec3T> &result_intersections,
     if (!isClose_vec3(result_intersections[i], reference_intersections[i]))
     {
       PLOG_ERROR << "Calculated value does not match at pos " << i << std::endl;
-      // TODO: Vec3 printf/cout
-      // PLOG_ERROR << "Received:\t" << result_intersections[i] << std::endl;
-      // PLOG_ERROR << "Should be:\t" << reference_intersections[i] << std::endl;
+      PLOG_ERROR << "Received:\t(" << result_intersections[i][0] << "|"
+                 << result_intersections[i][1] << "|" << result_intersections[i][2] << ")"
+                 << std::endl;
+
+      PLOG_ERROR << "Should be:\t(" << reference_intersections[i][0] << "|"
+                 << reference_intersections[i][1] << "|" << reference_intersections[i][2] << ")"
+                 << std::endl;
       err_flag = true;
     }
   }
