@@ -217,7 +217,7 @@ void Benchmarker::run_singleSphere()
   for (size_t n_rays : ray_vals)
   {
     run_openVDB(level_set_ovbd, n_rays);
-    // run_nanoVDB_CPU(level_set_cpu, n_rays);
+    run_nanoVDB_CPU(level_set_cpu, n_rays);
     // run_nanoVDB_GPU(level_set_gpu, n_rays);
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
@@ -231,8 +231,8 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   nanovdb::FloatGrid *h_grid = level_set.grid<FP_Type>();
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_GridT, NVDB_RayT>(*h_grid, n_rays);
-  std::vector<NVBD_Vec3T> reference_intersections =
-      calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_1);
+  std::vector<OVBD_Vec3T> reference_intersections =
+      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_1);
 
   auto acc = h_grid->tree().getAccessor();
   std::vector<NVBD_CoordT> iResults(n_rays);
@@ -251,16 +251,8 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   PLOG_INFO << "NanoVDB on CPU Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
-  /*
-  std::vector<NVBD_Vec3T> result_intersections(n_rays);
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    result_intersections[i] = h_grid->indexToWorldF<NVBD_Vec3T>(result_coords[i].asVec3s());
-  }
-  */
-
-  // auto wResults = indexToWorld(*h_grid, iResults);
-  // verify_results<NVBD_Vec3T>(wResults, reference_intersections);
+  auto wResults = indexToWorld(*h_grid, iResults);
+  verify_results(wResults, reference_intersections);
 }
 
 // verify results by comparing them to precomputed reference solutions
