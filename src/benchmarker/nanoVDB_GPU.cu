@@ -38,10 +38,8 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   size_t block_size = 256;
   size_t bytes = 0;
 
-  FP_Type sphere_radius_outer = 5; // TODO: replace with optionsd argument
-
   assert(n_rays > 0);
-
+  /*
   // std::vector<Vec3T> reference_intersections =
   //     calculate_reference_solution<Vec3T>(n_rays, sphere_radius_outer);
 
@@ -53,7 +51,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
 
   // Init rays on GPU
   bytes = sizeof(RayT) * n_rays;
-  std::vector<RayT> rays = generate_rays<RayT>(n_rays);
+  std::vector<RayT> rays = generate_rays<RayT>(grid_handle, n_rays);
   RayT *d_rays;
   cudaMalloc(&d_rays, bytes);
   cudaMemcpy(d_rays, rays.data(), bytes, cudaMemcpyHostToDevice);
@@ -87,7 +85,6 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaMemcpy(result_coords.data(), d_result_coords, sizeof(result_coords[0]) * n_rays,
              cudaMemcpyDeviceToHost);
 
-
   // Transform index results to World Coordinates
   auto *h_grid = grid_handle.grid<FP_Type>();
   std::vector<nanovdb::Vec3<FP_Type>> result_intersections(n_rays);
@@ -96,10 +93,10 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
     result_intersections[i] = h_grid->indexToWorldF<Vec3T>(result_coords[i].asVec3s());
   }
 
-
   // verify_results(result_intersections, reference_intersections);
 
   cudaFree(d_rays);
   cudaFree(d_result_coords);
   cudaFree(d_result_times);
+  */
 }

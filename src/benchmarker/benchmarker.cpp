@@ -27,8 +27,10 @@ using namespace openvdb;
  * @tparam NVDB_RayT either OpenVDB Rays or NanoVDB Rays
  * @param n_rays number of rays that should be generated
  * @return std::vector<NVDB_RayT>
+ * TODO: Update
  */
-template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays)
+template <class GridT, class RayT>
+std::vector<RayT> Benchmarker::generate_rays(GridT grid, size_t n_rays)
 {
   using Vec3T = typename RayT::Vec3T;
   using RealT = typename Vec3T::ValueType;
@@ -38,16 +40,19 @@ template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays
 
   for (size_t i = 0; i < n_rays; i++)
   {
-    // Generate Rays
+    // normalized direction
     Vec3T direction(std::cos(alpha_vals[i]), // x = Cos(α)
                     std::sin(alpha_vals[i]), // y = Sin(α)
                     0                        // z = 0
     );
-
     direction.normalize();
+
+    // Eye
     Vec3T eye(direction * (sphere_radius_0 + 0.5));
-    RayT ray(eye, direction);
-    rays[i] = ray;
+
+    // Finaly Ray
+    RayT wRay(eye, direction);
+    rays[i] = wRay.worldToIndex(*grid);
   }
 
   return rays;
@@ -96,7 +101,7 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
                                 OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL, OVBD_RayT>
       ray_intersector(*level_set);
 
-  std::vector<OVBD_RayT> rays = generate_rays<OVBD_RayT>(n_rays);
+  std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT::Ptr, OVBD_RayT>(level_set, n_rays);
   std::vector<OVBD_Vec3T> reference_intersections =
       calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_1);
 
@@ -198,8 +203,8 @@ void Benchmarker::run_singleSphere()
   for (size_t n_rays : ray_vals)
   {
     run_openVDB(level_set_ovbd, n_rays);
-    run_nanoVDB_CPU(level_set_cpu, n_rays);
-    run_nanoVDB_GPU(level_set_gpu, n_rays);
+    // run_nanoVDB_CPU(level_set_cpu, n_rays);
+    // run_nanoVDB_GPU(level_set_gpu, n_rays);
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
 }
@@ -207,12 +212,12 @@ void Benchmarker::run_singleSphere()
 // TODO: move to separate File
 void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
                                   size_t n_rays)
-{
+{ /*
   using NVDB_RayT = nanovdb::Ray<FP_Type>;
 
   auto *h_grid = level_set.grid<FP_Type>();
 
-  std::vector<NVDB_RayT> rays = generate_rays<NVDB_RayT>(n_rays);
+  std::vector<NVDB_RayT> rays = generate_rays(h_grid, n_rays);
   std::vector<NVBD_Vec3T> reference_intersections =
       calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_1);
 
@@ -240,6 +245,7 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   }
 
   verify_results<NVBD_Vec3T>(result_intersections, reference_intersections);
+  */
 }
 
 // verify results by comparing them to precomputed reference solutions
