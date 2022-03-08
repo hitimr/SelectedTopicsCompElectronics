@@ -52,7 +52,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
     grid.indexToWorld(eye);
 
     // Finaly Ray
-    // RayT iRay(eye.worldToIndex(grid), direction);
+    rays[i] = RayT(grid.worldToIndex(eye), direction);
   }
 
   return rays;
