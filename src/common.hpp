@@ -4,9 +4,6 @@ using FP_Type = float;
 
 // Default CLI Params
 // TODO: migrate to json file
-#define DEFAULT_NBENCH 16
-#define DEFAULT_NRAYS_MIN 1
-#define DEFAULT_NRAYS_MAX 24 
 #define DEFAULT_LOG_LEVEL plog::info
 #define DEFAULT_RADIUS 5.0
 

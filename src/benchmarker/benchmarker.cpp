@@ -199,7 +199,7 @@ void Benchmarker::save_grid(std::string filename, OVBD_GridT &grid)
 void Benchmarker::run_singleSphere()
 {
   // set number of rays for the benchmark
-  ray_vals = logspace(options["nrays_min"].as<int>(), options["nrays_max"].as<int>(), BASE2,
+  ray_vals = logspace(options["p_rays_start"].as<int>(), options["p_rays_end"].as<int>(), BASE2,
                       options["nbench"].as<int>());
 
   auto level_set_ovbd = generate_doubleSphere();

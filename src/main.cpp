@@ -43,15 +43,35 @@ OptionsT parse_options(int ac, char **av)
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
     
     // Colume Settings
-    ("voxel_size", po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), "voxel size in world units")
-    ("r0", po::value<double>()->default_value(global_settings["default_sphere_radius_0"]), "sphere radius r0")
-    ("r1", po::value<double>()->default_value(global_settings["default_sphere_radius_1"]), "sphere radius r1")
-    ("half_width", po::value<double>()->default_value(global_settings["defaults"]["half_width"]), "level set half width in voxel units")
+    ("voxel_size", 
+    po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), 
+    "voxel size in world units")
 
-    // Benchmakr settings
-    ("nrays_min", po::value<int>()->default_value(DEFAULT_NRAYS_MIN), "minimum number of rays per benchmark")
-    ("nrays_max", po::value<int>()->default_value(DEFAULT_NRAYS_MAX), "maximum number of rays per benchmark")
-    ("nbench,nb", po::value<int>()->default_value(DEFAULT_NBENCH), "number of points for the benchmark");
+    ("r0", 
+    po::value<double>()->default_value(global_settings["default_sphere_radius_0"]), 
+    "sphere radius r0")
+
+    ("r1", 
+    po::value<double>()->default_value(global_settings["default_sphere_radius_1"]), 
+    "sphere radius r1")
+
+    ("half_width", 
+    po::value<double>()->default_value(global_settings["defaults"]["half_width"]), 
+    "level set half width in voxel units")
+
+    // Benchmark settings
+    ("p_rays_start,p0",  
+    po::value<int>()->default_value(global_settings["defaults"]["p_rays_start"]), 
+    "2s complement of minimum number of rays for the benchmark")
+
+    ("p_rays_end,p1",    
+    po::value<int>()->default_value(global_settings["defaults"]["p_rays_end"]), 
+    "2s complement of the maximum number of rays for the benchmark")
+
+    ("nbench,nb",     
+    po::value<int>()->default_value(global_settings["defaults"]["n_bench"]), 
+    "number of benchmarks to perform. Ray counts are logarithmically spaced between 2^p0 and 2^p1");
+
   // clang-format on
   po::variables_map vm;
   po::store(po::parse_command_line(ac, av, desc), vm);
@@ -64,7 +84,7 @@ OptionsT parse_options(int ac, char **av)
   }
 
   // check sanity of arguments
-  assert(vm["nrays_min"].as<int>() < vm["nrays_max"].as<int>());
+  assert(vm["p_rays_start"].as<int>() < vm["p_rays_end"].as<int>());
 
   return vm;
 }
