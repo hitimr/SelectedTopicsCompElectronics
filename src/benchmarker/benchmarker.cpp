@@ -30,7 +30,7 @@ using namespace openvdb;
  * TODO: Update
  */
 template <class GridT, class RayT>
-std::vector<RayT> Benchmarker::generate_rays(GridT grid, size_t n_rays)
+std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
 {
   using Vec3T = typename RayT::Vec3T;
   using RealT = typename Vec3T::ValueType;
@@ -49,10 +49,10 @@ std::vector<RayT> Benchmarker::generate_rays(GridT grid, size_t n_rays)
 
     // Eye
     Vec3T eye(direction * (sphere_radius_0 + 0.5));
+    grid.indexToWorld(eye);
 
     // Finaly Ray
-    RayT wRay(eye, direction);
-    rays[i] = wRay.worldToIndex(*grid);
+    // RayT iRay(eye.worldToIndex(grid), direction);
   }
 
   return rays;
@@ -91,7 +91,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   assert(0 < level_set_half_width);
 }
 
-void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
+void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 {
   assert(n_rays > 0);
   PLOG_INFO << "Running OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
@@ -99,9 +99,9 @@ void Benchmarker::run_openVDB(const OVBD_GridT::Ptr &level_set, size_t n_rays)
   // Ray Intersector: Triple nested types. nice...
   tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
                                 OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL, OVBD_RayT>
-      ray_intersector(*level_set);
+      ray_intersector(level_set);
 
-  std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT::Ptr, OVBD_RayT>(level_set, n_rays);
+  std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(level_set, n_rays);
   std::vector<OVBD_Vec3T> reference_intersections =
       calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_1);
 
@@ -128,9 +128,9 @@ void Benchmarker::run_all()
 }
 
 // convenience funtion
-Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_sphere(FP_Type radius)
+Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius)
 {
-  return tools::createLevelSetSphere<OVBD_GridT>(
+  return *tools::createLevelSetSphere<OVBD_GridT>(
       radius,                         // radius of the sphere in world units
       {center_x, center_y, center_z}, // center of the sphere in world units
       voxel_size,                     // voxel size in world units
@@ -138,13 +138,13 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_sphere(FP_Type radius)
   );
 }
 
-Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
+Benchmarker::OVBD_GridT Benchmarker::generate_doubleSphere()
 {
-  auto grid = generate_sphere(sphere_radius_1);
-  auto sphere_0 = generate_sphere(sphere_radius_0);
+  OVBD_GridT grid = generate_sphere(sphere_radius_1);
+  OVBD_GridT sphere_0 = generate_sphere(sphere_radius_0);
 
   // use geometric difference to generate a sphere with an empty core
-  openvdb::tools::csgDifference(*grid, *sphere_0);
+  openvdb::tools::csgDifference(grid, sphere_0);
 
   // invert entire grid to generate 2 concentric spheres
   // taken from https://academysoftwarefoundation.github.io/openvdb/codeExamples.html
@@ -156,18 +156,18 @@ Benchmarker::OVBD_GridT::Ptr Benchmarker::generate_doubleSphere()
       iter.setValue(*iter * -1.0);
     }
   };
-  openvdb::tools::foreach (grid->beginValueAll(), Local::op);
+  openvdb::tools::foreach (grid.beginValueAll(), Local::op);
 
   // Meta data
-  grid->setGridClass(openvdb::GRID_LEVEL_SET);
-  grid->setName("LevelSetSphere");
+  grid.setGridClass(openvdb::GRID_LEVEL_SET);
+  grid.setName("LevelSetSphere");
 
   save_grid("nano_grid.vdb", grid);
 
   return grid;
 }
 
-void Benchmarker::save_grid(std::string filename, const openvdb::GridBase::Ptr grid)
+void Benchmarker::save_grid(std::string filename, OVBD_GridT & grid)
 {
   // generate absolute file path
   std::string outfile(global_settings["out_dir"]);
@@ -175,11 +175,11 @@ void Benchmarker::save_grid(std::string filename, const openvdb::GridBase::Ptr g
 
   // save to file (see:
   // https://academysoftwarefoundation.github.io/openvdb/codeExamples.html#sHelloWorld)
-  openvdb::io::File vdb_file(outfile);
-  openvdb::GridPtrVec grids;
-  grids.push_back(grid);
-  vdb_file.write(grids);
-  vdb_file.close();
+  // openvdb::io::File vdb_file(outfile);
+  // std::vector<OVBD_GridT&> grids;
+  // grids.push_back(grid);
+  // vdb_file.write(grids);
+  // vdb_file.close();
 }
 
 void Benchmarker::run_singleSphere()
@@ -192,12 +192,12 @@ void Benchmarker::run_singleSphere()
 
   // Convert to nanoVDBV
   // Note: it is possible to create Level sets directly in NanoVDB as well bus this is slower
-  auto level_set_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(*level_set_ovbd);
-  auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(*level_set_ovbd);
+  auto level_set_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(level_set_ovbd);
+  auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(level_set_ovbd);
 
   // convert grid back to open_vdb and save it.
   // mainly for debugging and checking if the grid is correctly converted
-  save_grid("nano_grid.vdb", nanovdb::nanoToOpenVDB(level_set_cpu));
+  // save_grid("nano_grid.vdb", nanovdb::nanoToOpenVDB(level_set_cpu));
 
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
@@ -212,12 +212,13 @@ void Benchmarker::run_singleSphere()
 // TODO: move to separate File
 void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
                                   size_t n_rays)
-{ /*
-  using NVDB_RayT = nanovdb::Ray<FP_Type>;
+{ 
 
-  auto *h_grid = level_set.grid<FP_Type>();
 
-  std::vector<NVDB_RayT> rays = generate_rays(h_grid, n_rays);
+  nanovdb::FloatGrid *h_grid = level_set.grid<FP_Type>();
+
+  std::vector<NVDB_RayT> rays = generate_rays<NVDB_GridT, NVDB_RayT>(*h_grid, n_rays);
+  /*
   std::vector<NVBD_Vec3T> reference_intersections =
       calculate_reference_solution<NVBD_Vec3T>(n_rays, sphere_radius_1);
 
