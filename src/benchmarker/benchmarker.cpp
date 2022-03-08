@@ -236,7 +236,7 @@ void Benchmarker::run_singleSphere()
   assert(outFile.is_open());
 
   // .csv Header
-  outFile << "n_rays;time_ovbd;time_nvbd_cpu;time_nvbd_gpu" << std::endl;
+  outFile << "n_rays;time_ovdb;time_nvdb_cpu;time_nvdb_gpu" << std::endl;
 
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
