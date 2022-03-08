@@ -27,7 +27,7 @@ __global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
   }
 }
 
-void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &level_set,
+double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &level_set,
                                   size_t n_rays)
 {
   using FP_Type = float;
@@ -92,4 +92,6 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaFree(d_rays);
   cudaFree(d_result_coords);
   cudaFree(d_result_times);
+
+  return time;
 }
