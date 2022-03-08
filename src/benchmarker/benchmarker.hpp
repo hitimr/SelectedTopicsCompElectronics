@@ -29,8 +29,8 @@ class Benchmarker
 public:
   // TODO: change to better names
   using OVBD_Vec3T = openvdb::math::Vec3<FP_Type>;
-  using OVBD_RayT = openvdb::math::Ray<FP_Type>;
   using OVBD_GridT = openvdb::FloatGrid;
+  using OVBD_RayT = openvdb::math::Ray<FP_Type>;
 
   using NVBD_CoordT = nanovdb::Coord;
   using NVBD_Vec3T = nanovdb::Vec3<FP_Type>;
@@ -45,17 +45,17 @@ public:
   // Benchmark settings
   FP_Type voxel_size = -1.;
 
-
   /*
   Sphere radii:
   (center)     r0       r1       r2
      *   -------> | -----> | -----> | -> inf
          solid    | empyt  | solid  | empty
+         // TODO: update
   */
   FP_Type sphere_radius_0 = -1.;
   FP_Type sphere_radius_1 = -1.;
   FP_Type sphere_radius_2 = -1.;
- 
+
   // required because OpenVDB and NanoVDB require different Classes for Vec3
   FP_Type center_x = 0;
   FP_Type center_y = 0;
@@ -75,8 +75,8 @@ public:
   void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
   void save_grid(std::string fileName, const openvdb::GridBase::Ptr grid);
 
-
-  template <typename RayT> std::vector<RayT> generate_rays(size_t n_rays);
+  template <class GridT, class RayT>
+  std::vector<RayT> generate_rays(GridT grid, size_t n_rays);
   template <typename Vec3T>
   std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
 
