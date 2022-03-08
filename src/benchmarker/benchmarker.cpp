@@ -45,7 +45,7 @@ template <class RayT> std::vector<RayT> Benchmarker::generate_rays(size_t n_rays
     );
 
     direction.normalize();
-    Vec3T eye(direction * (sphere_radius_0 + 5));
+    Vec3T eye(direction * (sphere_radius_0 + 0.5));
     RayT ray(eye, direction);
     rays[i] = ray;
   }
