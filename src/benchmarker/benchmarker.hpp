@@ -56,7 +56,6 @@ public:
   */
   FP_Type sphere_radius_0 = -1.;
   FP_Type sphere_radius_1 = -1.;
-  FP_Type sphere_radius_2 = -1.;
 
   // required because OpenVDB and NanoVDB require different Classes for Vec3
   FP_Type center_x = 0;
@@ -66,6 +65,7 @@ public:
   FP_Type level_set_half_width = -1;
   std::vector<int> ray_vals;
   FP_Type eps = -1;
+  FP_Type ray_offset = -1;
 
   // Methods
   void run_all();
