@@ -48,7 +48,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
     direction.normalize();
 
     // Eye
-    Vec3T eye(direction * (sphere_radius_0 + 0.5));
+    Vec3T eye(direction * (sphere_radius_0 + ray_offset));
     grid.indexToWorld(eye);
 
     // Finaly Ray
@@ -97,6 +97,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = (FP_Type)options["half_width"].as<double>();
   eps = voxel_size * math::Sqrt(3.);
+  ray_offset = (FP_Type)options["ray_offset"].as<double>(); 
 
   assert(0 <= sphere_radius_0);
   assert(sphere_radius_0 < sphere_radius_1);

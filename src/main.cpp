@@ -42,7 +42,7 @@ OptionsT parse_options(int ac, char **av)
     ("help,h", "produce help message")
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
     
-    // Colume Settings
+    // Greid Settings
     ("voxel_size", 
     po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), 
     "voxel size in world units")
@@ -58,6 +58,12 @@ OptionsT parse_options(int ac, char **av)
     ("half_width", 
     po::value<double>()->default_value(global_settings["defaults"]["half_width"]), 
     "level set half width in voxel units")
+
+    ("ray_offset",
+    po::value<double>()->default_value(global_settings["defaults"]["ray_offset"]),
+    "If rayhs are placed directly on the inner sphere theey may immediately intersect again\n\ 
+    For now a small offset is used to prevent this.\n\
+    Ideally the offset is still within the narrow band")
 
     // Benchmark settings
     ("p_rays_start,p0",  
