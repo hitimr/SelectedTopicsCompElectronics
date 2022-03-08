@@ -218,7 +218,7 @@ void Benchmarker::run_singleSphere()
   {
     run_openVDB(level_set_ovbd, n_rays);
     run_nanoVDB_CPU(level_set_cpu, n_rays);
-    // run_nanoVDB_GPU(level_set_gpu, n_rays);
+    run_nanoVDB_GPU(level_set_gpu, n_rays);
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
 }
