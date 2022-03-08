@@ -8,7 +8,7 @@
     "ray_offset": 0.2,
     "half_width": 2,
     "p_rays_start": 4,
-    "p_rays_end": 20,
+    "p_rays_end": 22,
     "n_bench": 16
   }
 }

@@ -61,7 +61,7 @@ OptionsT parse_options(int ac, char **av)
 
     ("ray_offset",
     po::value<double>()->default_value(global_settings["defaults"]["ray_offset"]),
-    "If rayhs are placed directly on the inner sphere theey may immediately intersect again\n\ 
+    "If rayhs are placed directly on the inner sphere theey may immediately intersect again\n\
     For now a small offset is used to prevent this.\n\
     Ideally the offset is still within the narrow band")
 
