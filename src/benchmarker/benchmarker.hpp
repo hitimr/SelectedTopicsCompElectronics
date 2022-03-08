@@ -34,6 +34,8 @@ public:
 
   using NVBD_CoordT = nanovdb::Coord;
   using NVBD_Vec3T = nanovdb::Vec3<FP_Type>;
+  using NVDB_RayT = nanovdb::Ray<FP_Type>;
+  using NVDB_GridT = nanovdb::FloatGrid;
 
   using OptionsT = boost::program_options::variables_map;
 
@@ -68,15 +70,14 @@ public:
   // Methods
   void run_all();
   void run_singleSphere();
-  OVBD_GridT::Ptr generate_sphere(FP_Type radius);
-  OVBD_GridT::Ptr generate_doubleSphere();
-  void run_openVDB(const OVBD_GridT::Ptr &level_set2, size_t nrays);
+  OVBD_GridT generate_sphere(FP_Type radius);
+  OVBD_GridT generate_doubleSphere();
+  void run_openVDB(OVBD_GridT &level_set, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
   void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
-  void save_grid(std::string fileName, const openvdb::GridBase::Ptr grid);
+  void save_grid(std::string fileName, OVBD_GridT & grid);
 
-  template <class GridT, class RayT>
-  std::vector<RayT> generate_rays(GridT grid, size_t n_rays);
+  template <class GridT, class RayT> std::vector<RayT> generate_rays(GridT &grid, size_t n_rays);
   template <typename Vec3T>
   std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
 
