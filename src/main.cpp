@@ -42,7 +42,7 @@ OptionsT parse_options(int ac, char **av)
     ("help,h", "produce help message")
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
     
-    // Greid Settings
+    // Grid Settings
     ("voxel_size", 
     po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), 
     "voxel size in world units")
@@ -76,7 +76,16 @@ OptionsT parse_options(int ac, char **av)
 
     ("nbench,nb",     
     po::value<int>()->default_value(global_settings["defaults"]["n_bench"]), 
-    "number of benchmarks to perform. Ray counts are logarithmically spaced between 2^p0 and 2^p1");
+    "number of benchmarks to perform. Ray counts are logarithmically spaced between 2^p0 and 2^p1")
+
+    // GPU Settings
+    ("grid_size",     
+    po::value<int>()->default_value(global_settings["defaults"]["gpu_grid_size"]), 
+    "number of blocks used on GPU")
+
+    ("block_size",     
+    po::value<int>()->default_value(global_settings["defaults"]["gpu_block_size"]), 
+    "number of threads used per block");
 
   // clang-format on
   po::variables_map vm;

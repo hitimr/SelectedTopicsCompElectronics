@@ -1,6 +1,7 @@
 {
   "out_dir": "out/",
   "grid_file_name": "grid.vdb",
+  "outfile_timings": "out/results.csv",
   "default_sphere_radius_0": 5,
   "default_sphere_radius_1": 15,
   "defaults" : {
@@ -9,6 +10,8 @@
     "half_width": 2,
     "p_rays_start": 4,
     "p_rays_end": 22,
-    "n_bench": 16
+    "n_bench": 16,
+    "gpu_grid_size": 256,
+    "gpu_block_size": 256
   }
 }

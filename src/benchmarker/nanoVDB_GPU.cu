@@ -34,8 +34,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   using RayT = nanovdb::Ray<FP_Type>;
   using Vec3T = nanovdb::Vec3<FP_Type>;
 
-  size_t grid_size = 256;
-  size_t block_size = 256;
+
   size_t bytes = 0;
 
   assert(n_rays > 0);

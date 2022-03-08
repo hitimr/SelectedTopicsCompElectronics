@@ -67,6 +67,10 @@ public:
   FP_Type eps = -1;
   FP_Type ray_offset = -1;
 
+  // GPU Settings
+  size_t grid_size = 0;
+  size_t block_size = 0;
+
   // Methods
   void run_all();
   void run_singleSphere();
