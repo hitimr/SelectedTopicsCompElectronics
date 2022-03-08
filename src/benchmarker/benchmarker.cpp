@@ -94,15 +94,23 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   sphere_radius_0 = (FP_Type)options["r0"].as<double>();
   sphere_radius_1 = (FP_Type)options["r1"].as<double>();
 
+  // Grid Settings
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = (FP_Type)options["half_width"].as<double>();
   eps = voxel_size * math::Sqrt(3.);
   ray_offset = (FP_Type)options["ray_offset"].as<double>(); 
 
+  // GPU
+  grid_size = (size_t)options["grid_size"].as<int>();
+  block_size = (size_t)options["block_size"].as<int>();
+
+  // Sanity checks
   assert(0 <= sphere_radius_0);
   assert(sphere_radius_0 < sphere_radius_1);
   assert(0 < voxel_size);
   assert(0 < level_set_half_width);
+  assert(0 < grid_size);
+  assert(0 < block_size);
 }
 
 void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
