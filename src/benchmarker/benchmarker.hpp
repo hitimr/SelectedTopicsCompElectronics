@@ -71,14 +71,18 @@ public:
   size_t grid_size = 0;
   size_t block_size = 0;
 
+  // Benchmark Settings
+  int n_bench = -1;
+
+
   // Methods
   void run_all();
   void run_singleSphere();
   OVBD_GridT generate_sphere(FP_Type radius);
   OVBD_GridT generate_doubleSphere();
-  void run_openVDB(OVBD_GridT &level_set, size_t nrays);
-  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
-  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
+  double run_openVDB(OVBD_GridT &level_set, size_t nrays);
+  double run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
+  double run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
   void save_grid(std::string fileName, OVBD_GridT &grid);
 
   template <class GridT, class RayT> std::vector<RayT> generate_rays(GridT &grid, size_t n_rays);
@@ -93,7 +97,3 @@ public:
 
   template <typename Vec3T> bool isClose_vec3(const Vec3T &a, const Vec3T &b);
 };
-
-// template <>
-// std::vector<nanovdb::Vec3<FP_Type>>
-//     Benchmarker::calculate_reference_solution<nanovdb::Vec3<FP_Type>>(size_t, FP_Type);

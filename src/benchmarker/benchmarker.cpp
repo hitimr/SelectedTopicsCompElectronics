@@ -16,6 +16,7 @@
 #include <openvdb/tools/ValueTransformer.h>
 
 #include <cmath>
+#include <fstream>
 #include <vector>
 
 using namespace openvdb;
@@ -98,11 +99,14 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = (FP_Type)options["half_width"].as<double>();
   eps = voxel_size * math::Sqrt(3.);
-  ray_offset = (FP_Type)options["ray_offset"].as<double>(); 
+  ray_offset = (FP_Type)options["ray_offset"].as<double>();
 
   // GPU
   grid_size = (size_t)options["grid_size"].as<int>();
   block_size = (size_t)options["block_size"].as<int>();
+
+  // Benchmark
+  n_bench = options["nbench"].as<int>();
 
   // Sanity checks
   assert(0 <= sphere_radius_0);
@@ -111,9 +115,10 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   assert(0 < level_set_half_width);
   assert(0 < grid_size);
   assert(0 < block_size);
+  assert(0 < n_bench);
 }
 
-void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
+double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 {
   assert(n_rays > 0);
   PLOG_INFO << "Running OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
@@ -143,6 +148,8 @@ void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 
   auto wResults = indexToWorld(level_set, iResults);
   verify_results(wResults, reference_intersections);
+
+  return time;
 }
 
 void Benchmarker::run_all()
@@ -208,8 +215,8 @@ void Benchmarker::save_grid(std::string filename, OVBD_GridT &grid)
 void Benchmarker::run_singleSphere()
 {
   // set number of rays for the benchmark
-  ray_vals = logspace(options["p_rays_start"].as<int>(), options["p_rays_end"].as<int>(), BASE2,
-                      options["nbench"].as<int>());
+  ray_vals =
+      logspace(options["p_rays_start"].as<int>(), options["p_rays_end"].as<int>(), BASE2, n_bench);
 
   auto level_set_ovbd = generate_doubleSphere();
 
@@ -222,19 +229,31 @@ void Benchmarker::run_singleSphere()
   // mainly for debugging and checking if the grid is correctly converted
   // save_grid("nano_grid.vdb", nanovdb::nanoToOpenVDB(level_set_cpu));
 
+  // output File
+  std::string outFile_name(global_settings["proj_root"]);
+  outFile_name += global_settings["outfile_timings"];
+  std::ofstream outFile(outFile_name);
+  assert(outFile.is_open());
+
+  // .csv Header
+  outFile << "n_rays;time_ovbd;time_nvbd_cpu;time_nvbd_gpu" << std::endl;
+
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
   {
-    run_openVDB(level_set_ovbd, n_rays);
-    run_nanoVDB_CPU(level_set_cpu, n_rays);
-    run_nanoVDB_GPU(level_set_gpu, n_rays);
+    outFile << n_rays << ";";
+    outFile << run_openVDB(level_set_ovbd, n_rays) << ";";
+    outFile << run_nanoVDB_CPU(level_set_cpu, n_rays) << ";";
+    outFile << run_nanoVDB_GPU(level_set_gpu, n_rays) << std::endl;
+
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
+  outFile.close();
 }
 
 // TODO: move to separate File
-void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
-                                  size_t n_rays)
+double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
+                                    size_t n_rays)
 {
 
   nanovdb::FloatGrid *h_grid = level_set.grid<FP_Type>();
@@ -262,6 +281,8 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
 
   auto wResults = indexToWorld(*h_grid, iResults);
   verify_results(wResults, reference_intersections);
+
+  return time;
 }
 
 // verify results by comparing them to precomputed reference solutions
