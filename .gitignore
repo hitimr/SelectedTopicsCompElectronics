@@ -15,6 +15,7 @@ CMakeCache.txt
 # temp files and debug files
 ~*
 *playground*
+*.pyc
 
 
 
