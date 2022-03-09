@@ -7,18 +7,14 @@ out/
 *.cmake
 CMakeCache.txt
 
-
 # Hidden Files and Folders
 .*/
-
 
 # temp files and debug files
 ~*
 *playground*
 *.pyc
 
-
-
-
 # Excpetions
-.env
+!.vscode
+
