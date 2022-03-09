@@ -35,7 +35,10 @@ sudo apt-get install -y \
     nlohmann-json3-dev
     
 # Tools
-sudo apt install paraview
+# sudo apt install paraview
+sudo apt install python3 python3-pip
+pip3 insall pandas numpy
+
 
 # build openvdb
 git -C  openvdb pull || git clone https://github.com/AcademySoftwareFoundation/openvdb openvdb
