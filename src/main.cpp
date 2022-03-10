@@ -144,5 +144,6 @@ int main(int ac, char **av)
   Benchmarker benchmarker(options);
   benchmarker.run();
 
+  PLOG_INFO << "Benchmark finished after " << global_timer.get() << "s" << std::endl;
   return EXIT_SUCCESS;
 }
