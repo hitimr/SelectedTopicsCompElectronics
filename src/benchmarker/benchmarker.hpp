@@ -47,15 +47,8 @@ public:
   // Benchmark settings
   FP_Type voxel_size = -1.;
 
-  /*
-  Sphere radii:
-  (center)     r0       r1       r2
-     *   -------> | -----> | -----> | -> inf
-         solid    | empyt  | solid  | empty
-         // TODO: update
-  */
-  FP_Type sphere_radius_0 = -1.;
-  FP_Type sphere_radius_1 = -1.;
+  FP_Type sphere_radius_inner = -1.;
+  FP_Type sphere_radius_outer = -1.;
 
   // required because OpenVDB and NanoVDB require different Classes for Vec3
   FP_Type center_x = 0;

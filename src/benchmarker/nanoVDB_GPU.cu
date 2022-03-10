@@ -42,7 +42,7 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
   nanovdb::FloatGrid *grid_handle = level_set.grid<FP_Type>();
 
   std::vector<OVBD_Vec3T> reference_intersections =
-      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_1);
+      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_outer);
 
   // Init Grid on GPU
   level_set.deviceUpload(); // TODO: move outside so it wont be called every time
@@ -68,7 +68,7 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
   nanovdb::Coord *d_result_coords;
   cudaMalloc(&d_result_coords, bytes);
 
-  // Start Bennchmark
+  // Start Benchmark
   Timer timer;
   timer.reset();
   run_cuda<<<grid_size, block_size>>>(d_grid_handle, d_rays, d_result_times, d_result_coords,

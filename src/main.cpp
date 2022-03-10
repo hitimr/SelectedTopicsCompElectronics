@@ -48,11 +48,11 @@ OptionsT parse_options(int ac, char **av)
     "voxel size in world units")
 
     ("r0", 
-    po::value<double>()->default_value(global_settings["default_sphere_radius_0"]), 
+    po::value<double>()->default_value(global_settings["defaults"]["default_radius_inner"]), 
     "sphere radius r0")
 
     ("r1", 
-    po::value<double>()->default_value(global_settings["default_sphere_radius_1"]), 
+    po::value<double>()->default_value(global_settings["defaults"]["default_radius_outer"]), 
     "sphere radius r1")
 
     ("half_width", 
@@ -61,7 +61,7 @@ OptionsT parse_options(int ac, char **av)
 
     ("ray_offset",
     po::value<double>()->default_value(global_settings["defaults"]["ray_offset"]),
-    "If rayhs are placed directly on the inner sphere theey may immediately intersect again\n\
+    "If rays are placed directly on the inner sphere they may immediately intersect again\n\
     For now a small offset is used to prevent this.\n\
     Ideally the offset is still within the narrow band")
 
