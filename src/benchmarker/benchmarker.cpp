@@ -49,7 +49,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
     direction.normalize();
 
     // Eye
-    Vec3T eye(direction * (sphere_radius_0 + ray_offset));
+    Vec3T eye(direction * (sphere_radius_inner + ray_offset));
     grid.indexToWorld(eye);
 
     // Finaly Ray
@@ -92,8 +92,8 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
 
   // Sphere Parameters
-  sphere_radius_0 = (FP_Type)options["r0"].as<double>();
-  sphere_radius_1 = (FP_Type)options["r1"].as<double>();
+  sphere_radius_inner = (FP_Type)options["r0"].as<double>();
+  sphere_radius_outer = (FP_Type)options["r1"].as<double>();
 
   // Grid Settings
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
@@ -109,8 +109,8 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   n_bench = options["nbench"].as<int>();
 
   // Sanity checks
-  assert(0 <= sphere_radius_0);
-  assert(sphere_radius_0 < sphere_radius_1);
+  assert(0 <= sphere_radius_inner);
+  assert(sphere_radius_inner < sphere_radius_outer);
   assert(0 < voxel_size);
   assert(0 < level_set_half_width);
   assert(0 < grid_size);
@@ -130,7 +130,7 @@ double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(level_set, n_rays);
   std::vector<OVBD_Vec3T> reference_intersections =
-      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_1);
+      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_outer);
 
   // Run Benchmark
   std::vector<OVBD_Vec3T> iResults(n_rays);
@@ -157,7 +157,7 @@ void Benchmarker::run_all()
   run_singleSphere(); // TODO: rename
 }
 
-// convenience funtion
+// convenience function
 Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius)
 {
   return *tools::createLevelSetSphere<OVBD_GridT>(
@@ -170,8 +170,8 @@ Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius)
 
 Benchmarker::OVBD_GridT Benchmarker::generate_doubleSphere()
 {
-  OVBD_GridT grid = generate_sphere(sphere_radius_1);
-  OVBD_GridT sphere_0 = generate_sphere(sphere_radius_0);
+  OVBD_GridT grid = generate_sphere(sphere_radius_outer);
+  OVBD_GridT sphere_0 = generate_sphere(sphere_radius_inner);
 
   // use geometric difference to generate a sphere with an empty core
   openvdb::tools::csgDifference(grid, sphere_0);
@@ -260,7 +260,7 @@ double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &le
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_GridT, NVDB_RayT>(*h_grid, n_rays);
   std::vector<OVBD_Vec3T> reference_intersections =
-      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_1);
+      calculate_reference_solution<OVBD_Vec3T>(n_rays, sphere_radius_outer);
 
   auto acc = h_grid->tree().getAccessor();
   std::vector<NVBD_CoordT> iResults(n_rays);

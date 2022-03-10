@@ -6,9 +6,9 @@
   "out_dir": "out/",
   "grid_file_name": "grid.vdb",
   "outfile_timings": "out/results.csv",
-  "default_sphere_radius_0": 5,
-  "default_sphere_radius_1": 15,
-  "defaults" : {
+  "defaults": {
+    "default_radius_inner": 5,
+    "default_radius_outer": 15,
     "voxel_size": 0.1,
     "ray_offset": 0.2,
     "half_width": 2,

@@ -83,6 +83,11 @@
     "cSpell.words": [
         "basicstyle",
         "keywordstyle",
-        "stringstyle"
+        "nbench",
+        "openvdb",
+        "outfile",
+        "raytracing",
+        "stringstyle",
+        "voxel"
     ],
 }
