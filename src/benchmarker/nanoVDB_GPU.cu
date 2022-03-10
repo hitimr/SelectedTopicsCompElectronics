@@ -1,12 +1,6 @@
 #include "benchmarker.hpp"
-
 #include <nanovdb/util/Ray.h>
-
 #include <vector>
-
-// TODO: switch to common definition of
-using FP_Type = float;
-using RayT = nanovdb::Ray<FP_Type>;
 
 __global__ void kernel_raytracing(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
                                   Benchmarker::NVDB_RayT *rays, FP_Type *time_results,
@@ -29,7 +23,6 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
                                     size_t n_rays)
 {
   size_t bytes = 0;
-
   nanovdb::FloatGrid *grid_handle = level_set.grid<FP_Type>();
 
   std::vector<OVBD_Vec3T> reference_intersections =
@@ -42,10 +35,10 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
     throw std::runtime_error("GridHandle does not contain a valid device grid");
 
   // Init rays on GPU
-  bytes = sizeof(RayT) * n_rays;
+  bytes = sizeof(NVDB_RayT) * n_rays;
   std::vector<NVDB_RayT> rays =
       generate_rays<NVDB_GridT, NVDB_RayT>(*grid_handle, n_rays); // TODO: change to levelset
-  RayT *d_rays;
+  NVDB_RayT *d_rays;
   cudaMalloc(&d_rays, bytes);
   cudaMemcpy(d_rays, rays.data(), bytes, cudaMemcpyHostToDevice);
 
@@ -67,9 +60,6 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
   cudaDeviceSynchronize();
   double time = timer.get();
 
-  PLOG_INFO << "NanoVDB on GPU Finished in " << time << "s (" << (double)n_rays / (1e6 * time)
-            << " MRays/s)" << std::endl;
-
   // Transfer results back to CPU
   cudaMemcpy(result_times.data(), d_result_times, sizeof(result_times[0]) * n_rays,
              cudaMemcpyDeviceToHost);
@@ -80,9 +70,12 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
   auto wResults = indexToWorld(*grid_handle, result_coords);
   verify_results(wResults, reference_intersections);
 
+  // free up GPU Allocations
   cudaFree(d_rays);
   cudaFree(d_result_coords);
   cudaFree(d_result_times);
 
+  PLOG_INFO << "NanoVDB on GPU Finished in " << time << "s (" << (double)n_rays / (1e6 * time)
+            << " MRays/s)" << std::endl;
   return time;
 }
