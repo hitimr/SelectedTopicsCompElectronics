@@ -152,11 +152,6 @@ double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
   return time;
 }
 
-void Benchmarker::run_all()
-{
-  run_singleSphere(); // TODO: rename
-}
-
 // convenience function
 Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius)
 {
@@ -212,7 +207,7 @@ void Benchmarker::save_grid(std::string filename, OVBD_GridT &grid)
   // vdb_file.close();
 }
 
-void Benchmarker::run_singleSphere()
+void Benchmarker::run()
 {
   // set number of rays for the benchmark
   ray_vals =

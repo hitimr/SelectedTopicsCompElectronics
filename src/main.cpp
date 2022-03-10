@@ -142,7 +142,7 @@ int main(int ac, char **av)
   openvdb::initialize();
 
   Benchmarker benchmarker(options);
-  benchmarker.run_all();
+  benchmarker.run();
 
   return EXIT_SUCCESS;
 }
