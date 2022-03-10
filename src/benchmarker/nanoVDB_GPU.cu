@@ -7,13 +7,11 @@
 // TODO: switch to common definition of
 using FP_Type = float;
 using RayT = nanovdb::Ray<FP_Type>;
-using Vec3T = nanovdb::Vec3<FP_Type>;
 
-// TODO: rename fucntion
-__global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set, RayT *rays,
-                         FP_Type *time_results, nanovdb::Coord *result_coords, size_t n_rays)
+__global__ void kernel_raytracing(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
+                                  Benchmarker::NVDB_RayT *rays, FP_Type *time_results,
+                                  nanovdb::Coord *result_coords, size_t n_rays)
 {
-
   unsigned int n_threads = blockDim.x * gridDim.x;
   unsigned int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -28,16 +26,9 @@ __global__ void run_cuda(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
 }
 
 double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &level_set,
-                                  size_t n_rays)
+                                    size_t n_rays)
 {
-  using FP_Type = float;
-  using RayT = nanovdb::Ray<FP_Type>;
-  using Vec3T = nanovdb::Vec3<FP_Type>;
-
-
   size_t bytes = 0;
-
-  assert(n_rays > 0);
 
   nanovdb::FloatGrid *grid_handle = level_set.grid<FP_Type>();
 
@@ -57,9 +48,9 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
   RayT *d_rays;
   cudaMalloc(&d_rays, bytes);
   cudaMemcpy(d_rays, rays.data(), bytes, cudaMemcpyHostToDevice);
-  
+
   // Allocate Results on GPU
-  bytes = sizeof(Vec3T) * n_rays;
+  bytes = sizeof(OVBD_Vec3T) * n_rays;
   std::vector<FP_Type> result_times(n_rays);
   FP_Type *d_result_times;
   cudaMalloc(&d_result_times, bytes);
@@ -71,8 +62,8 @@ double Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffe
   // Start Benchmark
   Timer timer;
   timer.reset();
-  run_cuda<<<grid_size, block_size>>>(d_grid_handle, d_rays, d_result_times, d_result_coords,
-                                      n_rays);
+  kernel_raytracing<<<grid_size, block_size>>>(d_grid_handle, d_rays, d_result_times,
+                                               d_result_coords, n_rays);
   cudaDeviceSynchronize();
   double time = timer.get();
 
