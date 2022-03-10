@@ -241,6 +241,7 @@ void Benchmarker::run_singleSphere()
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
   {
+    assert(n_rays > 0);
     outFile << n_rays << ";";
     outFile << run_openVDB(level_set_ovbd, n_rays) << ";";
     outFile << run_nanoVDB_CPU(level_set_cpu, n_rays) << ";";

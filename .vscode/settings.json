@@ -84,6 +84,7 @@
         "basicstyle",
         "keywordstyle",
         "nbench",
+        "NVDB",
         "openvdb",
         "outfile",
         "raytracing",
