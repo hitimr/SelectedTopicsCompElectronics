@@ -69,8 +69,7 @@ public:
 
 
   // Methods
-  void run_all();
-  void run_singleSphere();
+  void run();
   OVBD_GridT generate_sphere(FP_Type radius);
   OVBD_GridT generate_doubleSphere();
   double run_openVDB(OVBD_GridT &level_set, size_t nrays);
