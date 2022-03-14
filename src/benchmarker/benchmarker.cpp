@@ -37,7 +37,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
 
   std::vector<RayT> rays(n_rays);
   std::vector<FP_Type> alpha_vals;
-  size_t sqrt_n_rays = 0;
+  size_t sqrt_n_rays = sqrt(n_rays);
   FP_Type theta, phi;
 
   switch (ray_dim)
@@ -84,7 +84,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
         grid.indexToWorld(eye);
 
         // Final Ray
-        rays[i] = RayT(grid.worldToIndex(eye), direction);
+        rays[i*sqrt_n_rays + j] = RayT(grid.worldToIndex(eye), direction);
       }
     }
     break;
