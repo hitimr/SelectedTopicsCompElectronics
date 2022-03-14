@@ -78,6 +78,10 @@ OptionsT parse_options(int ac, char **av)
     po::value<int>()->default_value(global_settings["defaults"]["n_bench"]), 
     "number of benchmarks to perform. Ray counts are logarithmically spaced between 2^p0 and 2^p1")
 
+    ("omp_n_threads",     
+    po::value<int>()->default_value(global_settings["defaults"]["omp_n_threads"]), 
+    "Number of threads used for OpenVDB and NanoVDB on CPU")
+
     // GPU Settings
     ("grid_size",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_grid_size"]), 
@@ -104,6 +108,7 @@ OptionsT parse_options(int ac, char **av)
 
   // check sanity of arguments
   assert(vm["p_rays_start"].as<int>() < vm["p_rays_end"].as<int>());
+  assert(vm["omp_n_threads"].as<int>() > 0);
 
   return vm;
 }
