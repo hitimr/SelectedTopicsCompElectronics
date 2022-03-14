@@ -85,7 +85,11 @@ OptionsT parse_options(int ac, char **av)
 
     ("block_size",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_block_size"]), 
-    "number of threads used per block");
+    "number of threads used per block")
+
+    ("ray_dim,d",     
+    po::value<int>()->default_value(global_settings["defaults"]["ray_distribution_dimensions"]), 
+    "[2, 3] number of dimensions used for distribution (circular or spherical)");
 
   // clang-format on
   po::variables_map vm;

@@ -37,6 +37,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
   using RealT = typename Vec3T::ValueType;
 
   std::vector<RealT> alpha_vals = linspace<RealT>(0.0, 2.0 * M_PI, n_rays);
+  
   std::vector<RayT> rays(n_rays);
 
   for (size_t i = 0; i < n_rays; i++)
@@ -94,6 +95,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   // Sphere Parameters
   sphere_radius_inner = (FP_Type)options["r0"].as<double>();
   sphere_radius_outer = (FP_Type)options["r1"].as<double>();
+  ray_dim = (int) options["ray_dim"].as<int>();
 
   // Grid Settings
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
@@ -116,6 +118,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   assert(0 < grid_size);
   assert(0 < block_size);
   assert(0 < n_bench);
+  assert((ray_dim == 2) || (ray_dim == 3));
 }
 
 double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
