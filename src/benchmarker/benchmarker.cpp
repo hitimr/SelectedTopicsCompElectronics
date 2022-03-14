@@ -84,7 +84,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
         grid.indexToWorld(eye);
 
         // Final Ray
-        rays[i*sqrt_n_rays + j] = RayT(grid.worldToIndex(eye), direction);
+        rays[i * sqrt_n_rays + j] = RayT(grid.worldToIndex(eye), direction);
       }
     }
     break;
@@ -116,11 +116,40 @@ std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_T
 {
   std::vector<Vec3T> reference_solution(n_rays);
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
+  size_t sqrt_n_rays = sqrt(n_rays);
+  FP_Type theta, phi;
 
-  for (size_t i = 0; i < n_rays; i++)
+  switch (ray_dim)
   {
-    Vec3T solution(radius * std::cos(alpha_vals[i]), radius * std::sin(alpha_vals[i]), 0);
-    reference_solution[i] = solution;
+  case DIM2:
+    for (size_t i = 0; i < n_rays; i++)
+    {
+      Vec3T solution(radius * std::cos(alpha_vals[i]), radius * std::sin(alpha_vals[i]), 0);
+      reference_solution[i] = solution;
+    }
+    break;
+
+  case DIM3:
+    assert(floor(sqrt(n_rays)) == sqrt(n_rays));
+    alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, sqrt_n_rays);
+
+    for (size_t i = 0; i < sqrt_n_rays; i++)
+    {
+      for (size_t j = 0; j < sqrt_n_rays; j++)
+      {
+        theta = alpha_vals[i];
+        phi = alpha_vals[j];
+
+        Vec3T solution(radius * std::sin(theta) * std::cos(phi),
+                       radius * std::sin(theta) * std::sin(phi), radius * std::cos(theta));
+
+        reference_solution[i * sqrt_n_rays + j] = solution;
+      }
+    }
+    break;
+
+  default:
+    throw RuntimeError("Only 2D or 3D available");
   }
   return reference_solution;
 }
