@@ -11,6 +11,8 @@ using FP_Type = float;
 #define BASE2 2
 #define BASE10 10
 #define PROJ_ROOT_FOLDER_NAME "SelectedTopicsCompElectronics"
+#define DIM3 3
+#define DIM2 2
 
 // Exit Codes
 #define EXIT_SUCCESS 0

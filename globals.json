@@ -17,6 +17,6 @@
     "n_bench": 16,
     "gpu_grid_size": 256,
     "gpu_block_size": 256,
-    "ray_distribution_dimensions": 2
+    "ray_distribution_dimensions": 3
   }
 }

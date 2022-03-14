@@ -34,27 +34,63 @@ template <class GridT, class RayT>
 std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
 {
   using Vec3T = typename RayT::Vec3T;
-  using RealT = typename Vec3T::ValueType;
 
-  std::vector<RealT> alpha_vals = linspace<RealT>(0.0, 2.0 * M_PI, n_rays);
-  
   std::vector<RayT> rays(n_rays);
+  std::vector<FP_Type> alpha_vals;
+  size_t sqrt_n_rays = 0;
+  FP_Type theta, phi;
 
-  for (size_t i = 0; i < n_rays; i++)
+  switch (ray_dim)
   {
-    // normalized direction
-    Vec3T direction(std::cos(alpha_vals[i]), // x = Cos(α)
-                    std::sin(alpha_vals[i]), // y = Sin(α)
-                    0                        // z = 0
-    );
-    direction.normalize();
+  case DIM2:
+    // Generate rays in circular arrangement on x-y-Plane
+    alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
+    for (size_t i = 0; i < n_rays; i++)
+    {
+      // normalized direction
+      Vec3T direction(std::cos(alpha_vals[i]), // x = Cos(α)
+                      std::sin(alpha_vals[i]), // y = Sin(α)
+                      0                        // z = 0
+      );
+      direction.normalize();
 
-    // Eye
-    Vec3T eye(direction * (sphere_radius_inner + ray_offset));
-    grid.indexToWorld(eye);
+      // Eye
+      Vec3T eye(direction * (sphere_radius_inner + ray_offset));
+      grid.indexToWorld(eye);
 
-    // Finaly Ray
-    rays[i] = RayT(grid.worldToIndex(eye), direction);
+      // Final Ray
+      rays[i] = RayT(grid.worldToIndex(eye), direction);
+    }
+    break;
+
+  case DIM3:
+    assert(floor(sqrt(n_rays)) == sqrt(n_rays));
+    alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, sqrt_n_rays);
+
+    for (size_t i = 0; i < sqrt_n_rays; i++)
+    {
+      for (size_t j = 0; j < sqrt_n_rays; j++)
+      {
+        theta = alpha_vals[i];
+        phi = alpha_vals[j];
+
+        // normalized direction
+        Vec3T direction(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi),
+                        std::cos(theta));
+        direction.normalize();
+
+        // Eye
+        Vec3T eye(direction * (sphere_radius_inner + ray_offset));
+        grid.indexToWorld(eye);
+
+        // Final Ray
+        rays[i] = RayT(grid.worldToIndex(eye), direction);
+      }
+    }
+    break;
+
+  default:
+    throw RuntimeError("Only 2D or 3D available");
   }
 
   return rays;
@@ -91,11 +127,10 @@ std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_T
 
 Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 {
-
   // Sphere Parameters
   sphere_radius_inner = (FP_Type)options["r0"].as<double>();
   sphere_radius_outer = (FP_Type)options["r1"].as<double>();
-  ray_dim = (int) options["ray_dim"].as<int>();
+  ray_dim = (int)options["ray_dim"].as<int>();
 
   // Grid Settings
   voxel_size = (FP_Type)options["voxel_size"].as<double>();
@@ -118,7 +153,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   assert(0 < grid_size);
   assert(0 < block_size);
   assert(0 < n_bench);
-  assert((ray_dim == 2) || (ray_dim == 3));
+  assert((ray_dim == DIM2) || (ray_dim == DIM3));
 }
 
 double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
@@ -238,7 +273,15 @@ void Benchmarker::run()
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
   {
+    if (ray_dim == DIM3)
+    {
+      // change n_rays to next perfect square
+      size_t sqrt_n_rays = (size_t)sqrt((FP_Type)n_rays);
+      n_rays = sqrt_n_rays * sqrt_n_rays;
+    }
+
     assert(n_rays > 0);
+
     outFile << n_rays << ";";
     outFile << run_openVDB(level_set_ovbd, n_rays) << ";";
     outFile << run_nanoVDB_CPU(level_set_cpu, n_rays) << ";";
