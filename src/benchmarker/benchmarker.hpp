@@ -49,6 +49,7 @@ public:
 
   FP_Type sphere_radius_inner = -1.;
   FP_Type sphere_radius_outer = -1.;
+  int ray_dim = -1;
 
   // required because OpenVDB and NanoVDB require different Classes for Vec3
   FP_Type center_x = 0;
