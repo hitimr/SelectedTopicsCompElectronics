@@ -8,6 +8,7 @@
 
 // Boost
 #include <boost/program_options.hpp>
+#include <omp.h>
 
 // Custom
 #include "benchmarker/benchmarker.hpp"
@@ -149,6 +150,10 @@ int main(int ac, char **av)
 
   // Init OpenVBD
   openvdb::initialize();
+
+  int n_threads = options["omp_n_threads"].as<int>();
+  omp_set_num_threads(n_threads);
+
 
   Benchmarker benchmarker(options);
   benchmarker.run();
