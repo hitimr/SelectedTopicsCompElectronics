@@ -137,7 +137,6 @@ double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 
   Timer timer;
   timer.reset();
-  // TODO: make multiple repeats with custom wrapper function
   for (size_t i = 0; i < n_rays; i++)
   {
     ray_intersector.intersectsIS(rays[i], iResults[i]);
@@ -247,7 +246,6 @@ void Benchmarker::run()
   outFile.close();
 }
 
-// TODO: move to separate File
 double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
                                     size_t n_rays)
 {
