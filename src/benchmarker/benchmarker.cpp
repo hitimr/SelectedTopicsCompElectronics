@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <omp.h>
 #include <vector>
 
 using namespace openvdb;
@@ -191,9 +192,12 @@ double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
   PLOG_INFO << "Running OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
 
   // Ray Intersector: Triple nested types. nice...
-  tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
-                                OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL, OVBD_RayT>
-      ray_intersector(level_set);
+  using IntersectorT =
+      tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
+                                    OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL,
+                                    OVBD_RayT>;
+
+  IntersectorT ray_intersector(level_set);
 
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(level_set, n_rays);
   std::vector<OVBD_Vec3T> reference_intersections =
@@ -204,6 +208,7 @@ double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 
   Timer timer;
   timer.reset();
+#pragma omp parallel for firstprivate(ray_intersector)
   for (size_t i = 0; i < n_rays; i++)
   {
     ray_intersector.intersectsIS(rays[i], iResults[i]);
@@ -279,12 +284,12 @@ void Benchmarker::run()
   ray_vals =
       logspace(options["p_rays_start"].as<int>(), options["p_rays_end"].as<int>(), BASE2, n_bench);
 
-  auto level_set_ovbd = generate_doubleSphere();
+  auto grid = generate_doubleSphere();
 
   // Convert to nanoVDBV
   // Note: it is possible to create Level sets directly in NanoVDB as well bus this is slower
-  auto level_set_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(level_set_ovbd);
-  auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(level_set_ovbd);
+  auto level_set_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(grid);
+  auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(grid);
 
   // convert grid back to open_vdb and save it.
   // mainly for debugging and checking if the grid is correctly converted
@@ -297,7 +302,7 @@ void Benchmarker::run()
   assert(outFile.is_open());
 
   // .csv Header
-  outFile << "n_rays;time_ovdb;time_nvdb_cpu;time_nvdb_gpu" << std::endl;
+  outFile << "n_rays;time_ovdb;time_nvdb_cpu;time_nvdb_gpu;omp_n_threads" << std::endl;
 
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
@@ -312,9 +317,10 @@ void Benchmarker::run()
     assert(n_rays > 0);
 
     outFile << n_rays << ";";
-    outFile << run_openVDB(level_set_ovbd, n_rays) << ";";
+    outFile << run_openVDB(grid, n_rays) << ";";
     outFile << run_nanoVDB_CPU(level_set_cpu, n_rays) << ";";
-    outFile << run_nanoVDB_GPU(level_set_gpu, n_rays) << std::endl;
+    outFile << run_nanoVDB_GPU(level_set_gpu, n_rays) << ";";
+    outFile << omp_get_num_threads() << std::endl;
 
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
