@@ -30,8 +30,11 @@ def run_benchmark(args="", print_output=True, verbose=True):
     else:
         subprocess.run(cmd.split(sep=" "), check=True,
                        stdout=subprocess.DEVNULL)
-    return pd.read_csv(output_file, sep=";")
+    return load_df(output_file)
 
-
+def load_df(file_name):
+    df = pd.read_csv(file_name, sep=";")
+    df = df.set_index(["n_rays","kernel"])
+    return df
 
 globals = load_globals()
