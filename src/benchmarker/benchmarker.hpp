@@ -88,8 +88,8 @@ public:
   OVBD_GridT generate_sphere(FP_Type radius);
   OVBD_GridT generate_doubleSphere();
   void run_openVDB(OVBD_GridT &level_set, size_t nrays);
-  double run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
-  double run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle,
+  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
+  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle,
                          size_t n_rays);
   void save_grid(std::string fileName, OVBD_GridT &grid);
 
