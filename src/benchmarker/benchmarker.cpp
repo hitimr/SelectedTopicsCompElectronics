@@ -345,6 +345,7 @@ double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &le
 
   // Run Benchmark
   timer.reset();
+#pragma omp parallel for firstprivate(acc, v, t0)
   for (size_t i = 0; i < n_rays; i++)
   {
     nanovdb::ZeroCrossing(rays[i], acc, iResults[i], v, t0);
