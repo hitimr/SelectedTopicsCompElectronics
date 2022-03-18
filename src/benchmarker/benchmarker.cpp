@@ -318,7 +318,7 @@ void Benchmarker::run()
   result_file.close();
 }
 
-double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
+void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
                                     size_t n_rays)
 {
 
@@ -330,8 +330,8 @@ double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &le
 
   auto acc = h_grid->tree().getAccessor();
   std::vector<NVBD_CoordT> iResults(n_rays);
-  FP_Type t0;
-  FP_Type v;
+  FP_Type t0 = 0.;
+  FP_Type v = 0.;
   Timer timer;
 
   // Run Benchmark
@@ -348,8 +348,7 @@ double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &le
 
   auto wResults = indexToWorld(*h_grid, iResults);
   verify_results(wResults, reference_intersections);
-
-  return time;
+  write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_thread_num());
 }
 
 // verify results by comparing them to precomputed reference solutions
