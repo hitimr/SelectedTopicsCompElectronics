@@ -123,8 +123,6 @@ json parse_globals()
   json j;
   infile >> j;
 
-  j["proj_root"] = proj_root;
-  j["out_dir"] = proj_root + std::string(j["out_dir"]); // Update with absolute path
 
   return j;
 }
@@ -136,8 +134,8 @@ int main(int ac, char **av)
 
   // Create output folder if it does not exists yet
   int exit_status = -1;
-  std::string outdir = global_settings["out_dir"];
-  execCommand("mkdir -p " + outdir, exit_status);
+  std::string outdir = global_settings["paths"]["out_dir"];
+  execCommand("mkdir -p " + abs_path(outdir), exit_status);
   assert(exit_status == EXIT_SUCCESS);
 
   // Parse CLI options

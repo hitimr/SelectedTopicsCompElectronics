@@ -42,6 +42,11 @@ std::string get_proj_root_dir()
 }
 
 
+std::string abs_path(std::string rel_path)
+{
+  return get_proj_root_dir() + rel_path;
+}
+
 /**
  * @brief execute a shell command
  * taken from https://dev.to/aggsol/calling-shell-commands-from-c-8ej
