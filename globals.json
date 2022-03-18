@@ -1,11 +1,10 @@
 {
   "paths": {
     "executable": "build/src/raytracing",
-    "outfile_timings": "out/results.csv"
+    "outfile_timings": "out/results.csv",
+    "out_dir": "out/"
   },
-  "out_dir": "out/",
   "grid_file_name": "grid.vdb",
-  "outfile_timings": "out/results.csv",
   "defaults": {
     "default_radius_inner": 5,
     "default_radius_outer": 15,
