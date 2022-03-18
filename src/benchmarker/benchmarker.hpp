@@ -73,14 +73,15 @@ public:
   void init_result_file(std::ofstream &out)
   {
     assert(result_file.is_open());
-    out << "kernel;n_rays;time;n_blocks;n_threads" << std::endl;
+    out << "kernel;n_rays;time;MRps;n_blocks;n_threads" << std::endl;
   }
 
   void write_results(std::ofstream &out, std::string &&kernel, int n_rays, double time,
                      int n_blocks, int n_threads)
   {
     assert(result_file.is_open());
-    out << kernel << ";" << n_rays << ";" << time << ";" << n_blocks << ";" << n_threads
+    double mrps = (double)n_rays * 1e-6 / time;
+    out << kernel << ";" << n_rays << ";" << time << ";" << mrps << n_blocks << ";" << n_threads
         << std::endl;
   }
 
@@ -89,8 +90,7 @@ public:
   OVBD_GridT generate_doubleSphere();
   void run_openVDB(OVBD_GridT &level_set, size_t nrays);
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
-  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle,
-                         size_t n_rays);
+  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
   void save_grid(std::string fileName, OVBD_GridT &grid);
 
   template <class GridT, class RayT> std::vector<RayT> generate_rays(GridT &grid, size_t n_rays);
