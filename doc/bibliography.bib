@@ -43,3 +43,21 @@ series = {SIGGRAPH '21}
   url = {https://developer.nvidia.com/blog/accelerating-openvdb-on-gpus-with-nanovdb/},
   urldate = {2022-03-19}
 }
+
+
+@inproceedings{rendering_turner,
+author = {Whitted, Turner},
+title = {An Improved Illumination Model for Shaded Display},
+year = {2005},
+isbn = {9781450378338},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1198555.1198743},
+doi = {10.1145/1198555.1198743},
+abstract = {To accurately render a two-dimensional image of a three-dimensional scene, global illumination information that affects the intensity of each pixel of the image must be known at the time the intensity is calculated. In a simplified form, this information is stored in a tree of "rays" extending from the viewer to the first surface encountered and from there to other surfaces and to the light sources. A visible surface algorithm creates this tree for each pixel of the display and passes it to the shader. The shader then traverses the tree to determine the intensity of the light received by the viewer. Consideration of all of these factors allows the shader to accurately simulate true reflection, shadows, and refraction, as well as the effects simulated by conventional shaders. Anti-aliasing is included as an integral part of the visibility calculations. Surfaces displayed include curved as well as polygonal surfaces.},
+booktitle = {ACM SIGGRAPH 2005 Courses},
+pages = {4–es},
+keywords = {computer graphics, computer animation, shading, visible surface algorithms, raster displays},
+location = {Los Angeles, California},
+series = {SIGGRAPH '05}
+}
