@@ -160,7 +160,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   ray_dim = (int)options["ray_dim"].as<int>();
 
   // Grid Settings
-  voxel_size = (FP_Type)options["half_width"].as<double>();
+  voxel_size = (FP_Type)options["voxel_size"].as<double>();
   level_set_half_width = (FP_Type)options["half_width"].as<double>();
   eps = voxel_size * math::Sqrt(3.);
   ray_offset = (FP_Type)options["ray_offset"].as<double>();
@@ -242,8 +242,8 @@ Benchmarker::OVBD_GridT Benchmarker::generate_doubleSphere()
   grid.setGridClass(openvdb::GRID_LEVEL_SET);
   grid.setName("LevelSetSphere");
 
-  std::string file_name = abs_path(global_settings["grid_file_name"]);
-  save_grid(abs_path(file_name), grid);
+  std::string file_name = abs_path(global_settings["paths"]["grid_output_file"]);
+  save_grid(file_name, grid);
 
   return grid;
 }
@@ -252,11 +252,11 @@ void Benchmarker::save_grid(std::string filename, OVBD_GridT &grid)
 {
   // save to file (see:
   // https://academysoftwarefoundation.github.io/openvdb/codeExamples.html#sHelloWorld)
-  // openvdb::io::File vdb_file(outfile);
-  // std::vector<OVBD_GridT&> grids;
-  // grids.push_back(grid);
-  // vdb_file.write(grids);
-  // vdb_file.close();
+  openvdb::io::File file(filename);
+  openvdb::GridPtrVec grids;
+  grids.push_back(std::make_shared<OVBD_GridT>(grid));
+  file.write(grids);
+  file.close();
 }
 
 void Benchmarker::run()
@@ -268,13 +268,10 @@ void Benchmarker::run()
   auto grid = generate_doubleSphere();
 
   // Convert to nanoVDBV
-  // Note: it is possible to create Level sets directly in NanoVDB as well bus this is slower
+  // Note: it is possible to create Level sets directly in NanoVDB as well bus it's significantly
+  // slower
   auto level_set_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(grid);
   auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(grid);
-
-  // convert grid back to open_vdb and save it.
-  // mainly for debugging and checking if the grid is correctly converted
-  // save_grid("nano_grid.vdb", nanovdb::nanoToOpenVDB(level_set_cpu));
 
   // output Files
   result_file.open(abs_path(global_settings["paths"]["outfile_timings"]));

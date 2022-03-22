@@ -45,7 +45,6 @@ public:
   const OptionsT &options;
   std::ofstream result_file;
 
-
   int ray_dim = -1;
   FP_Type voxel_size = -1;
 
@@ -79,8 +78,8 @@ public:
     assert(result_file.is_open());
     double rps = (double)n_rays / time;
     double rps_eur = rps / price;
-    out << kernel << ";" << n_rays << ";" << time << ";" << rps * 1e-6 << ";" << rps_eur * 1e-3 << ";"
-        << n_blocks << ";" << n_threads << std::endl;
+    out << kernel << ";" << n_rays << ";" << time << ";" << rps * 1e-6 << ";" << rps_eur * 1e-3
+        << ";" << n_blocks << ";" << n_threads << std::endl;
   }
 
   void run();
