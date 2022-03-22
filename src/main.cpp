@@ -7,6 +7,7 @@
 #include <openvdb/tools/RayTracer.h> // for Film
 
 // Boost
+#include <boost/assert.hpp>
 #include <boost/program_options.hpp>
 #include <omp.h>
 
@@ -17,7 +18,6 @@
 #include "util/timer.hpp"
 
 // Standard Library
-#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <time.h>
@@ -30,6 +30,27 @@ using OptionsT = boost::program_options::variables_map;
 
 Timer global_timer;
 json global_settings;
+
+void verify_cli_options(OptionsT const &options)
+{
+  BOOST_ASSERT_MSG(0 < options["r0"].as<double>(), "Sphere radius must be > 0");
+  BOOST_ASSERT_MSG(options["r0"].as<double>() < options["r1"].as<double>(),
+                   "Inner radius (r0) must be smaller than Outer radius (r1)");
+  BOOST_ASSERT_MSG(options["p_rays_start"].as<int>() < options["p_rays_end"].as<int>(),
+                   "Inner radius (r0) must be smaller than Outer radius (r1)");
+
+  BOOST_ASSERT(0 < options["voxel_size"].as<double>());
+  BOOST_ASSERT(0 < options["half_width"].as<double>());
+  BOOST_ASSERT(0 < options["grid_size"].as<int>());
+  BOOST_ASSERT(0 < options["block_size"].as<int>());
+  BOOST_ASSERT(0 < options["n_bench"].as<int>());
+  BOOST_ASSERT(0 < options["p_rays_start"].as<int>());
+  BOOST_ASSERT(0 < options["p_rays_end"].as<int>());
+  BOOST_ASSERT(0 < options["n_bench"].as<int>());
+
+  int ray_dim = options["ray_dim"].as<int>();
+  BOOST_ASSERT_MSG((ray_dim == DIM2) || (ray_dim == DIM3), "Only 2D or 3D possible");
+}
 
 OptionsT parse_options(int ac, char **av)
 {
@@ -83,7 +104,7 @@ OptionsT parse_options(int ac, char **av)
     po::value<int>()->default_value(global_settings["defaults"]["p_rays_end"]), 
     "2s complement of the maximum number of rays for the benchmark")
 
-    ("nbench,nb",     
+    ("n_bench,nb",     
     po::value<int>()->default_value(global_settings["defaults"]["n_bench"]), 
     "number of benchmarks to perform. Ray counts are logarithmically spaced between 2^p0 and 2^p1")
 
@@ -119,6 +140,8 @@ OptionsT parse_options(int ac, char **av)
   assert(vm["p_rays_start"].as<int>() < vm["p_rays_end"].as<int>());
   assert(vm["omp_n_threads"].as<int>() > 0);
 
+  verify_cli_options(vm);
+
   return vm;
 }
 
@@ -130,7 +153,6 @@ json parse_globals()
   std::ifstream infile(proj_root + "globals.json");
   json j;
   infile >> j;
-
 
   return j;
 }
@@ -159,7 +181,6 @@ int main(int ac, char **av)
 
   int n_threads = options["omp_n_threads"].as<int>();
   omp_set_num_threads(n_threads);
-
 
   Benchmarker benchmarker(options);
   benchmarker.run();
