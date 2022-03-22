@@ -42,7 +42,15 @@ OptionsT parse_options(int ac, char **av)
     // General
     ("help,h", "produce help message")
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
-    
+
+    ("gpu_price", 
+    po::value<double>()->default_value(global_settings["defaults"]["gpu_price"]), 
+    "Price of GPU in EUR")
+
+    ("cpu_price", 
+    po::value<double>()->default_value(global_settings["defaults"]["gpu_price"]), 
+    "Price of CPU in EUR")
+
     // Grid Settings
     ("voxel_size", 
     po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), 
@@ -123,8 +131,6 @@ json parse_globals()
   json j;
   infile >> j;
 
-  j["proj_root"] = proj_root;
-  j["out_dir"] = proj_root + std::string(j["out_dir"]); // Update with absolute path
 
   return j;
 }
@@ -136,8 +142,8 @@ int main(int ac, char **av)
 
   // Create output folder if it does not exists yet
   int exit_status = -1;
-  std::string outdir = global_settings["out_dir"];
-  execCommand("mkdir -p " + outdir, exit_status);
+  std::string outdir = global_settings["paths"]["out_dir"];
+  execCommand("mkdir -p " + abs_path(outdir), exit_status);
   assert(exit_status == EXIT_SUCCESS);
 
   // Parse CLI options

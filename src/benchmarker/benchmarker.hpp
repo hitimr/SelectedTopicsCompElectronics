@@ -43,6 +43,7 @@ public:
   ~Benchmarker(){};
 
   const OptionsT &options;
+  std::ofstream result_file;
 
   // Benchmark settings
   FP_Type voxel_size = -1.;
@@ -68,14 +69,29 @@ public:
   // Benchmark Settings
   int n_bench = -1;
 
-
   // Methods
+  void init_result_file(std::ofstream &out)
+  {
+    assert(result_file.is_open());
+    out << "kernel;n_rays;time;MRps;kRps/Eur;n_blocks;n_threads" << std::endl;
+  }
+
+  void write_results(std::ofstream &out, std::string &&kernel, int n_rays, double time,
+                     int n_blocks, int n_threads, double price)
+  {
+    assert(result_file.is_open());
+    double rps = (double)n_rays / time;
+    double rps_eur = rps / price;
+    out << kernel << ";" << n_rays << ";" << time << ";" << rps * 1e-6 << ";" << rps_eur * 1e-3 << ";"
+        << n_blocks << ";" << n_threads << std::endl;
+  }
+
   void run();
   OVBD_GridT generate_sphere(FP_Type radius);
   OVBD_GridT generate_doubleSphere();
-  double run_openVDB(OVBD_GridT &level_set, size_t nrays);
-  double run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
-  double run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
+  void run_openVDB(OVBD_GridT &level_set, size_t nrays);
+  void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
+  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
   void save_grid(std::string fileName, OVBD_GridT &grid);
 
   template <class GridT, class RayT> std::vector<RayT> generate_rays(GridT &grid, size_t n_rays);
