@@ -97,7 +97,6 @@ template <typename T> std::vector<T> linspace(T start, T end, size_t count)
   return ret_vals;
 }
 
-// TODO: this function is probably buggy -> fix asap
 template<typename T = int>
 std::vector<T> logspace(double start, double end, double base, size_t sample_cnt)
 {
