@@ -1,0 +1,63 @@
+@inproceedings{openvdb,
+author = {Museth, Ken and Lait, Jeff and Johanson, John and Budsberg, Jeff and Henderson, Ron and Alden, Mihai and Cucka, Peter and Hill, David and Pearce, Andrew},
+title = {OpenVDB: An Open-Source Data Structure and Toolkit for High-Resolution Volumes},
+year = {2013},
+isbn = {9781450323390},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2504435.2504454},
+doi = {10.1145/2504435.2504454},
+abstract = {OpenVDB has already been integrated into the next major release of the high-end 3D animation package Houdini, and there is anecdotal evidence that many of the major VFX and production houses are in the process of either evaluating or adopting VDB. This course presents a comprehensive overview of OpenVDB, an open-source C++ library comprising a novel hierarchical data structure and a suite of tools for efficient storage and manipulation of sparse volumetric data discretized on three-dimensional grids..},
+booktitle = {ACM SIGGRAPH 2013 Courses},
+articleno = {19},
+numpages = {1},
+location = {Anaheim, California},
+series = {SIGGRAPH '13}
+}
+
+
+@inproceedings{nanovdb,
+author = {Museth, Ken},
+title = {NanoVDB: A GPU-Friendly and Portable VDB Data Structure For Real-Time Rendering And Simulation},
+year = {2021},
+isbn = {9781450383738},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3450623.3464653},
+doi = {10.1145/3450623.3464653},
+abstract = { We introduce a sparse volumetric data structure, dubbed NanoVDB, which is portable to both C++11 and C99 as well as most graphics APIs, e.g.&nbsp;CUDA, OpenCL, OpenGL, WebGL, DirectX 12, OptiX, HLSL, and GLSL. As indicated by its name, NanoVDB is a mini-version of the much bigger OpenVDB library, both in terms of functionality and scope. However, NanoVDB offers one major advantage over OpenVDB, namely support for GPUs. As such it is applicable to both CPU and GPU accelerated simulation and rendering of high-resolution sparse volumes. In fact, it has already been adopted for real-time applications by several commercial renders and digital content creation tools, e.g. Autodesk’s Arnold, Blender, SideFX’s Houdini, and NVIDIA’s Omniverse just to mention a few.},
+booktitle = {ACM SIGGRAPH 2021 Talks},
+articleno = {1},
+numpages = {2},
+keywords = {gpu data structures, simulation, Sparse volumes, rendering},
+location = {Virtual Event, USA},
+series = {SIGGRAPH '21}
+}
+
+
+
+@online{nanovdb_nvidia,
+  author = {Museth, Ken and Braithwaite, Wil},
+  title = {Accelerating OpenVDB on GPUs with NanoVDB},
+  year = 2020,
+  url = {https://developer.nvidia.com/blog/accelerating-openvdb-on-gpus-with-nanovdb/},
+  urldate = {2022-03-19}
+}
+
+
+@inproceedings{rendering_turner,
+author = {Whitted, Turner},
+title = {An Improved Illumination Model for Shaded Display},
+year = {2005},
+isbn = {9781450378338},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1198555.1198743},
+doi = {10.1145/1198555.1198743},
+abstract = {To accurately render a two-dimensional image of a three-dimensional scene, global illumination information that affects the intensity of each pixel of the image must be known at the time the intensity is calculated. In a simplified form, this information is stored in a tree of "rays" extending from the viewer to the first surface encountered and from there to other surfaces and to the light sources. A visible surface algorithm creates this tree for each pixel of the display and passes it to the shader. The shader then traverses the tree to determine the intensity of the light received by the viewer. Consideration of all of these factors allows the shader to accurately simulate true reflection, shadows, and refraction, as well as the effects simulated by conventional shaders. Anti-aliasing is included as an integral part of the visibility calculations. Surfaces displayed include curved as well as polygonal surfaces.},
+booktitle = {ACM SIGGRAPH 2005 Courses},
+pages = {4–es},
+keywords = {computer graphics, computer animation, shading, visible surface algorithms, raster displays},
+location = {Los Angeles, California},
+series = {SIGGRAPH '05}
+}
