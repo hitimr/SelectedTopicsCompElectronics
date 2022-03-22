@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # becnhmarker library
 set(LIB_BENCHMARKER_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 cuda_add_library(benchmarker benchmarker/benchmarker.cpp
-                 benchmarker/nanoVDB_GPU.cu)
+                 benchmarker/benchmarker_cuda.cu)
 
 target_compile_options(benchmarker PRIVATE -fopenmp)
 
