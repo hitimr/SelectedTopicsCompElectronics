@@ -1,7 +1,5 @@
 #pragma once
 
-using FP_Type = float;
-
 // Default CLI Params
 // TODO: migrate to json file
 #define DEFAULT_LOG_LEVEL plog::info
@@ -13,20 +11,13 @@ using FP_Type = float;
 #define PROJ_ROOT_FOLDER_NAME "SelectedTopicsCompElectronics"
 #define DIM3 3
 #define DIM2 2
-
-// Exit Codes
 #define EXIT_SUCCESS 0
 
 #include "util/timer.hpp"
-
-// Logging
+#include <nlohmann/json.hpp>
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Log.h>
-
-// JSON
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
 
 #include <cmath>
 #include <iomanip>
@@ -37,11 +28,13 @@ using json = nlohmann::json;
 #undef M_PI
 #endif // M_PI
 
-const double M_PI = std::acos(-1); // TODO: replace with FP_type
+using json = nlohmann::json;
+using FP_Type = float;
 
 // Globals
 extern Timer global_timer;
-extern json global_settings;  //  uses https://github.com/nlohmann/json
+extern json global_settings; //  uses https://github.com/nlohmann/json
+const FP_Type M_PI = std::acos(-1);
 
 class CustomPlogFormatter
 {
@@ -56,8 +49,7 @@ public:
   format(const plog::Record &record) // This method returns a string from a record.
   {
     plog::util::nostringstream ss;
-    ss << std::fixed << std::setprecision(3) << global_timer.get() << ": "
-       << record.getMessage();
+    ss << std::fixed << std::setprecision(3) << global_timer.get() << ": " << record.getMessage();
 
     return ss.str();
   }
