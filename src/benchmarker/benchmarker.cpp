@@ -97,6 +97,15 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
   return rays;
 }
 
+/**
+ * @brief Convenience Function to convert between IS and WS.
+ *
+ * @tparam GridT
+ * @tparam Vec3T
+ * @param grid
+ * @param iPoints
+ * @return std::vector<Benchmarker::OVBD_Vec3T>
+ */
 template <class GridT, class Vec3T>
 std::vector<Benchmarker::OVBD_Vec3T> Benchmarker::indexToWorld(GridT &grid,
                                                                std::vector<Vec3T> &iPoints)
@@ -111,7 +120,18 @@ std::vector<Benchmarker::OVBD_Vec3T> Benchmarker::indexToWorld(GridT &grid,
 }
 
 // calculate ray intersections analytically
-// TODO: Docstring
+/**
+ * @brief Calculate a reference solution using analytical methods
+ *  Depending on the benchmark being in 2D or 3D different solutions are derived
+ *
+ * The distribution is the same as in generate_rays() but this time the only points on the outer
+ * sphere are generated
+ *
+ * @tparam Vec3T
+ * @param n_rays
+ * @param radius
+ * @return std::vector<Vec3T>
+ */
 template <typename Vec3T>
 std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_Type radius)
 {
@@ -170,7 +190,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   block_size = (size_t)options["block_size"].as<int>();
 }
 // TODO: rename level_set to grid everywhere
-void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
+void Benchmarker::run_openVDB(OVBD_GridT &grid, size_t n_rays)
 {
   assert(n_rays > 0);
   PLOG_INFO << "Running OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
@@ -181,10 +201,10 @@ void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
                                     OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL,
                                     OVBD_RayT>;
 
-  IntersectorT ray_intersector(level_set);
+  IntersectorT ray_intersector(grid);
 
-  std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(level_set, n_rays);
-  std::vector<OVBD_Vec3T> reference_intersections =
+  std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(grid, n_rays);
+  std::vector<OVBD_Vec3T> reference_solutionn =
       calculate_reference_solution<OVBD_Vec3T>(n_rays, options["r1"].as<double>());
 
   // Run Benchmark
@@ -201,8 +221,8 @@ void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
   PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
             << " kRays/s)" << std::endl;
 
-  auto wResults = indexToWorld(level_set, iResults);
-  verify_results(wResults, reference_intersections);
+  auto wResults = indexToWorld(grid, iResults);
+  analyze_results(wResults, reference_solutionn);
   write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_num_threads(),
                 options["cpu_price"].as<double>());
 }
@@ -265,13 +285,13 @@ void Benchmarker::run()
   ray_vals = logspace(options["p_rays_start"].as<int>(), options["p_rays_end"].as<int>(), BASE2,
                       options["n_bench"].as<int>());
 
-  auto grid = generate_doubleSphere();
+  auto ovdb_grid = generate_doubleSphere();
 
   // Convert to nanoVDBV
   // Note: it is possible to create Level sets directly in NanoVDB as well bus it's significantly
   // slower
-  auto level_set_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(grid);
-  auto level_set_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(grid);
+  auto nvdb_grid_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(ovdb_grid);
+  auto nvdb_grid_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(ovdb_grid);
 
   // output Files
   result_file.open(abs_path(global_settings["paths"]["outfile_timings"]));
@@ -289,9 +309,9 @@ void Benchmarker::run()
 
     assert(n_rays > 0);
 
-    run_openVDB(grid, n_rays);
-    run_nanoVDB_CPU(level_set_cpu, n_rays);
-    run_nanoVDB_GPU(level_set_gpu, n_rays);
+    run_openVDB(ovdb_grid, n_rays);
+    run_nanoVDB_CPU(nvdb_grid_cpu, n_rays);
+    run_nanoVDB_GPU(nvdb_grid_gpu, n_rays);
 
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
@@ -328,15 +348,15 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
             << " kRays/s)" << std::endl;
 
   auto wResults = indexToWorld(*h_grid, iResults);
-  verify_results(wResults, reference_intersections);
+  analyze_results(wResults, reference_intersections);
   write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_num_threads(),
                 options["cpu_price"].as<double>());
 }
 
 // verify results by comparing them to precomputed reference solutions
 template <typename Vec3T>
-bool Benchmarker::verify_results(const std::vector<Vec3T> &wResults,
-                                 const std::vector<Vec3T> &wReference)
+bool Benchmarker::analyze_results(const std::vector<Vec3T> &wResults,
+                                  const std::vector<Vec3T> &wReference)
 {
   assert(wResults.size() == wReference.size());
 

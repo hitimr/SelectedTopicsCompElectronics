@@ -97,7 +97,7 @@ public:
   std::vector<OVBD_Vec3T> indexToWorld(GridT &grid, std::vector<Vec3T> &iPoints);
 
   template <typename Vec3T>
-  bool verify_results(const std::vector<Vec3T> &result_intersections,
+  bool analyze_results(const std::vector<Vec3T> &result_intersections,
                       const std::vector<Vec3T> &reference_intersections);
 
   template <typename Vec3T> bool isClose_vec3(const Vec3T &a, const Vec3T &b);
