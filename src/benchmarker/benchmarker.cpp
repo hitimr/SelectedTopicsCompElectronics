@@ -219,7 +219,8 @@ void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 
   auto wResults = indexToWorld(level_set, iResults);
   verify_results(wResults, reference_intersections);
-  write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_thread_num());
+  write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_num_threads(),
+                options["cpu_price"].as<double>());
 }
 
 // convenience function
@@ -295,7 +296,6 @@ void Benchmarker::run()
   result_file.open(abs_path(global_settings["paths"]["outfile_timings"]));
   init_result_file(result_file);
 
-
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
   {
@@ -319,7 +319,7 @@ void Benchmarker::run()
 }
 
 void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
-                                    size_t n_rays)
+                                  size_t n_rays)
 {
 
   nanovdb::FloatGrid *h_grid = level_set.grid<FP_Type>();
@@ -348,7 +348,8 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
 
   auto wResults = indexToWorld(*h_grid, iResults);
   verify_results(wResults, reference_intersections);
-  write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_thread_num());
+  write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_num_threads(),
+                options["cpu_price"].as<double>());
 }
 
 // verify results by comparing them to precomputed reference solutions

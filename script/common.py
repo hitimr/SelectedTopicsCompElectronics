@@ -35,6 +35,10 @@ def run_benchmark(args="", print_output=True, verbose=True):
 def load_df(file_name):
     df = pd.read_csv(file_name, sep=";")
     df = df.set_index(["n_rays","kernel"])
-    return df
+ 
+    # if raycount is low some values for n_rays may appear multiple times
+    df = df.groupby(["n_rays", "kernel"]).mean()
+    return df 
+
 
 globals = load_globals()
