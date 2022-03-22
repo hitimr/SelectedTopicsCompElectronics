@@ -68,7 +68,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
              cudaMemcpyDeviceToHost);
 
   auto wResults = indexToWorld(*grid_handle, result_coords);
-  verify_results(wResults, reference_intersections);
+  analyze_results(wResults, reference_intersections);
 
   // free up GPU Allocations
   cudaFree(d_rays);
