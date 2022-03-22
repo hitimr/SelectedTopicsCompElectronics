@@ -185,8 +185,8 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   assert(0 < n_bench);
   assert((ray_dim == DIM2) || (ray_dim == DIM3));
 }
-
-double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
+// TODO: rename level_set to grid everywhere
+void Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 {
   assert(n_rays > 0);
   PLOG_INFO << "Running OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
@@ -219,8 +219,8 @@ double Benchmarker::run_openVDB(OVBD_GridT &level_set, size_t n_rays)
 
   auto wResults = indexToWorld(level_set, iResults);
   verify_results(wResults, reference_intersections);
-
-  return time;
+  write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_num_threads(),
+                options["cpu_price"].as<double>());
 }
 
 // convenience function
@@ -258,17 +258,14 @@ Benchmarker::OVBD_GridT Benchmarker::generate_doubleSphere()
   grid.setGridClass(openvdb::GRID_LEVEL_SET);
   grid.setName("LevelSetSphere");
 
-  save_grid("nano_grid.vdb", grid);
+  std::string file_name = abs_path(global_settings["grid_file_name"]);
+  save_grid(abs_path(file_name), grid);
 
   return grid;
 }
 
 void Benchmarker::save_grid(std::string filename, OVBD_GridT &grid)
 {
-  // generate absolute file path
-  std::string outfile(global_settings["out_dir"]);
-  outfile += filename;
-
   // save to file (see:
   // https://academysoftwarefoundation.github.io/openvdb/codeExamples.html#sHelloWorld)
   // openvdb::io::File vdb_file(outfile);
@@ -295,14 +292,9 @@ void Benchmarker::run()
   // mainly for debugging and checking if the grid is correctly converted
   // save_grid("nano_grid.vdb", nanovdb::nanoToOpenVDB(level_set_cpu));
 
-  // output File
-  std::string outFile_name(global_settings["proj_root"]);
-  outFile_name += global_settings["outfile_timings"];
-  std::ofstream outFile(outFile_name);
-  assert(outFile.is_open());
-
-  // .csv Header
-  outFile << "n_rays;time_ovdb;time_nvdb_cpu;time_nvdb_gpu;omp_n_threads" << std::endl;
+  // output Files
+  result_file.open(abs_path(global_settings["paths"]["outfile_timings"]));
+  init_result_file(result_file);
 
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
@@ -316,19 +308,18 @@ void Benchmarker::run()
 
     assert(n_rays > 0);
 
-    outFile << n_rays << ";";
-    outFile << run_openVDB(grid, n_rays) << ";";
-    outFile << run_nanoVDB_CPU(level_set_cpu, n_rays) << ";";
-    outFile << run_nanoVDB_GPU(level_set_gpu, n_rays) << ";";
-    outFile << omp_get_num_threads() << std::endl;
+    run_openVDB(grid, n_rays);
+    run_nanoVDB_CPU(level_set_cpu, n_rays);
+    run_nanoVDB_GPU(level_set_gpu, n_rays);
 
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
-  outFile.close();
+
+  result_file.close();
 }
 
-double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
-                                    size_t n_rays)
+void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
+                                  size_t n_rays)
 {
 
   nanovdb::FloatGrid *h_grid = level_set.grid<FP_Type>();
@@ -339,8 +330,8 @@ double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &le
 
   auto acc = h_grid->tree().getAccessor();
   std::vector<NVBD_CoordT> iResults(n_rays);
-  FP_Type t0;
-  FP_Type v;
+  FP_Type t0 = 0.;
+  FP_Type v = 0.;
   Timer timer;
 
   // Run Benchmark
@@ -357,8 +348,8 @@ double Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &le
 
   auto wResults = indexToWorld(*h_grid, iResults);
   verify_results(wResults, reference_intersections);
-
-  return time;
+  write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_num_threads(),
+                options["cpu_price"].as<double>());
 }
 
 // verify results by comparing them to precomputed reference solutions
