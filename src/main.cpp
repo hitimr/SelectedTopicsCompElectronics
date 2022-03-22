@@ -42,7 +42,15 @@ OptionsT parse_options(int ac, char **av)
     // General
     ("help,h", "produce help message")
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
-    
+
+    ("gpu_price", 
+    po::value<double>()->default_value(global_settings["defaults"]["gpu_price"]), 
+    "Price of GPU in EUR")
+
+    ("cpu_price", 
+    po::value<double>()->default_value(global_settings["defaults"]["gpu_price"]), 
+    "Price of CPU in EUR")
+
     // Grid Settings
     ("voxel_size", 
     po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), 

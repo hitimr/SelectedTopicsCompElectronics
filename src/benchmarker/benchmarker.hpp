@@ -73,16 +73,17 @@ public:
   void init_result_file(std::ofstream &out)
   {
     assert(result_file.is_open());
-    out << "kernel;n_rays;time;MRps;n_blocks;n_threads" << std::endl;
+    out << "kernel;n_rays;time;MRps;kRps/Eur;n_blocks;n_threads" << std::endl;
   }
 
   void write_results(std::ofstream &out, std::string &&kernel, int n_rays, double time,
-                     int n_blocks, int n_threads)
+                     int n_blocks, int n_threads, double price)
   {
     assert(result_file.is_open());
-    double mrps = (double)n_rays * 1e-6 / time;
-    out << kernel << ";" << n_rays << ";" << time << ";" << mrps << n_blocks << ";" << n_threads
-        << std::endl;
+    double rps = (double)n_rays / time;
+    double rps_eur = rps / price;
+    out << kernel << ";" << n_rays << ";" << time << ";" << rps * 1e-6 << ";" << rps_eur * 1e-3 << ";"
+        << n_blocks << ";" << n_threads << std::endl;
   }
 
   void run();
