@@ -86,6 +86,7 @@
         "iloc",
         "keywordstyle",
         "multithreaded",
+        "nanovdb",
         "nbench",
         "nsmallest",
         "NVDB",
