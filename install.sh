@@ -2,58 +2,45 @@
 
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
+export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
+export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
 
-
-
-
-# install dependencies
-sudo apt-get install -y \
-    pkg-config \
-    libboost-all-dev \
-    build-essential \
-    libgl1-mesa-dev \
-    glfw3 \
-    libglfw3-dev \
-    libgtest-dev \
-    freeglut3-dev \
-    libboost-iostreams-dev \
-    libtbb-dev \
-    libblosc-dev \
-    libpthread-stubs0-dev \
-    libgtest-dev \
-    doxygen \
-    libgl1-mesa-dev \
-    libglfw3-dev \
-    libopengl-dev \
-    libjemalloc-dev \ 
-    freeglut3-dev \
-    nvidia-cuda-dev \
-    libboost-program-options-dev
-    libtbb-dev \
-    freeglut3-dev \
-    clang-format \
-    nlohmann-json3-dev
+# # install dependencies
+# sudo apt-get install \
+#     pkg-config \
+#     libboost-all-dev \
+#     build-essential \
+#     libgl1-mesa-dev \
+#     freeglut3-dev \
+#     libboost-iostreams-dev \
+#     libtbb-dev \
+#     libblosc-dev \
+#     libpthread-stubs0-dev \
+#     nvidia-cuda-dev \
+#     libboost-program-options-dev
+#     nlohmann-json3-dev \
+#     libjemalloc-dev
     
 # Tools
 # sudo apt install paraview
 sudo apt install python3 python3-pip
-pip3 insall pandas numpy
+pip3 install pandas numpy
 
 
 # build openvdb
-git -C  openvdb pull || git clone https://github.com/AcademySoftwareFoundation/openvdb openvdb
-git pull
-mkdir -p $DIR_PROJECT_ROOT/openvdb/build
+git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFoundation/openvdb $DIR_OPENVDB 
+mkdir -p $DIR_OPENVDB_BUILD
 ( \
-    cd $DIR_PROJECT_ROOT/openvdb/build \
+    cd $DIR_OPENVDB_BUILD \
     && cmake \
-    -D OPENVDB_BUILD_VDB_PRINT=ON \
-    -D OPENVDB_BUILD_VDB_LOD=ON \
-    -D OPENVDB_BUILD_VDB_RENDER=ON \
-    -D OPENVDB_BUILD_VDB_VIEW=ON \
-    -D OPENVDB_BUILD_UNITTESTS=ON \
-    -D OPENVDB_BUILD_VDB_RENDER=ON \
+    -D OPENVDB_BUILD_VDB_PRINT=OFF \
+    -D OPENVDB_BUILD_VDB_LOD=OFF \
+    -D OPENVDB_BUILD_VDB_RENDER=OFF \
+    -D OPENVDB_BUILD_VDB_VIEW=OFF \
+    -D OPENVDB_BUILD_UNITTESTS=OFF \
+    -D OPENVDB_BUILD_VDB_RENDER=OFF \
     -D OPENVDB_BUILD_NANOVDB=ON \
+    -D CMAKE_INSTALL_PREFIX=$DIR_OPENVDB
     .. \
     && make -j4 \
     && sudo make install \
