@@ -6,22 +6,22 @@ export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
 export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
 export OPENVDB_INSTALL_DIR=$HOME/lib/openvdb
 
-# install dependencies
-sudo apt-get install \
-    build-essential \
-    # freeglut3-dev \
-    libboost-iostreams-dev \
-    libtbb-dev \
-    libblosc-dev \
-    libpthread-stubs0-dev \
-    nvidia-cuda-dev \
-    libboost-program-options-dev
-    nlohmann-json3-dev \
-    libjemalloc-dev
+# # install dependencies
+# sudo apt-get install \
+#     build-essential \
+#     # freeglut3-dev \
+#     libboost-iostreams-dev \
+#     libtbb-dev \
+#     libblosc-dev \
+#     libpthread-stubs0-dev \
+#     nvidia-cuda-dev \
+#     libboost-program-options-dev
+#     nlohmann-json3-dev \
+#     libjemalloc-dev
     
-# Tools
-sudo apt install python3 python3-pip
-pip3 install pandas numpy matplotlib
+# # Tools
+# sudo apt install python3 python3-pip
+# pip3 install pandas numpy matplotlib
 
 # build openvdb
 git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFoundation/openvdb $DIR_OPENVDB 
