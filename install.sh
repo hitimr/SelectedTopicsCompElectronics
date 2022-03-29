@@ -2,9 +2,7 @@
 
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
-export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
-export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
-export OPENVDB_INSTALL_DIR=$HOME/lib/openvdb
+
 
 # # install dependencies
 # sudo apt-get install \
@@ -23,7 +21,33 @@ export OPENVDB_INSTALL_DIR=$HOME/lib/openvdb
 # sudo apt install python3 python3-pip
 # pip3 install pandas numpy matplotlib
 
+
+## Dependencies
+# TBB
+export TBB_DIR=$DIR_PROJECT_ROOT/lib/oneTBB
+export TBB_BUILD_DIR=$TBB_DIR/build
+
+# git -C  $TBB_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $TBB_DIR 
+# mkdir -p $TBB_BUILD_DIR 
+
+# cmake \
+#     -D CMAKE_INSTALL_PREFIX=$TBB_BUILD_DIR \
+#     -D TBB_TEST=OFF \
+#     -S $TBB_DIR \
+#     -B $TBB_BUILD_DIR\
+
+# cmake --build $TBB_BUILD_DIR --config Release -j4 
+# cmake --install $TBB_BUILD_DIR 
+
+export TBB_INCLUDEDIR=$TBB_BUILD_DIR/include
+export  
+
+
 # build openvdb
+export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
+export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
+export OPENVDB_INSTALL_DIR=$HOME/lib/openvdb
+
 git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFoundation/openvdb $DIR_OPENVDB 
 mkdir -p $DIR_OPENVDB_BUILD
 cmake \
@@ -34,9 +58,11 @@ cmake \
     -D OPENVDB_BUILD_UNITTESTS=OFF \
     -D OPENVDB_BUILD_VDB_RENDER=OFF \
     -D OPENVDB_BUILD_NANOVDB=ON \
+    -D TBB_INCLUDEDIR=$TBB_BUILD_DIR/include \
+    -D TBB_LIBRARYDIR=$TBB_BUILD_DIR/lib64 \
     -D CMAKE_PREFIX_PATH=$DIR_OPENVDB \
+    -D CMAKE_INSTALL_PREFIX=$OPENVDB_INSTALL_DIR \
     -B $DIR_OPENVDB_BUILD \
-    -S $DIR_OPENVDB \
-    -D CMAKE_INSTALL_PREFIX=$OPENVDB_INSTALL_DIR
+    -S $DIR_OPENVDB
 
 make -C $DIR_OPENVDB_BUILD 
