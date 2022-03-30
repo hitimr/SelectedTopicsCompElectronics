@@ -6,7 +6,10 @@ set(ENV{DIR_PROJ_ROOT} "${CMAKE_CURRENT_SOURCE_DIR}")
 set(ENV{DIR_BUILD} $ENV{DIR_PROJ_ROOT}/build)
 set(ENV{DIR_SRC} $ENV{DIR_PROJ_ROOT}/src)
 set(ENV{DIR_UTIL} $ENV{DIR_SRC}/util)
-set(ENV{DIR_OPEN_VDB} $HOME/lib/openvdb)
+set(ENV{OpenVDB_DIR} $ENV{DIR_PROJ_ROOT}/lib/openvdb)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OpenVDB_DIR}/cmake)
+find_package(OpenVDB REQUIRED)
 
 # Versions, Standards
 set(CMAKE_CXX_STANDARD 17)
