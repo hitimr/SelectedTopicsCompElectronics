@@ -5,7 +5,7 @@ project(Benchmark)
 # Dependencies
 list(APPEND CMAKE_MODULE_PATH ENV{DIR_OPEN_VDB})
 
-find_package(OpenVDB REQUIRED)
+# find_package(OpenVDB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(CUDA 11.6 REQUIRED)
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
