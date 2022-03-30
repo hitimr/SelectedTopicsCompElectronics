@@ -31,6 +31,7 @@ add_definitions(-D CMAKE_PREFIX_PATH=/home/hiti/workspace/SelectedTopicsCompElec
 find_package(CUDA 11.6 REQUIRED)
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
 find_package(OpenMP REQUIRED)
+find_package(TBB REQUIRED)
 
 # # becnhmarker library
 set(LIB_BENCHMARKER_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -39,14 +40,22 @@ cuda_add_library(   benchmarker
                     benchmarker/benchmarker_cuda.cu)
 
 target_compile_options(benchmarker PRIVATE -fopenmp)
-target_link_libraries(benchmarker openvdb)
-target_include_directories(benchmarker PUBLIC "${LIB_BENCHMARKER_INCLUDE_DIRS}"
-                                              "/usr/local/cuda/include/" ENV{DIR_PROJ_ROOT}/lib/json/include)
+target_link_libraries(benchmarker openvdb tbb)
+target_include_directories(benchmarker PUBLIC 
+    "${LIB_BENCHMARKER_INCLUDE_DIRS}"
+    "/usr/local/cuda/include/" 
+    $ENV{DIR_PROJ_ROOT}/lib/json/include
+    $ENV{DIR_PROJ_ROOT}/lib/openvdb/build/include
+    $ENV{DIR_PROJ_ROOT}/lib/oneTBB/build/include)
 
 # main Benchmarker
 cuda_add_executable(raytracing main.cpp)
-
-target_link_libraries(raytracing openvdb Boost::program_options OpenMP::OpenMP_CXX
-                      benchmarker OpenMP::OpenMP_CXX)
+target_include_directories(raytracing PUBLIC $ENV{DIR_PROJ_ROOT}/lib/json/include)
+target_link_libraries(raytracing
+    benchmarker
+    openvdb 
+    Boost::program_options 
+    OpenMP::OpenMP_CXX
+    )
 
 
