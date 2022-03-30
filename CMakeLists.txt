@@ -8,8 +8,8 @@ set(ENV{DIR_SRC} $ENV{DIR_PROJ_ROOT}/src)
 set(ENV{DIR_UTIL} $ENV{DIR_SRC}/util)
 set(ENV{OpenVDB_DIR} $ENV{DIR_PROJ_ROOT}/lib/openvdb)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OpenVDB_DIR}/cmake)
-find_package(OpenVDB REQUIRED)
+set(ENV{CUDA_TOOLKIT_ROOT_DIR} "/usr/local/cuda/bin/")
+
 
 # Versions, Standards
 set(CMAKE_CXX_STANDARD 17)

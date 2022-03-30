@@ -1,4 +1,4 @@
-# TODO: install OVDB in dir that does not require root
+NJOBS=20
 
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
@@ -34,7 +34,7 @@ cmake \
     -D TBB_TEST=OFF \
     -S $TBB_DIR \
     -B $TBB_BUILD_DIR
-cmake --build $TBB_BUILD_DIR --config Release -j4 
+cmake --build $TBB_BUILD_DIR --config Release -j$NJOBS 
 cmake --install $TBB_BUILD_DIR 
 
 
@@ -48,7 +48,7 @@ cmake \
     -D CMAKE_INSTALL_PREFIX=$BLOSC_BUILD_DIR \
     -S $BLOSC_DIR \
     -B $BLOSC_BUILD_DIR 
-cmake --build $BLOSC_BUILD_DIR -j4
+cmake --build $BLOSC_BUILD_DIR -j$NJOBS
 cmake --install $BLOSC_BUILD_DIR 
 
 
@@ -59,6 +59,8 @@ git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFounda
 mkdir -p $DIR_OPENVDB_BUILD
 
 cmake \
+    -D OPENVDB_BUILD_CORE=ON \
+    -D OPENVDB_BUILD_BINARIES=ON \
     -D OPENVDB_BUILD_VDB_PRINT=OFF \
     -D OPENVDB_BUILD_VDB_LOD=OFF \
     -D OPENVDB_BUILD_VDB_RENDER=OFF \
@@ -75,5 +77,5 @@ cmake \
     -D CMAKE_INSTALL_PREFIX=$DIR_OPENVDB_BUILD \
     -B $DIR_OPENVDB_BUILD \
     -S $DIR_OPENVDB
-make -C $DIR_OPENVDB_BUILD -j4
+make -C $DIR_OPENVDB_BUILD -j$NJOBS
 make -C $DIR_OPENVDB_BUILD install
