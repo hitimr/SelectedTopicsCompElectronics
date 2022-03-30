@@ -13,7 +13,7 @@
 #include <array>
 #include <stdexcept>
 
-std::string get_proj_root_dir()
+static std::string get_proj_root_dir()
 {
 #ifdef __linux__
   // Get path to exe
@@ -41,10 +41,12 @@ std::string get_proj_root_dir()
   return path;
 }
 
-
-std::string abs_path(std::string rel_path)
+namespace misc
 {
-  return get_proj_root_dir() + rel_path;
+  static std::string abs_path(std::string rel_path)
+  {
+    return get_proj_root_dir() + rel_path;
+  }
 }
 
 /**
@@ -55,7 +57,7 @@ std::string abs_path(std::string rel_path)
  * @param out_exitStatus return status of 
  * @return std::string output of shell command
  */
-std::string execCommand(const std::string cmd, int &out_exitStatus)
+static std::string execCommand(const std::string cmd, int &out_exitStatus)
 {
   out_exitStatus = 0;
   auto pPipe = ::popen(cmd.c_str(), "r");
@@ -84,7 +86,7 @@ std::string execCommand(const std::string cmd, int &out_exitStatus)
   return output;
 }
 
-template <typename T> std::vector<T> linspace(T start, T end, size_t count)
+template <typename T> static std::vector<T> linspace(T start, T end, size_t count)
 {
   assert(end - start != 0.0);
   T step = (end - start) / count;
@@ -98,7 +100,7 @@ template <typename T> std::vector<T> linspace(T start, T end, size_t count)
 }
 
 template<typename T = int>
-std::vector<T> logspace(double start, double end, double base, size_t sample_cnt)
+static std::vector<T> logspace(double start, double end, double base, size_t sample_cnt)
 {
   std::vector<T> vals;
   double spacing = (end - start) / (double) sample_cnt;

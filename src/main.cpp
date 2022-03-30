@@ -165,7 +165,7 @@ int main(int ac, char **av)
   // Create output folder if it does not exists yet
   int exit_status = -1;
   std::string outdir = global_settings["paths"]["out_dir"];
-  execCommand("mkdir -p " + abs_path(outdir), exit_status);
+  execCommand("mkdir -p " + misc::abs_path(outdir), exit_status);
   assert(exit_status == EXIT_SUCCESS);
 
   // Parse CLI options

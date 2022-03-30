@@ -262,7 +262,7 @@ Benchmarker::OVBD_GridT Benchmarker::generate_doubleSphere()
   grid.setGridClass(openvdb::GRID_LEVEL_SET);
   grid.setName("LevelSetSphere");
 
-  std::string file_name = abs_path(global_settings["paths"]["grid_output_file"]);
+  std::string file_name = misc::abs_path(global_settings["paths"]["grid_output_file"]);
   save_grid(file_name, grid);
 
   return grid;
@@ -294,7 +294,7 @@ void Benchmarker::run()
   auto nvdb_grid_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(ovdb_grid);
 
   // output Files
-  result_file.open(abs_path(global_settings["paths"]["outfile_timings"]));
+  result_file.open(misc::abs_path(global_settings["paths"]["outfile_timings"]));
   init_result_file(result_file);
 
   // Run Benchmarks
