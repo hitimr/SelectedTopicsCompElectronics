@@ -19,8 +19,7 @@ def load_globals():
 def run_command(command):
     return subprocess.run(command.split(sep=" "), check=True)
 
-def run_benchmark(args="", print_output=True, verbose=True):
-    output_file = globals["paths"]["outfile_timings"] 
+def run_benchmark(outfile, args="", print_output=True, verbose=True):
     executable = globals["paths"]["executable"]
     cmd = str(f"{executable} {args}")
     print(cmd)
@@ -32,7 +31,7 @@ def run_benchmark(args="", print_output=True, verbose=True):
     else:
         subprocess.run(cmd.split(sep=" "), check=True,
                        stdout=subprocess.DEVNULL)
-    return load_df(output_file)
+    return load_df(outfile)
 
 def load_df(file_name):
     df = pd.read_csv(file_name, sep=";")
@@ -45,3 +44,5 @@ def load_df(file_name):
 
 
 globals = load_globals()
+
+'--ray_offset 0.2     --omp_n_threads 8     --p_rays_start 12     --p_rays_end 18     --n_bench 8 --outfile /home/hiti/Workspace/SelectedTopicsCompElectronics/build/2022-03-31_23-47-30_Ryzen7_3700X_GTX_970.csv'

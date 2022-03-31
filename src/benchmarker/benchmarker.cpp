@@ -297,8 +297,10 @@ void Benchmarker::run()
   std::string out_file_name = options.count("outfile")
                                   ? options["outfile"].as<std::vector<std::string>>()[0]
                                   : misc::abs_path(global_settings["paths"]["outfile_timings"]);
+                          
   result_file.open(out_file_name);
   init_result_file(result_file);
+  PLOG_INFO << "Writing results to " << out_file_name << std::endl;
 
   // Run Benchmarks
   for (size_t n_rays : ray_vals)
