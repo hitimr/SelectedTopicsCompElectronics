@@ -38,6 +38,7 @@ cmake \
     -D CMAKE_INSTALL_PREFIX=$TBB_BUILD_DIR \
     -D TBB_TEST=OFF \
     -D CMAKE_INSTALL_LIBDIR=lib64 \
+    -D CMAKE_BUILD_TYPE=Release \
     -S $TBB_DIR \
     -B $TBB_BUILD_DIR
 cmake --build $TBB_BUILD_DIR --config Release -j$NJOBS 
@@ -53,6 +54,7 @@ mkdir -p $BLOSC_BUILD_DIR
 
 cmake \
     -D CMAKE_INSTALL_PREFIX=$BLOSC_BUILD_DIR \
+    -D CMAKE_BUILD_TYPE=Release \
     -S $BLOSC_DIR \
     -B $BLOSC_BUILD_DIR 
 cmake --build $BLOSC_BUILD_DIR -j$NJOBS
@@ -85,6 +87,7 @@ cmake \
     -D CMAKE_PREFIX_PATH=$DIR_OPENVDB \
     -D CMAKE_INSTALL_PREFIX=$DIR_OPENVDB_BUILD \
     -D CMAKE_INSTALL_LIBDIR=lib64 \
+    -D CMAKE_BUILD_TYPE=Release \
     -B $DIR_OPENVDB_BUILD \
     -S $DIR_OPENVDB
 make -C $DIR_OPENVDB_BUILD -j$NJOBS
