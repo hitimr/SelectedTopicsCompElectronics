@@ -58,7 +58,6 @@ cmake \
 cmake --build $BLOSC_BUILD_DIR -j$NJOBS
 cmake --install $BLOSC_BUILD_DIR 
 
-
 # OpenVDB
 echo "Installing OpenVDB"
 export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
@@ -83,7 +82,7 @@ cmake \
     -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib64 \
     -D CMAKE_PREFIX_PATH=$DIR_OPENVDB \
     -D CMAKE_INSTALL_PREFIX=$DIR_OPENVDB_BUILD \
-    -D CMAKE_INSTALL_LIBDIR=lib64
+    -D CMAKE_INSTALL_LIBDIR=lib64 \
     -B $DIR_OPENVDB_BUILD \
     -S $DIR_OPENVDB
 make -C $DIR_OPENVDB_BUILD -j$NJOBS
