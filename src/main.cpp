@@ -80,6 +80,10 @@ OptionsT parse_options(int ac, char **av)
     po::value<double>()->default_value(global_settings["defaults"]["cpu_power"]), 
     "CPU power consumption in Watts")
 
+    ("outfile,o",
+    po::value<std::vector<std::string>>(),
+    "file for data output")
+
     // Grid Settings
     ("voxel_size", 
     po::value<double>()->default_value(global_settings["defaults"]["voxel_size"]), 

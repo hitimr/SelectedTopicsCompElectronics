@@ -294,7 +294,10 @@ void Benchmarker::run()
   auto nvdb_grid_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(ovdb_grid);
 
   // output Files
-  result_file.open(misc::abs_path(global_settings["paths"]["outfile_timings"]));
+  std::string out_file_name = options.count("outfile")
+                                  ? options["outfile"].as<std::vector<std::string>>()[0]
+                                  : misc::abs_path(global_settings["paths"]["outfile_timings"]);
+  result_file.open(out_file_name);
   init_result_file(result_file);
 
   // Run Benchmarks

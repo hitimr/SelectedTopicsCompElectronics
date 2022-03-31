@@ -1,8 +1,8 @@
 {
   "paths": {
     "executable": "build/src/raytracing",
-    "outfile_timings": "data/results.csv",
-    "out_dir": "data/",
+    "outfile_timings": "out/results.csv",
+    "out_dir": "out/",
     "grid_output_file": "build/grid.vdb"
   },
   "defaults": {
@@ -11,9 +11,9 @@
     "voxel_size": 0.1,
     "ray_offset": 0.2,
     "half_width": 2,
-    "p_rays_start": 4,
-    "p_rays_end": 22,
-    "n_bench": 16,
+    "p_rays_start": 12,
+    "p_rays_end": 16,
+    "n_bench": 4,
     "gpu_grid_size": 256,
     "gpu_block_size": 256,
     "ray_distribution_dimensions": 3,
