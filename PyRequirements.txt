@@ -1,5 +1,3 @@
 pandas
 py-cpuinfo
-gpuinfo
 numpy
-gpuinfo

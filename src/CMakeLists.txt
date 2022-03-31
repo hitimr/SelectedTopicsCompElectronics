@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.14)
 project(Benchmark)
 
 # Dependencies
-list(APPEND CMAKE_MODULE_PATH "/home/hiti/workspace/SelectedTopicsCompElectronics/lib/openvdb/build/lib64/cmake/OpenVDB")
-list(APPEND CMAKE_PREFIX_PATH /home/hiti/workspace/SelectedTopicsCompElectronics/lib/openvdb/build/lib64/cmake/OpenVDB/)
-list(APPEND CMAKE_PREFIX_PATH /home/hiti/workspace/SelectedTopicsCompElectronics/lib/oneTBB/build)
+list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb/build/lib64/cmake/OpenVDB)
+list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR}/openvdb/build/lib64/cmake/OpenVDB)
+list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR}/oneTBB/build)
 
-add_definitions(-D TBB_DIR=/home/hiti/workspace/SelectedTopicsCompElectronics/lib/oneTBB/build)
-add_definitions(-D CMAKE_PREFIX_PATH=/home/hiti/workspace/SelectedTopicsCompElectronics/lib/openvdb/build/lib64/cmake/OpenVDB)
+add_definitions(-D TBB_DIR=$ENV{LIB_DIR}/oneTBB/build)
+add_definitions(-D CMAKE_PREFIX_PATH=$ENV{LIB_DIR}/openvdb/build/lib64/cmake/OpenVDB)
 
 find_package(CUDA 11.6 REQUIRED)
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
@@ -22,27 +22,31 @@ cuda_add_library(   benchmarker
 
 target_compile_options(benchmarker PRIVATE -fopenmp)
 target_link_libraries(benchmarker 
-    /home/hiti/workspace/SelectedTopicsCompElectronics/lib/openvdb/build/lib64/libopenvdb.so
-    /home/hiti/workspace/SelectedTopicsCompElectronics/lib/oneTBB/build/lib64/libtbb.so)
+    $ENV{LIB_DIR}/openvdb/build/lib64/libopenvdb.so
+    $ENV{LIB_DIR}/oneTBB/build/lib64/libtbb.so)
     
 target_include_directories(benchmarker PUBLIC 
     "${LIB_BENCHMARKER_INCLUDE_DIRS}"
     "/usr/local/cuda/include/" 
-    $ENV{DIR_PROJ_ROOT}/lib/json/include
-    $ENV{DIR_PROJ_ROOT}/lib/openvdb/build/include
-    $ENV{DIR_PROJ_ROOT}/lib/oneTBB/build/include)
+    $ENV{LIB_DIR}json/include
+    $ENV{LIB_DIR}/openvdb/build/include
+    $ENV{LIB_DIR}/oneTBB/build/include
+    $ENV{LIB_DIR}/plog/include)
 
 # main Benchmarker
 cuda_add_executable(raytracing main.cpp)
-target_include_directories(raytracing PUBLIC $ENV{DIR_PROJ_ROOT}/lib/json/include)
+target_include_directories(raytracing PUBLIC 
+    $ENV{LIB_DIR}/json/include
+    $ENV{LIB_DIR}/plog/include)
+
 target_link_libraries(raytracing
     benchmarker
-    /home/hiti/workspace/SelectedTopicsCompElectronics/lib/openvdb/build/lib64/libopenvdb.so 
+    $ENV{LIB_DIR}/openvdb/build/lib64/libopenvdb.so
     Boost::program_options 
     OpenMP::OpenMP_CXX
     )
 
-# Targets for running
+# # Targets for running
 add_custom_target(
     run
     COMMAND raytracing

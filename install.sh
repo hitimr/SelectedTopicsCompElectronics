@@ -1,4 +1,4 @@
-NJOBS = ${4:-foo}
+NJOBS=${1:-4}
 
 echo "Building workspace using $NJOBS cores"
 
@@ -9,20 +9,34 @@ export DIR_PROJECT_ROOT=$(pwd)
 echo "Setting up Python virtual environment"
 python3 -m venv .venv
 source .venv/bin/activate
-pip3 install PyRequirements.txt
-return 0
+python3 -m pip install -r PyRequirements.txt
+
 
 ## Dependencies
+mkdir -p lib
+
+# json
+echo "Downloading json for C++"
+export JSON_DIR=$DIR_PROJECT_ROOT/lib/json
+git -C  $JSON_DIR  pull || git clone https://github.com/nlohmann/json $JSON_DIR --depth 1
+ 
+
+# plog
+echo "Downloading plog"
+export PLOG_DIR=$DIR_PROJECT_ROOT/lib/plog
+git -C  $PLOG_DIR  pull || git clone https://github.com/SergiusTheBest/plog $PLOG_DIR --depth 1
+
 # TBB
 echo "Installing TBB"
 export TBB_DIR=$DIR_PROJECT_ROOT/lib/oneTBB
 export TBB_BUILD_DIR=$TBB_DIR/build
-git -C  $TBB_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $TBB_DIR 
+git -C  $TBB_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $TBB_DIR --depth 1
 mkdir -p $TBB_BUILD_DIR 
 
 cmake \
     -D CMAKE_INSTALL_PREFIX=$TBB_BUILD_DIR \
     -D TBB_TEST=OFF \
+    -D CMAKE_INSTALL_LIBDIR=lib64 \
     -S $TBB_DIR \
     -B $TBB_BUILD_DIR
 cmake --build $TBB_BUILD_DIR --config Release -j$NJOBS 
@@ -33,7 +47,7 @@ cmake --install $TBB_BUILD_DIR
 echo "Installing BLOSC"
 export BLOSC_DIR=$DIR_PROJECT_ROOT/lib/c-blosc
 export BLOSC_BUILD_DIR=$BLOSC_DIR/build
-git -C  $BLOSC_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $BLOSC_DIR 
+git -C  $BLOSC_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $BLOSC_DIR --depth 1
 mkdir -p $BLOSC_BUILD_DIR 
 
 cmake \
@@ -48,7 +62,7 @@ cmake --install $BLOSC_BUILD_DIR
 echo "Installing OpenVDB"
 export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
 export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
-git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFoundation/openvdb $DIR_OPENVDB 
+git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFoundation/openvdb $DIR_OPENVDB --depth 1
 mkdir -p $DIR_OPENVDB_BUILD
 
 cmake \
@@ -68,6 +82,7 @@ cmake \
     -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib64 \
     -D CMAKE_PREFIX_PATH=$DIR_OPENVDB \
     -D CMAKE_INSTALL_PREFIX=$DIR_OPENVDB_BUILD \
+    -D CMAKE_INSTALL_LIBDIR=lib64
     -B $DIR_OPENVDB_BUILD \
     -S $DIR_OPENVDB
 make -C $DIR_OPENVDB_BUILD -j$NJOBS
