@@ -42,6 +42,7 @@ target_include_directories(raytracing PUBLIC
 target_link_libraries(raytracing
     benchmarker
     $ENV{LIB_DIR}/openvdb/build/lib64/libopenvdb.so
+    $ENV{LIB_DIR}/oneTBB/build/lib64/libtbb.so
     Boost::program_options 
     OpenMP::OpenMP_CXX
     )
