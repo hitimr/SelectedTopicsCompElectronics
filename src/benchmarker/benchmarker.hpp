@@ -69,16 +69,18 @@ public:
   void init_result_file(std::ofstream &out)
   {
     assert(result_file.is_open());
-    out << "kernel;n_rays;time;MRps;kRps/Eur;n_blocks;n_threads" << std::endl;
+    out << "kernel;n_rays;time;Rps;Rps/Eur;Rps/W;n_blocks;n_threads" << std::endl;
   }
 
   void write_results(std::ofstream &out, std::string &&kernel, int n_rays, double time,
-                     int n_blocks, int n_threads, double price)
+                     int n_blocks, int n_threads, double price, double power)
   {
     assert(result_file.is_open());
     double rps = (double)n_rays / time;
     double rps_eur = rps / price;
-    out << kernel << ";" << n_rays << ";" << time << ";" << rps * 1e-6 << ";" << rps_eur * 1e-3
+    double rps_w = rps / power;
+
+    out << kernel << ";" << n_rays << ";" << time << ";" << rps << ";" << rps_eur << ";" << rps_w
         << ";" << n_blocks << ";" << n_threads << std::endl;
   }
 
@@ -98,7 +100,7 @@ public:
 
   template <typename Vec3T>
   bool analyze_results(const std::vector<Vec3T> &result_intersections,
-                      const std::vector<Vec3T> &reference_intersections);
+                       const std::vector<Vec3T> &reference_intersections);
 
   template <typename Vec3T> bool isClose_vec3(const Vec3T &a, const Vec3T &b);
 };

@@ -19,6 +19,8 @@
     "ray_distribution_dimensions": 3,
     "omp_n_threads": 4,
     "gpu_price": 400,
-    "cpu_price": 300
+    "cpu_price": 300,
+    "gpu_power": 500,
+    "cpu_power": 150
   }
 }

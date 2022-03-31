@@ -224,7 +224,7 @@ void Benchmarker::run_openVDB(OVBD_GridT &grid, size_t n_rays)
   auto wResults = indexToWorld(grid, iResults);
   analyze_results(wResults, reference_solutionn);
   write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_num_threads(),
-                options["cpu_price"].as<double>());
+                options["cpu_price"].as<double>(), options["cpu_power"].as<double>());
 }
 
 // convenience function
@@ -350,7 +350,7 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   auto wResults = indexToWorld(*h_grid, iResults);
   analyze_results(wResults, reference_intersections);
   write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_num_threads(),
-                options["cpu_price"].as<double>());
+                options["cpu_price"].as<double>(), options["cpu_power"].as<double>());
 }
 
 // verify results by comparing them to precomputed reference solutions

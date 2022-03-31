@@ -79,5 +79,5 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
             << " MRays/s)" << std::endl;
 
   write_results(result_file, "NanoVDB_GPU", n_rays, time, grid_size, block_size,
-                options["cpu_price"].as<double>());
+                options["gpu_price"].as<double>(), options["gpu_power"].as<double>());
 }
