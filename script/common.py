@@ -16,6 +16,8 @@ def load_globals():
          
     return data
 
+def run_command(command):
+    return subprocess.run(command.split(sep=" "), check=True)
 
 def run_benchmark(args="", print_output=True, verbose=True):
     output_file = globals["paths"]["outfile_timings"] 
@@ -39,6 +41,7 @@ def load_df(file_name):
     # if raycount is low some values for n_rays may appear multiple times
     df = df.groupby(["n_rays", "kernel"]).mean()
     return df 
+
 
 
 globals = load_globals()
