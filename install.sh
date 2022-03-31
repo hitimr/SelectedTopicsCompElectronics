@@ -1,29 +1,20 @@
-NJOBS=20
+NJOBS = ${4:-foo}
+
+echo "Building workspace using $NJOBS cores"
 
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
 
-
-# # install dependencies
-# sudo apt-get install \
-#     build-essential \
-#     # freeglut3-dev \
-#     libboost-iostreams-dev \
-#     libtbb-dev \
-#     libblosc-dev \
-#     libpthread-stubs0-dev \
-#     nvidia-cuda-dev \
-#     libboost-program-options-dev
-#     nlohmann-json3-dev \
-#     libjemalloc-dev
-    
-# # Tools
-# sudo apt install python3 python3-pip
-# pip3 install pandas numpy matplotlib
-
+# Python virtual environment
+echo "Setting up Python virtual environment"
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install PyRequirements.txt
+return 0
 
 ## Dependencies
 # TBB
+echo "Installing TBB"
 export TBB_DIR=$DIR_PROJECT_ROOT/lib/oneTBB
 export TBB_BUILD_DIR=$TBB_DIR/build
 git -C  $TBB_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $TBB_DIR 
@@ -39,6 +30,7 @@ cmake --install $TBB_BUILD_DIR
 
 
 # BLOSC
+echo "Installing BLOSC"
 export BLOSC_DIR=$DIR_PROJECT_ROOT/lib/c-blosc
 export BLOSC_BUILD_DIR=$BLOSC_DIR/build
 git -C  $BLOSC_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $BLOSC_DIR 
@@ -53,6 +45,7 @@ cmake --install $BLOSC_BUILD_DIR
 
 
 # OpenVDB
+echo "Installing OpenVDB"
 export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
 export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
 git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFoundation/openvdb $DIR_OPENVDB 
