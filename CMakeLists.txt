@@ -20,5 +20,8 @@ set(MINIMUM_BOOST_VERSION 1.63.0)
 set(CMAKE_CXX_FLAGS "-O3 -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
 
+set(CMAKE_CUDA_FLAGS "-O3 -g -Wall")
+set(CMAKE_CUDA_FLAGS_DEBUG "-O0 -g -Wall")
+
 include_directories(lib)
 add_subdirectory(src)

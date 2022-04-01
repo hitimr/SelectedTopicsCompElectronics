@@ -29,21 +29,25 @@ git -C  $PLOG_DIR  pull || git clone https://github.com/SergiusTheBest/plog $PLO
 
 # TBB
 echo "Installing TBB"
-export TBB_DIR=$DIR_PROJECT_ROOT/lib/oneTBB
-export TBB_BUILD_DIR=$TBB_DIR/build
-git -C  $TBB_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $TBB_DIR --depth 1
+export TBB_SOURCE_DIR=$DIR_PROJECT_ROOT/lib/download/oneTBB
+export TBB_BUILD_DIR=$TBB_SOURCE_DIR/build
+export TBB_INSTALL_DIR=$DIR_PROJECT_ROOT/lib/oneTBB
+
+git -C  $TBB_SOURCE_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $TBB_SOURCE_DIR --depth 1
 mkdir -p $TBB_BUILD_DIR 
+mkdir -p $TBB_INSTALL_DIR 
 
 cmake \
-    -D CMAKE_INSTALL_PREFIX=$TBB_BUILD_DIR \
+    -D CMAKE_INSTALL_PREFIX=$TBB_INSTALL_DIR \
     -D TBB_TEST=OFF \
-    -D CMAKE_INSTALL_LIBDIR=lib64 \
-    -D CMAKE_BUILD_TYPE=Release \
-    -S $TBB_DIR \
+    -S $TBB_SOURCE_DIR \
     -B $TBB_BUILD_DIR
-cmake --build $TBB_BUILD_DIR --config Release -j$NJOBS 
-cmake --install $TBB_BUILD_DIR 
+cd $TBB_BUILD_DIR
+cmake --build $TBB_BUILD_DIR -j$NJOBS ..
+make install 
 
+cd $DIR_PROJECT_ROOT
+return 0
 
 # BLOSC
 echo "Installing BLOSC"
