@@ -4,6 +4,10 @@ echo "Building workspace using $NJOBS cores"
 
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
+export DOWNLOAD_DIR=$LIB_DIR/download
+export LIB_DIR=$DIR_PROJECT_ROOT/lib
+
+echo "Creating Directories"
 
 # Python virtual environment
 echo "Setting up Python virtual environment"
@@ -11,15 +15,10 @@ python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r PyRequirements.txt
 
-
-
 ## Dependencies
-mkdir -p lib
 
 # json
-echo "Downloading json for C++"
-export JSON_DIR=$DIR_PROJECT_ROOT/lib/json
-git -C  $JSON_DIR  pull || git clone https://github.com/nlohmann/json $JSON_DIR --depth 1
+tar -xf $DOWNLOAD_DIR/json.tar.xz -C $DIR_PROJECT_ROOT/lib/download
  
 
 # plog
@@ -47,7 +46,6 @@ cmake --build $TBB_BUILD_DIR -j$NJOBS ..
 make install 
 
 cd $DIR_PROJECT_ROOT
-return 0
 
 # BLOSC
 echo "Installing BLOSC"
@@ -66,10 +64,13 @@ cmake --install $BLOSC_BUILD_DIR
 
 # OpenVDB
 echo "Installing OpenVDB"
-export DIR_OPENVDB=$DIR_PROJECT_ROOT/lib/openvdb
-export DIR_OPENVDB_BUILD=$DIR_OPENVDB/build
-git -C  $DIR_OPENVDB  pull || git clone https://github.com/AcademySoftwareFoundation/openvdb $DIR_OPENVDB --depth 1
-mkdir -p $DIR_OPENVDB_BUILD
+export OPENVDB_SOURCE_DIR=$DIR_PROJECT_ROOT/lib/download/openvdb-9.0.0
+export OPENVDB_BUILD_DIR=$OPENVDB_SOURCE_DIR/lib/openvdb/build
+export OPENVDB_INSTALL_DIR=$DIR_PROJECT_ROOT/openVDB
+
+wget -nc https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v9.0.0.tar.gz -P $DIR_PROJECT_ROOT/lib/download
+tar -xf $DIR_PROJECT_ROOT/lib/download/v9.0.0.tar.gz -C $DIR_PROJECT_ROOT/lib/download
+mkdir -p $OPENVDB_BUILD_DIR
 
 cmake \
     -D OPENVDB_BUILD_CORE=ON \
@@ -82,17 +83,18 @@ cmake \
     -D OPENVDB_BUILD_VDB_RENDER=OFF \
     -D OPENVDB_BUILD_NANOVDB=ON \
     -D OPENVDB_INSTALL_CMAKE_MODULES=ON \
-    -D TBB_ROOT=$TBB_BUILD_DIR \
-    -D TBB_INCLUDEDIR=$TBB_BUILD_DIR/include \
-    -D TBB_LIBRARYDIR=$TBB_BUILD_DIR/lib64 \
+    -D OPENVDB_USE_DEPRECATED_ABI=ON \
+    -D OPENVDB_USE_DEPRECATED_ABI_6=ON \
+    -D OPENVDB_USE_DEPRECATED_ABI_7=ON \
+    -D OPENVDB_FUTURE_DEPRECATION=OFF \
+    -D TBB_INCLUDEDIR=$TBB_INSTALL_DIR/include \
+    -D TBB_LIBRARYDIR=$TBB_INSTALL_DIR/lib \
     -D BLOSC_ROOT=$BLOSC_BUILD_DIR \
     -D BLOSC_INCLUDEDIR=$BLOSC_BUILD_DIR/include \
     -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib64 \
-    -D CMAKE_PREFIX_PATH=$DIR_OPENVDB \
-    -D CMAKE_INSTALL_PREFIX=$DIR_OPENVDB_BUILD \
+    -D CMAKE_INSTALL_PREFIX=$OPENVDB_INSTALL_DIR \
     -D CMAKE_INSTALL_LIBDIR=lib64 \
-    -D CMAKE_BUILD_TYPE=Release \
-    -B $DIR_OPENVDB_BUILD \
-    -S $DIR_OPENVDB
-make -C $DIR_OPENVDB_BUILD -j$NJOBS
-make -C $DIR_OPENVDB_BUILD install
+    -B $OPENVDB_BUILD_DIR \
+    -S $OPENVDB_SOURCE_DIR
+make -C $OPENVDB_BUILD_DIR -j$NJOBS
+make -C $OPENVDB_BUILD_DIR install

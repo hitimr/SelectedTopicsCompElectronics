@@ -18,3 +18,5 @@ CMakeCache.txt
 # Excpetions
 !.vscode
 
+
+lib/

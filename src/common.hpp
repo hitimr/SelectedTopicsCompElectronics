@@ -13,6 +13,8 @@
 #define DIM2 2
 #define EXIT_SUCCESS 0
 
+#include <mmintrin.h>
+
 #include "util/timer.hpp"
 #include <nlohmann/json.hpp>
 #include <plog/Appenders/ColorConsoleAppender.h>

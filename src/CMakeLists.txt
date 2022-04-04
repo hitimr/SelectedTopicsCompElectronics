@@ -9,10 +9,9 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR}/oneTBB)
 # list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR}/oneTBB/build)
 
 
-add_definitions(-D TBB_DIR=$ENV{LIB_DIR}/oneTBB/build)
 add_definitions(-D CMAKE_PREFIX_PATH=$ENV{LIB_DIR}/openvdb/build/lib64/cmake/OpenVDB)
 
-find_package(CUDA 11.6 REQUIRED)
+
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
 find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
@@ -25,8 +24,9 @@ cuda_add_library(   benchmarker
 
 target_compile_options(benchmarker PRIVATE -fopenmp)
 target_link_libraries(benchmarker 
-    $ENV{LIB_DIR}/openvdb/build/lib64/libopenvdb.so TBB::tbb)
-    
+    $ENV{LIB_DIR}/openvdb/build/lib64/libopenvdb.so)
+
+
 target_include_directories(benchmarker PUBLIC 
     "${LIB_BENCHMARKER_INCLUDE_DIRS}"
     "/usr/local/cuda/include/" 
@@ -49,7 +49,7 @@ target_link_libraries(raytracing
     OpenMP::OpenMP_CXX
     )
 
-# # Targets for running
+# Targets for running
 add_custom_target(
     run
     COMMAND raytracing
