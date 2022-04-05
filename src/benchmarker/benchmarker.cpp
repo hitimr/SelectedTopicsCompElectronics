@@ -68,6 +68,7 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
     assert(floor(sqrt(n_rays)) == sqrt(n_rays));
     alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, sqrt_n_rays);
 
+#pragma omp parallel for
     for (size_t i = 0; i < sqrt_n_rays; i++)
     {
       for (size_t j = 0; j < sqrt_n_rays; j++)
@@ -154,6 +155,7 @@ std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_T
     assert(floor(sqrt(n_rays)) == sqrt(n_rays));
     alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, sqrt_n_rays);
 
+#pragma omp parallel for
     for (size_t i = 0; i < sqrt_n_rays; i++)
     {
       for (size_t j = 0; j < sqrt_n_rays; j++)
@@ -193,7 +195,6 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 void Benchmarker::run_openVDB(OVBD_GridT &grid, size_t n_rays)
 {
   assert(n_rays > 0);
-  PLOG_INFO << "Running OpenVDB benchmark for " << n_rays << " Rays" << std::endl;
 
   // Ray Intersector: Triple nested types. nice...
   using IntersectorT =
@@ -303,8 +304,10 @@ void Benchmarker::run()
   PLOG_INFO << "Writing results to " << out_file_name << std::endl;
 
   // Run Benchmarks
+  int counter = 0;
   for (size_t n_rays : ray_vals)
   {
+    counter ++;
     if (ray_dim == DIM3)
     {
       // change n_rays to next perfect square
@@ -313,6 +316,8 @@ void Benchmarker::run()
     }
 
     assert(n_rays > 0);
+
+    PLOG_INFO << "Running benchmark for " << n_rays << " Rays (" << counter << "/" <<  ray_vals.size() << ")" << std::endl;
 
     run_openVDB(ovdb_grid, n_rays);
     run_nanoVDB_CPU(nvdb_grid_cpu, n_rays);
@@ -366,7 +371,6 @@ bool Benchmarker::analyze_results(const std::vector<Vec3T> &wResults,
   assert(wResults.size() == wReference.size());
 
   bool err_flag = false;
-
   for (size_t i = 0; i < wResults.size(); i++)
   {
     if (!isClose_vec3(wResults[i], wReference[i]))
