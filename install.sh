@@ -76,6 +76,17 @@ cmake \
 make -C $OPENVDB_BUILD_DIR -j$NJOBS
 make -C $OPENVDB_BUILD_DIR install
 
+mkdir -p build
+cd build
+cmake 
+    -D TBB_INCLUDEDIR=$TBB_DIR/include 
+    -D TBB_LIBRARYDIR=$TBB_DIR/lib/intel64/gcc4.8/ 
+    -D BLOSC_INCLUDEDIR=$BLOSC_BUILD_DIR/include \
+    -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib \
+    -D CMAKE_BUILD_TYPE=Release 
+    ..
+cd .. 
+
 
 # # Python virtual environment
 # echo "Setting up Python virtual environment"
