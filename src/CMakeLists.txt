@@ -12,7 +12,7 @@ target_link_libraries(benchmarker
 target_include_directories(benchmarker PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}
     "/usr/local/cuda/include/" 
-    $ENV{LIB_DIR}json/include
+    $ENV{LIB_DIR}/json/include
     $ENV{LIB_DIR}/oneapi-tbb-2021.5.0/include
     $ENV{LIB_DIR}/oneTBB/include
     $ENV{LIB_DIR}/plog-1.1.6/include)

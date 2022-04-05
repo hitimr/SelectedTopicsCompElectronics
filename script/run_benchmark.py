@@ -81,8 +81,8 @@ if(is_cluster()):
     # Cluster
     args = {
         "p_rays_start": 12,
-        "p_rays_end": 20,
-        "n_bench": 64,
+        "p_rays_end": 26,
+        "n_bench": 128,
     }
 else:
     # Home PC
