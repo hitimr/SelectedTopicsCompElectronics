@@ -19,20 +19,20 @@ echo "Installing dependencies..."
 
 # json
 echo "Installing JSON for C++"
-tar -xf --skip-old-files $PACKAGE_DIR/json.tar.xz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/json.tar.xz -C $LIB_DIR --skip-old-files
 
 # plog
 echo "Installing plog"
-tar -xf --skip-old-files $PACKAGE_DIR/plog-1.1.6.tar.gz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/plog-1.1.6.tar.gz -C $LIB_DIR --skip-old-files
 
 # TBB
 echo "Installing TBB"
-tar -xf --skip-old-files $PACKAGE_DIR/oneapi-tbb-2021.5.0-lin.tgz -C $LIB_DIR
+tar -xf  $PACKAGE_DIR/oneapi-tbb-2021.5.0-lin.tgz -C $LIB_DIR --skip-old-files
 export TBB_DIR=$LIB_DIR/oneapi-tbb-2021.5.0
 
 # BLOSC
 echo "Installing C-BLOSC"
-tar -xfk $PACKAGE_DIR/c-blosc-1.21.1.tar.gz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/c-blosc-1.21.1.tar.gz -C $LIB_DIR --skip-old-files
 export BLOSC_DIR=$LIB_DIR/c-blosc-1.21.1
 export BLOSC_BUILD_DIR=$BLOSC_DIR/build
 
@@ -47,36 +47,37 @@ cmake --install $BLOSC_BUILD_DIR
 
 # OpenVDB
 echo "Installing OpenVDB"
-tar -xf --skip-old-files $PACKAGE_DIR/openvdb-9.0.0_modified.tar.gz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/openvdb-9.0.0_modified.tar.gz -C $LIB_DIR --skip-old-files
 
 export OPENVDB_DIR=$LIB_DIR/openvdb-9.0.0_modified
 export OPENVDB_BUILD_DIR=$OPENVDB_DIR/build
 export OPENVDB_INSTALL_DIR=$OPENVDB_DIR
 
 
-# cmake \
-#     -D OPENVDB_BUILD_CORE=ON \
-#     -D OPENVDB_BUILD_BINARIES=ON \
-#     -D OPENVDB_BUILD_VDB_PRINT=OFF \
-#     -D OPENVDB_BUILD_VDB_LOD=OFF \
-#     -D OPENVDB_BUILD_VDB_RENDER=OFF \
-#     -D OPENVDB_BUILD_VDB_VIEW=OFF \
-#     -D OPENVDB_BUILD_UNITTESTS=OFF \
-#     -D OPENVDB_BUILD_VDB_RENDER=OFF \
-#     -D OPENVDB_BUILD_NANOVDB=ON \
-#     -D OPENVDB_INSTALL_CMAKE_MODULES=ON \
-#     -D OPENVDB_USE_DEPRECATED_ABI=ON \
-#     -D OPENVDB_FUTURE_DEPRECATION=OFF \
-#     -D TBB_INCLUDEDIR=$TBB_DIR/include \
-#     -D TBB_LIBRARYDIR=$TBB_DIR/lib/intel64/gcc4.8 \
-#     -D BLOSC_INCLUDEDIR=$BLOSC_BUILD_DIR/include \
-#     -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib \
-#     -D CMAKE_INSTALL_PREFIX=$OPENVDB_INSTALL_DIR \
-#     -D CMAKE_INSTALL_LIBDIR=lib \
-#     -B $OPENVDB_BUILD_DIR \
-#     -S $OPENVDB_DIR
-# make -C $OPENVDB_BUILD_DIR -j$NJOBS
-# make -C $OPENVDB_BUILD_DIR install
+ cmake \
+    -D OPENVDB_BUILD_CORE=ON \
+    -D OPENVDB_BUILD_BINARIES=ON \
+    -D OPENVDB_BUILD_VDB_PRINT=OFF \
+    -D OPENVDB_BUILD_VDB_LOD=OFF \
+    -D OPENVDB_BUILD_VDB_RENDER=OFF \
+    -D OPENVDB_BUILD_VDB_VIEW=OFF \
+    -D OPENVDB_BUILD_UNITTESTS=OFF \
+    -D OPENVDB_BUILD_VDB_RENDER=OFF \
+    -D OPENVDB_BUILD_NANOVDB=ON \
+    -D OPENVDB_INSTALL_CMAKE_MODULES=ON \
+    -D OPENVDB_USE_DEPRECATED_ABI=ON \
+    -D OPENVDB_FUTURE_DEPRECATION=OFF \
+    -D TBB_INCLUDEDIR=$TBB_DIR/include \
+    -D TBB_LIBRARYDIR=$TBB_DIR/lib/intel64/gcc4.8 \
+    -D BLOSC_INCLUDEDIR=$BLOSC_BUILD_DIR/include \
+    -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib \
+    -D CMAKE_INSTALL_PREFIX=$OPENVDB_INSTALL_DIR \
+    -D CMAKE_INSTALL_LIBDIR=lib \
+    -B $OPENVDB_BUILD_DIR \
+    -S $OPENVDB_DIR
+make -C $OPENVDB_BUILD_DIR -j$NJOBS
+make -C $OPENVDB_BUILD_DIR install
+
 
 mkdir -p build
 cmake \
