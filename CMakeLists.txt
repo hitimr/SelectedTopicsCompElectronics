@@ -6,7 +6,6 @@ set(ENV{DIR_PROJ_ROOT} "${CMAKE_CURRENT_SOURCE_DIR}")
 set(ENV{DIR_BUILD} $ENV{DIR_PROJ_ROOT}/build)
 set(ENV{DIR_SRC} $ENV{DIR_PROJ_ROOT}/src)
 set(ENV{DIR_UTIL} $ENV{DIR_SRC}/util)
-set(ENV{OpenVDB_DIR} $ENV{DIR_PROJ_ROOT}/lib/openvdb)
 set(ENV{LIB_DIR} $ENV{DIR_PROJ_ROOT}/lib)
 
 set(ENV{CUDA_TOOLKIT_ROOT_DIR} "/usr/local/cuda/bin/")

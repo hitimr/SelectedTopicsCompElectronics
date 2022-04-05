@@ -3,10 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 project(Benchmark)
 
 # Dependencies
-list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb/build/lib64/cmake/OpenVDB)
-list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR}/openvdb/build/lib64/cmake/OpenVDB)
-list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR}/oneTBB)
-# list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR}/oneTBB/build)
+list(APPEND CMAKE_PREFIX_PATH $ENV{LIB_DIR})
 
 
 add_definitions(-D CMAKE_PREFIX_PATH=$ENV{LIB_DIR}/openvdb/build/lib64/cmake/OpenVDB)
@@ -29,11 +26,12 @@ target_link_libraries(benchmarker
 
 target_include_directories(benchmarker PUBLIC 
     "${LIB_BENCHMARKER_INCLUDE_DIRS}"
+    "/usr/lib/gcc/x86_64-linux-gnu/9/include/"
     "/usr/local/cuda/include/" 
     $ENV{LIB_DIR}json/include
-    $ENV{LIB_DIR}/openvdb/build/include
+    $ENV{LIB_DIR}/oneapi-tbb-2021.5.0/include
     $ENV{LIB_DIR}/oneTBB/include
-    $ENV{LIB_DIR}/plog/include)
+    $ENV{LIB_DIR}/plog-1.1.6/include)
 
 # main Benchmarker
 cuda_add_executable(raytracing main.cpp)
