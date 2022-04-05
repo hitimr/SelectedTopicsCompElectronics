@@ -92,20 +92,41 @@ def get_system_information():
     data.update(get_CPU_data(cpu_name))
     data.update(get_GPU_data(gpu_name))
     return data
-    
-# Filename for output
-args.update(sys_info)
-timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-outfile = common.globals["paths"]['out_dir'] + f"{timestamp}_{args['cpu_short_name']}_{args['gpu_short_name']}.csv"
 
 
-# launch benchmark
-df = common.run_benchmark(
-    outfile,
-    args=f"--ray_offset 0.2 \
-    --outfile {outfile} \
-    --omp_n_threads {args['n_threads']} \
-    --p_rays_start {args['p_rays_start']} \
-    --p_rays_end {args['p_rays_end']} \
-    --n_bench {args['n_bench']}",
-    print_output=True)
+if __name__ == "__main__":
+
+    # Cluster specific options
+    if(is_cluster()):
+        args = {
+            "p_rays_start": 6,
+            "p_rays_end": 29,
+            "n_bench": 128,
+        }
+    else:
+        # Home PC
+        args = {
+        "p_rays_start": 6,
+        "p_rays_end": 26,
+        "n_bench": 128
+        }
+
+    sys_info = get_system_information()
+    args.update(sys_info)
+
+    # Filename for output
+    args.update(sys_info)
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    outfile = common.globals["paths"]['out_dir'] + f"{timestamp}_{args['cpu_short_name']}_{args['gpu_short_name']}.csv"
+
+
+    # launch benchmark
+    df = common.run_benchmark(
+        outfile,
+        args=f" \
+        --outfile {outfile} \
+        --omp_n_threads {args['n_threads']} \
+        --p_rays_start {args['p_rays_start']} \
+        --p_rays_end {args['p_rays_end']} \
+        --n_bench {args['n_bench']}",
+        print_output=True)

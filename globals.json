@@ -6,11 +6,11 @@
     "grid_output_file": "build/grid.vdb"
   },
   "defaults": {
-    "default_radius_inner": 5,
-    "default_radius_outer": 15,
-    "voxel_size": 0.1,
-    "ray_offset": 0.2,
-    "half_width": 2,
+    "default_radius_inner": 50,
+    "default_radius_outer": 150,
+    "voxel_size": 1,
+    "ray_offset": 2,
+    "half_width": 10,
     "p_rays_start": 12,
     "p_rays_end": 16,
     "n_bench": 4,
