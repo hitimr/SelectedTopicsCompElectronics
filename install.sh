@@ -9,8 +9,9 @@ export PACKAGE_DIR=$DIR_PROJECT_ROOT/packages
 
 
 echo "Creating Directories"
+mkdir -p $LIB_DIR
 
-
+echo "Installing dependencies..."
 
 ## Dependencies
 
@@ -44,9 +45,9 @@ cmake --install $BLOSC_BUILD_DIR
 
 # OpenVDB
 echo "Installing OpenVDB"
-tar -xf $PACKAGE_DIR/openvdb-9.0.0.tar.gz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/openvdb-9.0.0_modified.tar.gz -C $LIB_DIR
 
-export OPENVDB_DIR=$LIB_DIR/openvdb-9.0.0
+export OPENVDB_DIR=$LIB_DIR/openvdb-9.0.0_modified
 export OPENVDB_BUILD_DIR=$OPENVDB_DIR/build
 export OPENVDB_INSTALL_DIR=$OPENVDB_DIR
 
@@ -64,7 +65,8 @@ cmake \
     -D OPENVDB_INSTALL_CMAKE_MODULES=ON \
     -D OPENVDB_USE_DEPRECATED_ABI=ON \
     -D OPENVDB_FUTURE_DEPRECATION=OFF \
-    -D TBB_ROOT=TBB_DIR \
+    -D TBB_INCLUDEDIR=$TBB_DIR/include \
+    -D TBB_LIBRARYDIR=$TBB_DIR/lib/intel64/gcc4.8 \
     -D BLOSC_INCLUDEDIR=$BLOSC_BUILD_DIR/include \
     -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib \
     -D CMAKE_INSTALL_PREFIX=$OPENVDB_INSTALL_DIR \
@@ -75,8 +77,8 @@ make -C $OPENVDB_BUILD_DIR -j$NJOBS
 make -C $OPENVDB_BUILD_DIR install
 
 
-# Python virtual environment
-echo "Setting up Python virtual environment"
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r PyRequirements.txt
+# # Python virtual environment
+# echo "Setting up Python virtual environment"
+# python3 -m venv .venv
+# source .venv/bin/activate
+# python3 -m pip install -r PyRequirements.txt
