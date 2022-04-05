@@ -5,7 +5,7 @@ echo "Building workspace using $NJOBS cores"
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
 export LIB_DIR=$DIR_PROJECT_ROOT/lib
-export DOWNLOAD_DIR=$LIB_DIR/download
+export PACKAGE_DIR=$DIR_PROJECT_ROOT/packages
 
 
 echo "Creating Directories"
@@ -16,20 +16,20 @@ echo "Creating Directories"
 
 # json
 echo "Installing JSON for C++"
-tar -xf $DOWNLOAD_DIR/json.tar.xz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/json.tar.xz -C $LIB_DIR
 
 # plog
 echo "Installing plog"
-tar -xf $DOWNLOAD_DIR/plog-1.1.6.tar.gz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/plog-1.1.6.tar.gz -C $LIB_DIR
 
 # TBB
 echo "Installing TBB"
-tar -xf $DOWNLOAD_DIR/oneapi-tbb-2021.5.0-lin.tgz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/oneapi-tbb-2021.5.0-lin.tgz -C $LIB_DIR
 export TBB_DIR=$LIB_DIR/oneapi-tbb-2021.5.0
 
 # BLOSC
 echo "Installing C-BLOSC"
-tar -xf $DOWNLOAD_DIR/c-blosc-1.21.1.tar.gz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/c-blosc-1.21.1.tar.gz -C $LIB_DIR
 export BLOSC_DIR=$LIB_DIR/c-blosc-1.21.1
 export BLOSC_BUILD_DIR=$BLOSC_DIR/build
 
@@ -44,7 +44,7 @@ cmake --install $BLOSC_BUILD_DIR
 
 # OpenVDB
 echo "Installing OpenVDB"
-tar -xf $DOWNLOAD_DIR/openvdb-9.0.0.tar.gz -C $LIB_DIR
+tar -xf $PACKAGE_DIR/openvdb-9.0.0.tar.gz -C $LIB_DIR
 
 export OPENVDB_DIR=$LIB_DIR/openvdb-9.0.0
 export OPENVDB_BUILD_DIR=$OPENVDB_DIR/build
