@@ -192,7 +192,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   block_size = (size_t)options["block_size"].as<int>();
 }
 // TODO: rename level_set to grid everywhere
-void Benchmarker::run_openVDB(OVBD_GridT &grid, size_t n_rays)
+void Benchmarker::run_openVDB(OVBD_GridT &grid,  std::vector<OVBD_Vec3T> const & reference_solution, size_t n_rays)
 {
   assert(n_rays > 0);
 
@@ -201,12 +201,9 @@ void Benchmarker::run_openVDB(OVBD_GridT &grid, size_t n_rays)
       tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
                                     OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL,
                                     OVBD_RayT>;
-
   IntersectorT ray_intersector(grid);
 
   std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(grid, n_rays);
-  std::vector<OVBD_Vec3T> reference_solutionn =
-      calculate_reference_solution<OVBD_Vec3T>(n_rays, options["r1"].as<double>());
 
   // Run Benchmark
   std::vector<OVBD_Vec3T> iResults(n_rays);
@@ -223,7 +220,8 @@ void Benchmarker::run_openVDB(OVBD_GridT &grid, size_t n_rays)
             << " kRays/s)" << std::endl;
 
   auto wResults = indexToWorld(grid, iResults);
-  analyze_results(wResults, reference_solutionn);
+  analyze_results(wResults, reference_solution);
+
   write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_num_threads(),
                 options["cpu_price"].as<double>(), options["cpu_power"].as<double>());
 }
@@ -325,8 +323,8 @@ void Benchmarker::run()
       calculate_reference_solution<OVBD_Vec3T>(n_rays, options["r1"].as<double>());
 
 
-    run_openVDB(ovdb_grid, n_rays);
-    run_nanoVDB_CPU(nvdb_grid_cpu, n_rays);
+    run_openVDB(ovdb_grid, reference_solution, n_rays);
+    run_nanoVDB_CPU(nvdb_grid_cpu, reference_solution, n_rays);
     run_nanoVDB_GPU(nvdb_grid_gpu, reference_solution, n_rays);
 
     PLOG_INFO << "Done" << std::endl << std::endl;
@@ -335,15 +333,13 @@ void Benchmarker::run()
   result_file.close();
 }
 
-void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set,
+void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, std::vector<OVBD_Vec3T> const & reference_solution,
                                   size_t n_rays)
 {
 
   nanovdb::FloatGrid *h_grid = level_set.grid<FP_Type>();
 
   std::vector<NVDB_RayT> rays = generate_rays<NVDB_GridT, NVDB_RayT>(*h_grid, n_rays);
-  std::vector<OVBD_Vec3T> reference_intersections =
-      calculate_reference_solution<OVBD_Vec3T>(n_rays, options["r1"].as<double>());
 
   auto acc = h_grid->tree().getAccessor();
   std::vector<NVBD_CoordT> iResults(n_rays);
@@ -364,7 +360,7 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
             << " kRays/s)" << std::endl;
 
   auto wResults = indexToWorld(*h_grid, iResults);
-  analyze_results(wResults, reference_intersections);
+  analyze_results(wResults, reference_solution);
   write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_num_threads(),
                 options["cpu_price"].as<double>(), options["cpu_power"].as<double>());
 }
