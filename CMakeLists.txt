@@ -7,6 +7,7 @@ set(ENV{DIR_BUILD} $ENV{DIR_PROJ_ROOT}/build)
 set(ENV{DIR_SRC} $ENV{DIR_PROJ_ROOT}/src)
 set(ENV{DIR_UTIL} $ENV{DIR_SRC}/util)
 set(ENV{LIB_DIR} $ENV{DIR_PROJ_ROOT}/lib)
+set(ENV{TBB_DIR} $ENV{LIB_DIR}/oneapi-tbb-2021.5.0)
 
 set(ENV{CUDA_TOOLKIT_ROOT_DIR} "/usr/local/cuda/bin/")
 
@@ -23,5 +24,18 @@ set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
 set(CMAKE_CUDA_FLAGS "-O3 -g -Wall")
 set(CMAKE_CUDA_FLAGS_DEBUG "-O0 -g -Wall")
 
-include_directories(lib)
+
+# Macro for displaying all variables
+# useful for debugging
+macro(print_all_variables)
+    message(STATUS "print_all_variables------------------------------------------{")
+    get_cmake_property(_variableNames VARIABLES)
+    foreach (_variableName ${_variableNames})
+        message(STATUS "${_variableName}=${${_variableName}}")
+    endforeach()
+    message(STATUS "print_all_variables------------------------------------------}")
+endmacro()
+
+
+# include_directories(lib)
 add_subdirectory(src)
