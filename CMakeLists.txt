@@ -12,6 +12,18 @@ set(ENV{TBB_DIR} $ENV{LIB_DIR}/oneapi-tbb-2021.5.0)
 set(ENV{CUDA_TOOLKIT_ROOT_DIR} "/usr/local/cuda/bin/")
 
 
+list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb-9.0.0/lib/cmake/OpenVDB)
+find_package(OpenVDB REQUIRED)
+include_directories(${OpenVDB_INCLUDE_DIR} SYSTEM)
+
+list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/oneapi-tbb-2021.5.0/cmake)
+find_package(TBB REQUIRED)
+include_directories(${TBB_INCLUDE_DIRS} SYSTEM)
+
+find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
+find_package(OpenMP REQUIRED)
+
+
 # Versions, Standards
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

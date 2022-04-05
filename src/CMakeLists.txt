@@ -7,40 +7,48 @@ project(Benchmark)
 # set(TBB_LIBRARYDIR ${TBB_DIR}/lib/intel64/gcc4.8/)
 # set(Tbb_LIB_COMPONENTS ${TBB_DIR}/lib/intel64/gcc4.8/)
 
-
-# print_all_variables()
-
-# Dependencies
-
-list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/oneapi-tbb-2021.5.0/lib/cmake/tbb)
-list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb-9.0.0/lib/cmake/OpenVDB)
-
-find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS program_options)
-find_package(TBB REQUIRED)
-find_package(OpenMP REQUIRED)
-find_package(OpenVDB REQUIRED)
+# list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/oneapi-tbb-2021.5.0/lib/cmake/tbb)
+# list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb-9.0.0/lib/cmake/OpenVDB)
 
 
+
+# # print_all_variables()
+
+# # Dependencies
+
+# list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/oneapi-tbb-2021.5.0/lib/cmake/tbb)
+# list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb-9.0.0/lib/cmake/OpenVDB)
+
+
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/../cmake/")
+# find_package(OpenVDB REQUIRED)
+
+
+
+# 
+# # find_package(TBB REQUIRED)
+# 
+# find_package(OpenVDB REQUIRED)
 
 
 # becnhmarker library
-set(LIB_BENCHMARKER_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
-cuda_add_library(   benchmarker 
-                    benchmarker/benchmarker.cpp
-                    benchmarker/benchmarker_cuda.cu)
+cuda_add_library(benchmarker benchmarker/benchmarker.cpp benchmarker/benchmarker_cuda.cu)
 
-target_compile_options(benchmarker PRIVATE -fopenmp)
 target_link_libraries(benchmarker 
-    OpenVDB::openvdb)
-
+    ${OpenVDB_LIBRARIES}
+    ${TBB_LIBRARIES})
 
 target_include_directories(benchmarker PUBLIC 
-    "${LIB_BENCHMARKER_INCLUDE_DIRS}"
+    ${CMAKE_CURRENT_SOURCE_DIR}
     "/usr/local/cuda/include/" 
     $ENV{LIB_DIR}json/include
     $ENV{LIB_DIR}/oneapi-tbb-2021.5.0/include
     $ENV{LIB_DIR}/oneTBB/include
     $ENV{LIB_DIR}/plog-1.1.6/include)
+
+target_compile_options(benchmarker PRIVATE 
+    -fopenmp
+)
 
 # main Benchmarker
 cuda_add_executable(raytracing main.cpp)
@@ -50,10 +58,10 @@ target_include_directories(raytracing PUBLIC
 
 target_link_libraries(raytracing
     benchmarker
-    TBB::tbb
-    Boost::program_options 
+    ${Boost_LIBRARIES}
     OpenMP::OpenMP_CXX
-    OpenVDB::openvdb
+    ${OpenVDB_LIBRARIES}
+    TBB::tbb
     )
 
 # Targets for running

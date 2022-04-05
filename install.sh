@@ -26,6 +26,7 @@ tar -xf $DOWNLOAD_DIR/plog-1.1.6.tar.gz -C $LIB_DIR
 echo "Installing TBB"
 tar -xf $DOWNLOAD_DIR/oneapi-tbb-2021.5.0-lin.tgz -C $LIB_DIR
 export TBB_DIR=$LIB_DIR/oneapi-tbb-2021.5.0
+return 0
 
 # BLOSC
 echo "Installing C-BLOSC"
