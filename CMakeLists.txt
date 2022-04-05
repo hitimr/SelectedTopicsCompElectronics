@@ -12,7 +12,7 @@ set(ENV{TBB_DIR} $ENV{LIB_DIR}/oneapi-tbb-2021.5.0)
 set(ENV{CUDA_TOOLKIT_ROOT_DIR} "/usr/local/cuda/bin/")
 
 
-list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb-9.0.0/lib/cmake/OpenVDB)
+list(APPEND CMAKE_MODULE_PATH $ENV{LIB_DIR}/openvdb-9.0.0_modified/lib/cmake/OpenVDB)
 find_package(OpenVDB REQUIRED)
 include_directories(${OpenVDB_INCLUDE_DIR} SYSTEM)
 
