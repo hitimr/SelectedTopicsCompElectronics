@@ -366,25 +366,27 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
 }
 
 // verify results by comparing them to precomputed reference solutions
-template <typename Vec3T>
-bool Benchmarker::analyze_results(const std::vector<Vec3T> &wResults,
-                                  const std::vector<Vec3T> &wReference)
+bool Benchmarker::analyze_results(const std::vector<OVBD_Vec3T> &wResults,
+                                  const std::vector<OVBD_Vec3T> &wReference)
 {
   assert(wResults.size() == wReference.size());
 
   bool err_flag = false;
-  // #pragma omp parallel for shared(wResults, wReference, err_flag)
+#pragma omp parallel for shared(err_flag)
   for (size_t i = 0; i < wResults.size(); i++)
   {
     if (!isClose_vec3(wResults[i], wReference[i]))
     {
-      PLOG_ERROR << "Calculated value does not match at pos " << i << std::endl;
-      PLOG_ERROR << "Received:\t(" << wResults[i][0] << "|" << wResults[i][1] << "|"
-                 << wResults[i][2] << ")" << std::endl;
+      #pragma omp critical
+      {
+        PLOG_ERROR << "Calculated value does not match at pos " << i << std::endl;
+        PLOG_ERROR << "Received:\t(" << wResults[i][0] << "|" << wResults[i][1] << "|"
+                  << wResults[i][2] << ")" << std::endl;
 
-      PLOG_ERROR << "Should be:\t(" << wReference[i][0] << "|" << wReference[i][1] << "|"
-                 << wReference[i][2] << ")" << std::endl;
-      err_flag = true;
+        PLOG_ERROR << "Should be:\t(" << wReference[i][0] << "|" << wReference[i][1] << "|"
+                  << wReference[i][2] << ")" << std::endl;
+        err_flag = true;
+      }
     }
   }
   return err_flag;

@@ -25,9 +25,6 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   size_t bytes = 0;
   nanovdb::FloatGrid *grid_handle = level_set.grid<FP_Type>();
 
-  // std::vector<OVBD_Vec3T> reference_intersections =
-  //     calculate_reference_solution<OVBD_Vec3T>(n_rays, options["r1"].as<double>());
-
   // Init Grid on GPU
   level_set.deviceUpload(); // TODO: move outside so it wont be called every time
   nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_grid_handle = level_set.deviceGrid<FP_Type>();
@@ -38,6 +35,8 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   bytes = sizeof(NVDB_RayT) * n_rays;
   std::vector<NVDB_RayT> rays =
       generate_rays<NVDB_GridT, NVDB_RayT>(*grid_handle, n_rays); // TODO: change to levelset
+
+
   NVDB_RayT *d_rays;
   cudaMalloc(&d_rays, bytes);
   cudaMemcpy(d_rays, rays.data(), bytes, cudaMemcpyHostToDevice);
@@ -67,7 +66,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaMemcpy(result_coords.data(), d_result_coords, sizeof(result_coords[0]) * n_rays,
              cudaMemcpyDeviceToHost);
 
-  auto wResults = indexToWorld(*grid_handle, result_coords);
+  std::vector<Benchmarker::OVBD_Vec3T> wResults = indexToWorld(*grid_handle, result_coords);
   analyze_results(wResults, reference_solution);
 
   // free up GPU Allocations
