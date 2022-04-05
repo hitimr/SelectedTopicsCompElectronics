@@ -4,56 +4,36 @@ echo "Building workspace using $NJOBS cores"
 
 # Environment variables
 export DIR_PROJECT_ROOT=$(pwd)
-export DOWNLOAD_DIR=$LIB_DIR/download
 export LIB_DIR=$DIR_PROJECT_ROOT/lib
+export DOWNLOAD_DIR=$LIB_DIR/download
+
 
 echo "Creating Directories"
 
-# Python virtual environment
-echo "Setting up Python virtual environment"
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r PyRequirements.txt
+
 
 ## Dependencies
 
 # json
-tar -xf $DOWNLOAD_DIR/json.tar.xz -C $DIR_PROJECT_ROOT/lib/download
- 
+echo "Installing JSON for C++"
+tar -xf $DOWNLOAD_DIR/json.tar.xz -C $LIB_DIR
 
 # plog
-echo "Downloading plog"
-export PLOG_DIR=$DIR_PROJECT_ROOT/lib/plog
-git -C  $PLOG_DIR  pull || git clone https://github.com/SergiusTheBest/plog $PLOG_DIR --depth 1
+echo "Installing plog"
+tar -xf $DOWNLOAD_DIR/plog-1.1.6.tar.gz -C $LIB_DIR
 
 # TBB
 echo "Installing TBB"
-export TBB_SOURCE_DIR=$DIR_PROJECT_ROOT/lib/download/oneTBB
-export TBB_BUILD_DIR=$TBB_SOURCE_DIR/build
-export TBB_INSTALL_DIR=$DIR_PROJECT_ROOT/lib/oneTBB
-
-git -C  $TBB_SOURCE_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $TBB_SOURCE_DIR --depth 1
-mkdir -p $TBB_BUILD_DIR 
-mkdir -p $TBB_INSTALL_DIR 
-
-cmake \
-    -D CMAKE_INSTALL_PREFIX=$TBB_INSTALL_DIR \
-    -D TBB_TEST=OFF \
-    -S $TBB_SOURCE_DIR \
-    -B $TBB_BUILD_DIR
-cd $TBB_BUILD_DIR
-cmake --build $TBB_BUILD_DIR -j$NJOBS ..
-make install 
-
-cd $DIR_PROJECT_ROOT
+tar -xf $DOWNLOAD_DIR/oneapi-tbb-2021.5.0-lin.tgz -C $LIB_DIR
+export TBB_DIR=$LIB_DIR/oneapi-tbb-2021.5.0
 
 # BLOSC
-echo "Installing BLOSC"
-export BLOSC_DIR=$DIR_PROJECT_ROOT/lib/c-blosc
+echo "Installing C-BLOSC"
+tar -xf $DOWNLOAD_DIR/c-blosc-1.21.1.tar.gz -C $LIB_DIR
+export BLOSC_DIR=$LIB_DIR/c-blosc-1.21.1
 export BLOSC_BUILD_DIR=$BLOSC_DIR/build
-git -C  $BLOSC_DIR  pull || git clone https://github.com/oneapi-src/oneTBB $BLOSC_DIR --depth 1
-mkdir -p $BLOSC_BUILD_DIR 
 
+echo "Building C-BLOSC"
 cmake \
     -D CMAKE_INSTALL_PREFIX=$BLOSC_BUILD_DIR \
     -D CMAKE_BUILD_TYPE=Release \
@@ -64,13 +44,12 @@ cmake --install $BLOSC_BUILD_DIR
 
 # OpenVDB
 echo "Installing OpenVDB"
-export OPENVDB_SOURCE_DIR=$DIR_PROJECT_ROOT/lib/download/openvdb-9.0.0
-export OPENVDB_BUILD_DIR=$OPENVDB_SOURCE_DIR/lib/openvdb/build
-export OPENVDB_INSTALL_DIR=$DIR_PROJECT_ROOT/openVDB
+tar -xf $DOWNLOAD_DIR/openvdb-9.0.0.tar.gz -C $LIB_DIR
 
-wget -nc https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v9.0.0.tar.gz -P $DIR_PROJECT_ROOT/lib/download
-tar -xf $DIR_PROJECT_ROOT/lib/download/v9.0.0.tar.gz -C $DIR_PROJECT_ROOT/lib/download
-mkdir -p $OPENVDB_BUILD_DIR
+export OPENVDB_DIR=$LIB_DIR/openvdb-9.0.0
+export OPENVDB_BUILD_DIR=$OPENVDB_DIR/build
+export OPENVDB_INSTALL_DIR=$OPENVDB_BUILD_DIR
+
 
 cmake \
     -D OPENVDB_BUILD_CORE=ON \
@@ -87,14 +66,20 @@ cmake \
     -D OPENVDB_USE_DEPRECATED_ABI_6=ON \
     -D OPENVDB_USE_DEPRECATED_ABI_7=ON \
     -D OPENVDB_FUTURE_DEPRECATION=OFF \
-    -D TBB_INCLUDEDIR=$TBB_INSTALL_DIR/include \
-    -D TBB_LIBRARYDIR=$TBB_INSTALL_DIR/lib \
-    -D BLOSC_ROOT=$BLOSC_BUILD_DIR \
+    -D TBB_INCLUDEDIR=$TBB_DIR/include \
+    -D TBB_LIBRARYDIR=$TBB_DIR/lib/intel64/gcc4.8 \
     -D BLOSC_INCLUDEDIR=$BLOSC_BUILD_DIR/include \
-    -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib64 \
+    -D BLOSC_LIBRARYDIR=$BLOSC_BUILD_DIR/lib \
     -D CMAKE_INSTALL_PREFIX=$OPENVDB_INSTALL_DIR \
     -D CMAKE_INSTALL_LIBDIR=lib64 \
     -B $OPENVDB_BUILD_DIR \
-    -S $OPENVDB_SOURCE_DIR
+    -S $OPENVDB_DIR
 make -C $OPENVDB_BUILD_DIR -j$NJOBS
 make -C $OPENVDB_BUILD_DIR install
+
+
+# Python virtual environment
+echo "Setting up Python virtual environment"
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r PyRequirements.txt
