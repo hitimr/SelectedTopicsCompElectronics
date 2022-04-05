@@ -283,14 +283,17 @@ void Benchmarker::save_grid(std::string filename, OVBD_GridT &grid)
 void Benchmarker::run()
 {
   // set number of rays for the benchmark
+  PLOG_INFO << "Setting up Benchmark run..." << std::endl;
   ray_vals = logspace(options["p_rays_start"].as<int>(), options["p_rays_end"].as<int>(), BASE2,
                       options["n_bench"].as<int>());
 
+  PLOG_INFO << "Generating Level Set using OpenVDB" << std::endl;
   auto ovdb_grid = generate_doubleSphere();
 
   // Convert to nanoVDBV
   // Note: it is possible to create Level sets directly in NanoVDB as well bus it's significantly
   // slower
+  PLOG_INFO << "Converting level set to NanoVDB Datastructure" << std::endl;
   auto nvdb_grid_cpu = nanovdb::openToNanoVDB<nanovdb::HostBuffer>(ovdb_grid);
   auto nvdb_grid_gpu = nanovdb::openToNanoVDB<nanovdb::CudaDeviceBuffer>(ovdb_grid);
 
@@ -303,6 +306,7 @@ void Benchmarker::run()
   init_result_file(result_file);
   PLOG_INFO << "Writing results to " << out_file_name << std::endl;
 
+
   // Run Benchmarks
   int counter = 0;
   for (size_t n_rays : ray_vals)
@@ -314,14 +318,16 @@ void Benchmarker::run()
       size_t sqrt_n_rays = (size_t)sqrt((FP_Type)n_rays);
       n_rays = sqrt_n_rays * sqrt_n_rays;
     }
-
     assert(n_rays > 0);
-
     PLOG_INFO << "Running benchmark for " << n_rays << " Rays (" << counter << "/" <<  ray_vals.size() << ")" << std::endl;
+
+    std::vector<OVBD_Vec3T> reference_solution =
+      calculate_reference_solution<OVBD_Vec3T>(n_rays, options["r1"].as<double>());
+
 
     run_openVDB(ovdb_grid, n_rays);
     run_nanoVDB_CPU(nvdb_grid_cpu, n_rays);
-    run_nanoVDB_GPU(nvdb_grid_gpu, n_rays);
+    run_nanoVDB_GPU(nvdb_grid_gpu, reference_solution, n_rays);
 
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
@@ -371,6 +377,7 @@ bool Benchmarker::analyze_results(const std::vector<Vec3T> &wResults,
   assert(wResults.size() == wReference.size());
 
   bool err_flag = false;
+  // #pragma omp parallel for shared(wResults, wReference, err_flag)
   for (size_t i = 0; i < wResults.size(); i++)
   {
     if (!isClose_vec3(wResults[i], wReference[i]))

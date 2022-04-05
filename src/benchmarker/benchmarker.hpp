@@ -85,16 +85,24 @@ public:
   }
 
   void run();
+
   OVBD_GridT generate_sphere(FP_Type radius);
+  
   OVBD_GridT generate_doubleSphere();
+
   void run_openVDB(OVBD_GridT &level_set, size_t nrays);
+
   void run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, size_t nrays);
-  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, size_t n_rays);
+
+  void run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &grid_handle, std::vector<OVBD_Vec3T> const & reference_solution, size_t n_rays);
+
   void save_grid(std::string fileName, OVBD_GridT &grid);
 
   template <class GridT, class RayT> std::vector<RayT> generate_rays(GridT &grid, size_t n_rays);
+
   template <typename Vec3T>
   std::vector<Vec3T> calculate_reference_solution(size_t n_rays, FP_Type sphere_radius_outer);
+
   template <class GridT, class Vec3T>
   std::vector<OVBD_Vec3T> static indexToWorld(GridT &grid, std::vector<Vec3T> &iPoints);
 
