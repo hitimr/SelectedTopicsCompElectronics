@@ -62,6 +62,7 @@ OptionsT parse_options(int ac, char **av)
   desc.add_options()
     // General
     ("help,h", "produce help message")
+
     ("loglevel,l", po::value<int>()->default_value(DEFAULT_LOG_LEVEL), "Log Level 0=none, fatal, error, warning, info, debug, 6=verbose")
 
     ("gpu_price", 
@@ -123,6 +124,12 @@ OptionsT parse_options(int ac, char **av)
     ("omp_n_threads",     
     po::value<int>()->default_value(global_settings["defaults"]["omp_n_threads"]), 
     "Number of threads used for OpenVDB and NanoVDB on CPU")
+
+    ("skip-openvdb", "Skip OpenVDB Benchmark on CPU")
+
+    ("skip-nanovdb-cpu", "Skip NanoVDB Benchmark on CPU")
+
+    ("skip-nanovdb-gpu", "Skip NanoVDB Benchmark on GPU")
 
     // GPU Settings
     ("grid_size",     

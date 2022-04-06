@@ -191,40 +191,7 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   grid_size = (size_t)options["grid_size"].as<int>();
   block_size = (size_t)options["block_size"].as<int>();
 }
-// TODO: rename level_set to grid everywhere
-void Benchmarker::run_openVDB(OVBD_GridT &grid,  std::vector<OVBD_Vec3T> const & reference_solution, size_t n_rays)
-{
-  assert(n_rays > 0);
 
-  // Ray Intersector: Triple nested types. nice...
-  using IntersectorT =
-      tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
-                                    OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL,
-                                    OVBD_RayT>;
-  IntersectorT ray_intersector(grid);
-
-  std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(grid, n_rays);
-
-  // Run Benchmark
-  std::vector<OVBD_Vec3T> iResults(n_rays);
-
-  Timer timer;
-  timer.reset();
-#pragma omp parallel for firstprivate(ray_intersector)
-  for (size_t i = 0; i < n_rays; i++)
-  {
-    ray_intersector.intersectsIS(rays[i], iResults[i]);
-  }
-  double time = timer.get();
-  PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
-            << " kRays/s)" << std::endl;
-
-  auto wResults = indexToWorld(grid, iResults);
-  analyze_results(wResults, reference_solution);
-
-  write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_num_threads(),
-                options["cpu_price"].as<double>(), options["cpu_power"].as<double>());
-}
 
 // convenience function
 Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius)
@@ -323,14 +290,55 @@ void Benchmarker::run()
       calculate_reference_solution<OVBD_Vec3T>(n_rays, options["r1"].as<double>());
 
 
-    run_openVDB(ovdb_grid, reference_solution, n_rays);
-    run_nanoVDB_CPU(nvdb_grid_cpu, reference_solution, n_rays);
-    run_nanoVDB_GPU(nvdb_grid_gpu, reference_solution, n_rays);
+    if (!options.count("skip-openvdb")) 
+      run_openVDB(ovdb_grid, reference_solution, n_rays);
+
+    if (!options.count("skip-nanovdb-cpu"))  
+      run_nanoVDB_CPU(nvdb_grid_cpu, reference_solution, n_rays);
+
+    if (!options.count("skip-nanovdb-gpu")) 
+      run_nanoVDB_GPU(nvdb_grid_gpu, reference_solution, n_rays);
 
     PLOG_INFO << "Done" << std::endl << std::endl;
   }
 
   result_file.close();
+}
+
+
+// TODO: rename level_set to grid everywhere
+void Benchmarker::run_openVDB(OVBD_GridT &grid,  std::vector<OVBD_Vec3T> const & reference_solution, size_t n_rays)
+{
+  assert(n_rays > 0);
+
+  // Ray Intersector: Triple nested types. nice...
+  using IntersectorT =
+      tools::LevelSetRayIntersector<OVBD_GridT, tools::LinearSearchImpl<OVBD_GridT, 0, FP_Type>,
+                                    OVBD_GridT::TreeType::RootNodeType::ChildNodeType::LEVEL,
+                                    OVBD_RayT>;
+  IntersectorT ray_intersector(grid);
+
+  std::vector<OVBD_RayT> rays = generate_rays<OVBD_GridT, OVBD_RayT>(grid, n_rays);
+
+  // Run Benchmark
+  std::vector<OVBD_Vec3T> iResults(n_rays);
+
+  Timer timer;
+  timer.reset();
+#pragma omp parallel for firstprivate(ray_intersector)
+  for (size_t i = 0; i < n_rays; i++)
+  {
+    ray_intersector.intersectsIS(rays[i], iResults[i]);
+  }
+  double time = timer.get();
+  PLOG_INFO << "OpenVDB Finished in " << time << "s (" << (double)n_rays / (1000 * time)
+            << " kRays/s)" << std::endl;
+
+  auto wResults = indexToWorld(grid, iResults);
+  analyze_results(wResults, reference_solution);
+
+  write_results(result_file, "OpenVDB", n_rays, time, 1, omp_get_num_threads(),
+                options["cpu_price"].as<double>(), options["cpu_power"].as<double>());
 }
 
 void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &level_set, std::vector<OVBD_Vec3T> const & reference_solution,
