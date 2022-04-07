@@ -20,7 +20,7 @@ if __name__ == "__main__":
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     gpu_short_name = "Tesla_T4"
     cpu_short_name = "Xeon_6248"
-    load_factor = 1
+    load_factor = 100
     outfile = common.globals["paths"]['out_dir'] + f"{timestamp}_{'gpu_short_name'}_loadfactor_{load_factor}.csv"
 
     args = {
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         # "skip-nanovdb-cpu": "",
         "skip-checks": "",
         "gpu_load_factor": load_factor,
-        "shuffle-rays": "",
+        # "shuffle-rays": "",
         "inner_sphere_offset": 2
 
     }
