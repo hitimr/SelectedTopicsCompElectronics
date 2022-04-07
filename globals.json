@@ -22,6 +22,7 @@
     "cpu_price": 300,
     "gpu_power": 500,
     "cpu_power": 150,
-    "gpu_load_factor": 1
+    "gpu_load_factor": 1,
+    "inner_sphere_offset": 0
   }
 }

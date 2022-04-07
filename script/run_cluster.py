@@ -20,14 +20,14 @@ if __name__ == "__main__":
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     gpu_short_name = "Tesla_T4"
     cpu_short_name = "Xeon_6248"
-    load_factor = 10
+    load_factor = 1
     outfile = common.globals["paths"]['out_dir'] + f"{timestamp}_{'gpu_short_name'}_loadfactor_{load_factor}.csv"
 
     args = {
         "outfile" : outfile,
-        "p_rays_start": 24,
+        "p_rays_start": 6,
         "p_rays_end": 27,
-        "n_bench": 32,
+        "n_bench": 128,
         "cpu_price": 3290.0,
         "cpu_power": 150.0,
         "omp_n_threads": 40,
@@ -35,10 +35,13 @@ if __name__ == "__main__":
         "gpu_power": 70.0,
         "gpu_grid_size": 256,
         "gpu_block_size": 256,
-        "skip-openvdb" : "",
-        "skip-nanovdb-cpu": "",
+        # "skip-openvdb" : "",
+        # "skip-nanovdb-cpu": "",
         "skip-checks": "",
-        "gpu_load_factor": load_factor
+        "gpu_load_factor": load_factor,
+        "shuffle-rays": "",
+        "inner_sphere_offset": 2
+
     }
 
 

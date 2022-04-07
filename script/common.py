@@ -27,7 +27,7 @@ def run_benchmark(outfile, args="", print_output=True, verbose=True):
         print(f"Running benchmark with {args}")
 
     if(print_output):
-        subprocess.run(cmd.split(sep=" "), check=True)
+        subprocess.run(cmd.split(sep=" "), check=True, stderr=subprocess.STDOUT)
     else:
         subprocess.run(cmd.split(sep=" "), check=True,
                        stdout=subprocess.DEVNULL)
@@ -39,10 +39,10 @@ def load_df(file_name):
  
     # if raycount is low some values for n_rays may appear multiple times
     df = df.groupby(["n_rays", "kernel"]).mean()
+    
+    df["MRps"] = df["Rps"] * 10**-6.
     return df 
 
 
 
 globals = load_globals()
-
-'--ray_offset 0.2     --omp_n_threads 8     --p_rays_start 12     --p_rays_end 18     --n_bench 8 --outfile /home/hiti/Workspace/SelectedTopicsCompElectronics/build/2022-03-31_23-47-30_Ryzen7_3700X_GTX_970.csv'
