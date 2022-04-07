@@ -4,7 +4,7 @@
 
 __global__ void kernel_raytracing(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
                                   Benchmarker::NVDB_RayT *rays, FP_Type *time_results,
-                                  nanovdb::Coord *result_coords, size_t n_rays)
+                                  nanovdb::Coord *result_coords, size_t n_rays, int load_factor)
 {
   unsigned int n_threads = blockDim.x * gridDim.x;
   unsigned int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -13,9 +13,12 @@ __global__ void kernel_raytracing(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_l
   nanovdb::Coord ijk;
   FP_Type value;
 
-  for (unsigned int i = thread_id; i < n_rays; i += n_threads)
+  for(unsigned int reps = 0; reps < load_factor; reps++)
   {
-    nanovdb::ZeroCrossing(rays[i], acc, result_coords[i], value, time_results[i]);
+    for (unsigned int i = thread_id; i < n_rays; i += n_threads)
+    {
+      nanovdb::ZeroCrossing(rays[i], acc, result_coords[i], value, time_results[i]);
+    }
   }
 }
 
@@ -26,6 +29,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   // GPU
   int grid_size = (size_t)options["gpu_grid_size"].as<int>();
   int block_size = (size_t)options["gpu_block_size"].as<int>();
+  int load_factor = (size_t)options["gpu_load_factor"].as<int>();
 
   size_t bytes = 0;
   nanovdb::FloatGrid *grid_handle = level_set.grid<FP_Type>();
@@ -61,9 +65,9 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaDeviceSynchronize();
   timer.reset();
   kernel_raytracing<<<grid_size, block_size>>>(d_grid_handle, d_rays, d_result_times,
-                                               d_result_coords, n_rays);
+                                               d_result_coords, n_rays, load_factor);
   cudaDeviceSynchronize();
-  double time = timer.get();
+  double time = timer.get() / (double) load_factor;
 
   // Transfer results back to CPU
   cudaMemcpy(result_times.data(), d_result_times, sizeof(result_times[0]) * n_rays,

@@ -134,6 +134,10 @@ OptionsT parse_options(int ac, char **av)
 
     ("skip-checks", "Skip verification of results")
 
+    ("gpu_load_factor",     
+    po::value<int>()->default_value(global_settings["defaults"]["gpu_load_factor"]), 
+    "Number of times the GPU calculation is repeated to simulate heavier load")
+
     // GPU Settings
     ("gpu_grid_size",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_grid_size"]), 
