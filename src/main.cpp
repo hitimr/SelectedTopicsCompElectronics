@@ -131,6 +131,8 @@ OptionsT parse_options(int ac, char **av)
 
     ("skip-nanovdb-gpu", "Skip NanoVDB Benchmark on GPU")
 
+    ("skip-checks", "Skip verification of results")
+
     // GPU Settings
     ("grid_size",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_grid_size"]), 

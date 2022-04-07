@@ -377,6 +377,11 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
 bool Benchmarker::analyze_results(const std::vector<OVBD_Vec3T> &wResults,
                                   const std::vector<OVBD_Vec3T> &wReference)
 {
+  if (options.count("skip-checks"))
+  {
+    return true;
+  }
+
   assert(wResults.size() == wReference.size());
 
   bool err_flag = false;
