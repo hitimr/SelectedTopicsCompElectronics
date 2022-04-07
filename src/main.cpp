@@ -57,6 +57,11 @@ void verify_cli_options(OptionsT const &options)
   {
     PLOG_WARNING << "Shuffling rays prevents result verification. It is advised to disable checks (use --skip-checks)" << std::endl;
   }
+
+  if((options["inner_sphere_offset"].as<double>() > 0) && !options.count("skip-checks"))
+  {
+    PLOG_WARNING << "Offsetting the inner sphere rpevents result verification. It is advised to disable checks (use --skip-checks)" << std::endl;
+  }
 }
 
 OptionsT parse_options(int ac, char **av)
@@ -105,10 +110,14 @@ OptionsT parse_options(int ac, char **av)
     po::value<double>()->default_value(global_settings["defaults"]["default_radius_outer"]), 
     "sphere radius r1")
 
+    ("inner_sphere_offset", 
+    po::value<double>()->default_value(global_settings["defaults"]["inner_sphere_offset"]), 
+    "offset in x-direction of the inner sphere to force different ray times. Note this prevents result verification")
+
     ("half_width", 
     po::value<double>()->default_value(global_settings["defaults"]["half_width"]), 
-    "level set half width in voxel units")
-
+    "level set half width in voxel units")    
+    
     ("ray_offset",
     po::value<double>()->default_value(global_settings["defaults"]["ray_offset"]),
     "If rays are placed directly on the inner sphere they may immediately intersect again\n\

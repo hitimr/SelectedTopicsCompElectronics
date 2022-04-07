@@ -82,7 +82,7 @@ public:
 
   void run();
 
-  OVBD_GridT generate_sphere(FP_Type radius);
+  OVBD_GridT generate_sphere(FP_Type radius, FP_Type offset_x=0);
 
   OVBD_GridT generate_doubleSphere();
 

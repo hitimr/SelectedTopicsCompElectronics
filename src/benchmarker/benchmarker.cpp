@@ -207,11 +207,11 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
 
 
 // convenience function
-Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius)
+Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius, FP_Type offset_x)
 {
   return *tools::createLevelSetSphere<OVBD_GridT>(
       radius,                                      // radius of the sphere in world units
-      {center_x, center_y, center_z},              // center of the sphere in world units
+      {center_x + offset_x, center_y, center_z},              // center of the sphere in world units
       (FP_Type)options["voxel_size"].as<double>(), // voxel size in world units
       level_set_half_width // half the width of the narrow band, in voxel units
   );
@@ -219,8 +219,12 @@ Benchmarker::OVBD_GridT Benchmarker::generate_sphere(FP_Type radius)
 
 Benchmarker::OVBD_GridT Benchmarker::generate_doubleSphere()
 {
-  OVBD_GridT grid = generate_sphere((FP_Type)options["r1"].as<double>());
-  OVBD_GridT sphere_0 = generate_sphere((FP_Type)options["r0"].as<double>());
+  OVBD_GridT grid = generate_sphere((FP_Type)options["r1"].as<double>()); // outer sphere
+
+  OVBD_GridT sphere_0 = generate_sphere(
+    (FP_Type) options["r0"].as<double>(), 
+    (FP_Type) options["inner_sphere_offset"].as<double>()
+    ); // inner sphere
 
   // use geometric difference to generate a sphere with an empty core
   openvdb::tools::csgDifference(grid, sphere_0);
