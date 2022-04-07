@@ -19,6 +19,8 @@
 #include <fstream>
 #include <omp.h>
 #include <vector>
+#include <algorithm>
+#include <random>
 
 using namespace openvdb;
 
@@ -93,6 +95,12 @@ std::vector<RayT> Benchmarker::generate_rays(GridT &grid, size_t n_rays)
 
   default:
     throw RuntimeError("Only 2D or 3D available");
+  }
+
+  if(options.count("shuffle-rays"))
+  {
+    auto rng = std::default_random_engine {};
+    std::shuffle(std::begin(rays), std::end(rays), rng);
   }
 
   return rays;

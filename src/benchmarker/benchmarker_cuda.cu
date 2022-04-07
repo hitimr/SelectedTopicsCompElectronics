@@ -2,6 +2,8 @@
 #include <nanovdb/util/Ray.h>
 #include <vector>
 
+#include <chrono>
+
 __global__ void kernel_raytracing(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_level_set,
                                   Benchmarker::NVDB_RayT *rays, FP_Type *time_results,
                                   nanovdb::Coord *result_coords, size_t n_rays, int load_factor)
@@ -64,10 +66,13 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   Timer timer;
   cudaDeviceSynchronize();
   timer.reset();
+
   kernel_raytracing<<<grid_size, block_size>>>(d_grid_handle, d_rays, d_result_times,
                                                d_result_coords, n_rays, load_factor);
   cudaDeviceSynchronize();
-  double time = timer.get() / (double) load_factor;
+
+  double time = timer.get();
+  double adjusted_time = time / (double) load_factor;
 
   // Transfer results back to CPU
   cudaMemcpy(result_times.data(), d_result_times, sizeof(result_times[0]) * n_rays,
@@ -84,9 +89,9 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   cudaFree(d_result_coords);
   cudaFree(d_result_times);
 
-  PLOG_INFO << "NanoVDB on GPU Finished in " << time << "s (" << (double)n_rays / (1e6 * time)
+  PLOG_INFO << "NanoVDB on GPU Finished in " << time << "s (" << (double)n_rays / (1e6 * adjusted_time)
             << " MRays/s)" << std::endl;
 
-  write_results(result_file, "NanoVDB_GPU", n_rays, time, grid_size, block_size,
+  write_results(result_file, "NanoVDB_GPU", n_rays, adjusted_time, grid_size, block_size,
                 options["gpu_price"].as<double>(), options["gpu_power"].as<double>());
 }

@@ -51,6 +51,12 @@ void verify_cli_options(OptionsT const &options)
 
   int ray_dim = options["ray_dim"].as<int>();
   BOOST_ASSERT_MSG((ray_dim == DIM2) || (ray_dim == DIM3), "Only 2D or 3D possible");
+
+
+  if(options.count("shuffle-rays") && !options.count("skip-checks"))
+  {
+    PLOG_WARNING << "Shuffling rays prevents result verification. It is advised to disable checks (use --skip-checks)" << std::endl;
+  }
 }
 
 OptionsT parse_options(int ac, char **av)
@@ -137,6 +143,8 @@ OptionsT parse_options(int ac, char **av)
     ("gpu_load_factor",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_load_factor"]), 
     "Number of times the GPU calculation is repeated to simulate heavier load")
+
+    ("shuffle-rays", "Shuffle rays before passing them to the kernel. Note: performance checks are no longer possible with that option")
 
     // GPU Settings
     ("gpu_grid_size",     
