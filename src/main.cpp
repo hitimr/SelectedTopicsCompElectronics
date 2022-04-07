@@ -41,12 +41,13 @@ void verify_cli_options(OptionsT const &options)
 
   BOOST_ASSERT(0 < options["voxel_size"].as<double>());
   BOOST_ASSERT(0 < options["half_width"].as<double>());
-  BOOST_ASSERT(0 < options["grid_size"].as<int>());
-  BOOST_ASSERT(0 < options["block_size"].as<int>());
   BOOST_ASSERT(0 < options["n_bench"].as<int>());
   BOOST_ASSERT(0 < options["p_rays_start"].as<int>());
   BOOST_ASSERT(0 < options["p_rays_end"].as<int>());
   BOOST_ASSERT(0 < options["n_bench"].as<int>());
+  BOOST_ASSERT(0 < options["gpu_grid_size"].as<int>());
+  BOOST_ASSERT(0 < options["gpu_block_size"].as<int>());
+
 
   int ray_dim = options["ray_dim"].as<int>();
   BOOST_ASSERT_MSG((ray_dim == DIM2) || (ray_dim == DIM3), "Only 2D or 3D possible");
@@ -134,11 +135,11 @@ OptionsT parse_options(int ac, char **av)
     ("skip-checks", "Skip verification of results")
 
     // GPU Settings
-    ("grid_size",     
+    ("gpu_grid_size",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_grid_size"]), 
     "number of blocks used on GPU")
 
-    ("block_size",     
+    ("gpu_block_size",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_block_size"]), 
     "number of threads used per block")
 

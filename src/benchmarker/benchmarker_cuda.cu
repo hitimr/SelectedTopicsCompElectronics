@@ -22,6 +22,11 @@ __global__ void kernel_raytracing(nanovdb::Grid<nanovdb::NanoTree<FP_Type>> *d_l
 void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> &level_set, std::vector<Benchmarker::OVBD_Vec3T> const & reference_solution,
                                   size_t n_rays)
 {
+
+  // GPU
+  int grid_size = (size_t)options["gpu_grid_size"].as<int>();
+  int block_size = (size_t)options["gpu_block_size"].as<int>();
+
   size_t bytes = 0;
   nanovdb::FloatGrid *grid_handle = level_set.grid<FP_Type>();
 
@@ -53,6 +58,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
 
   // Start Benchmark
   Timer timer;
+  cudaDeviceSynchronize();
   timer.reset();
   kernel_raytracing<<<grid_size, block_size>>>(d_grid_handle, d_rays, d_result_times,
                                                d_result_coords, n_rays);

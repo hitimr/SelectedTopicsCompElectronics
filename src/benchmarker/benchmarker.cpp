@@ -136,7 +136,16 @@ std::vector<Benchmarker::OVBD_Vec3T> Benchmarker::indexToWorld(GridT &grid,
 template <typename Vec3T>
 std::vector<Vec3T> Benchmarker::calculate_reference_solution(size_t n_rays, FP_Type radius)
 {
+
+  // If resutls are not checked its fine if we just return an empty vector
+  if(options.count("skip-checks"))
+  {
+      return std::vector<Vec3T>();
+  }
+
+
   std::vector<Vec3T> reference_solution(n_rays);
+
   std::vector<FP_Type> alpha_vals = linspace<FP_Type>(0.0, 2.0 * M_PI, n_rays);
   size_t sqrt_n_rays = sqrt(n_rays);
   FP_Type theta, phi;
@@ -186,10 +195,6 @@ Benchmarker::Benchmarker(const OptionsT &options) : options(options)
   level_set_half_width = (FP_Type)options["half_width"].as<double>();
   eps = voxel_size * math::Sqrt(3.);
   ray_offset = (FP_Type)options["ray_offset"].as<double>();
-
-  // GPU
-  grid_size = (size_t)options["grid_size"].as<int>();
-  block_size = (size_t)options["block_size"].as<int>();
 }
 
 
