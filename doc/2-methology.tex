@@ -1,21 +1,103 @@
+\setcounter{section}{1}
 \section{Methodology}
 
-Rendering images is usually achieved by casting a set amount of rays onto a 3D object and calculating all intersection points.
-Once an intersection is found a ray may spawn one or more rays at the intersection point in order to simulate effects such as reflections, glossy surfaces, semi-transparent materials, etc.
-It is also possible that no intersection is found if the ray leaves the bounding box. This is the equivalent of a ray "shooting into the sky".
-These rays do not contribute to the result and are usually discarded. 
-Since the exact point of exit is not required and no additional rays are spawned theses rays are cheaper to compute.
+% Rendering images is usually achieved by casting a set amount of rays onto a 3D object and calculating all intersection points.
+% Once an intersection is found a ray may spawn one or more rays at the intersection point in order to simulate effects such as reflections, glossy surfaces, semi-transparent materials, etc.
+% It is also possible that no intersection is found if the ray leaves the bounding box. This is the equivalent of a ray "shooting into the sky".
+% These rays do not contribute to the result and are usually discarded. 
+% Since the exact point of exit is not required and no additional rays are spawned theses rays are cheaper to compute.
+
+
+% \begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=0.5\textwidth]{res/rendered_image_turner.jpg}
+% 	\caption{One of the first rendered digitally rendered images \cite{rendering_turner}. Approximately half of the rendered area represents the sky. Rays casted there can be discarded}
+% 	\label{fig::rendered_image_turner}
+% \end{figure}
+
+
+% The main difference between image rendering and applications in Semiconductor Process Simulation is that there are usually no skyboxes.
+% Furthermore it is undesirable to discard rays since they do not contribute to the simulation and are therefore wasted computing power.
+
+The benchmark is designed to be baseline for future applications that are using NanoVDB for narrow-band level-sets and raytracing within the context of Semiconductor process simulation.
+Therefore no specific problem is chosen but the worst-case scenario in a typical application is modelled. 
+
+
+\subsection{Hardware setup}
+The benchmark is performed on a single node of a scientific cluster provided by TU Wien. 
+The node consists of the devices listed in Tab. \ref{tab:hardware} which are both used for the benchmark.
+
+CPUs and GPUs are different platforms in terms of architecture and design which makes a fair comparison with regards to their technical aspects difficult.
+However both devices are similar in cost of acquisition and operating expenses (i.e. power usage). 
+Furthermore both platforms are marketed towards scientific computing.
+
+
+\begin{table}[H]
+\caption{Hardware used for the benchmark. Prices may fluctuate due to current events. Power consumption according to absolute maximum ratings by the vendor}
+\label{tab:hardware}
+\centering
+\begin{tabular}{@{}llll@{}}
+	\toprule
+	& Price           & Power Consumption & Cores                \\ \hline
+Intel Xeon 6248 & € 3.300         & 105W              & 20 Cores; 40 Threads \\
+NVIDIA Tesla T4 & € 2.500 - 3.000 & 70W               & 2.560 CUDA-Cores     \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Simulation environment}
+
+A common problem in Semiconductor process simulation is light being cast into a trench with semi-reflective walls as shown in Fig. \ref{fig:benchmark_setup} (left).
+To simplify the program and enforce a worst-case scenario the following modifications are performed:
+
+\begin{itemize}
+	\item Rays leaving the bounding box (i.e. shooting into the sky) are cheaper to compute but do not contribute to the simulation. 
+	In order to prevent these edge cases rays are cast onto the inner surface of a hollow sphere.
+	\item The point source is replaced with a volumetric source. Otherwise every ray would start within the same voxel which would lead to a beneficial memory access pattern.
+	\item Depending on the reflecting angle, rays may cover different distances. Therefore the inner sphere (ray source) is offset to enforce a distribution of distances.
+	\item Rays are shuffled in memory before being passed to the kernel to prevent beneficial memory access patterns.
+	\item Any ray reflection on the surface is equivalent to having 2 separate rays (inbound and outbound) at the intersection point. Therefore reflections are not modelled.
+\end{itemize}
 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.5\textwidth]{res/rendered_image_turner.jpg}
-	\caption{One of the first rendered digitally rendered images \cite{rendering_turner}. Approximately half of the rendered area represents the sky. Rays casted there can be discarded}
-	\label{fig::rendered_image_turner}
+	% Rigth image
+	\begin{subfigure}{0.35\textwidth}
+	\includegraphics[width=1\linewidth]{res/trench_with_rays.png} 
+	\caption{}
+	%\label{fig:trench_with_rays}
+	
+\end{subfigure}
+	% left image
+	\begin{subfigure}{0.35\textwidth}
+	\includegraphics[width=1\linewidth]{res/benchmark_setup.png}
+	\caption{}
+	%\label{fig:parallel-solution}
+\end{subfigure}
+
+\caption{Benchmark setup. Left: a typical problem in Semiconductor Process simulation. Light is being cast into a trench. Every ray has a chance of being reflected or absorbed.
+Right: Approximated setup used for the benchmark} 
+\label{fig:benchmark_setup}
 \end{figure}
 
 
-The main difference between image rendering and applications in Semiconductor Process Simulation is that there are usually no skyboxes.
-Furthermore it is undesirable to discard rays since they do not contribute to the simulation and are therefore wasted computing power.
+Origin and direction of every ray along with a ground truth are precomputed and passed to three different kernels:
 
+\begin{itemize}
+	\item OpenVDB (CPU)
+	\item NanoVDB (CPU)
+	\item NanoVDB (GPU)
+\end{itemize}
 
+The OpenVDB kernel uses the algorithms and data structures published by Ken Musth et al. in 2013 and servers as a baseline for further comparison.
+Both NanoVDB kernels are identical but launched on different platforms.
+
+Only the time required to calculate intersections is measured. Memory management, data transfer, ray generation, result verification, etc. is not measured.
+After the benchmark is complete the number of calculated rays per second is calculated using 
+
+\begin{equation}
+	Rps = \frac{ray\_count}{time}
+\end{equation}
+
+The benchmark is repeated multiple times while increasing the number of rays until no further increases in Rps is observed.
+The asymptotic behaviour of the resulting performance curve is used to estimate a potential performance gain for switching to NanoVDB or GPUs.
