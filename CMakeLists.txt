@@ -8,6 +8,14 @@ set(ENV{DIR_SRC} $ENV{DIR_PROJ_ROOT}/src)
 set(ENV{DIR_UTIL} $ENV{DIR_SRC}/util)
 set(ENV{LIB_DIR} $ENV{DIR_PROJ_ROOT}/lib)
 set(ENV{TBB_DIR} $ENV{LIB_DIR}/oneapi-tbb-2021.5.0)
+set(ENV{BLOSC_DIR} $ENV{LIB_DIR}/c-blosc-1.21.1/build)
+
+
+set(TBB_INCLUDEDIR $ENV{TBB_DIR}/include)
+set(TBB_LIBRARYDIR $ENV{TBB_DIR}/lib/intel64/gcc4.8)
+set(BLOSC_INCLUDEDIR $ENV{BLOSC_DIR}/include)
+set(BLOSC_LIBRARYDIR $ENV{BLOSC_DIR}/lib)
+
 
 set(ENV{CUDA_TOOLKIT_ROOT_DIR} "/usr/local/cuda/bin/")
 
