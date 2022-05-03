@@ -149,6 +149,8 @@ OptionsT parse_options(int ac, char **av)
 
     ("skip-checks", "Skip verification of results")
 
+    ("calculate-error", "Performa a detailed calculation of the error after each run. (currently only implemented for NanoVDB on CUDA.")
+
     ("gpu_load_factor",     
     po::value<int>()->default_value(global_settings["defaults"]["gpu_load_factor"]), 
     "Number of times the GPU calculation is repeated to simulate heavier load")

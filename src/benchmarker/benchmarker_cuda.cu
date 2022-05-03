@@ -84,6 +84,11 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   std::vector<Benchmarker::OVBD_Vec3T> wResults = indexToWorld(*grid_handle, result_coords);
   analyze_results(wResults, reference_solution);
 
+  if(options.count("calculate-error"))
+  {
+    std::cout << "Calculating Error for NanoVDB on GPU" << std::endl;
+  }
+
   // free up GPU Allocations
   cudaFree(d_rays);
   cudaFree(d_result_coords);
