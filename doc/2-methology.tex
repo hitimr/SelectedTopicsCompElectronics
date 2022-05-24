@@ -23,6 +23,11 @@ The benchmark is designed to be baseline for future applications that are using 
 Therefore no specific problem is chosen but the worst-case scenario in a typical application is modelled. 
 
 
+Source code, build instructions and measurement data are available at \footnote{Pre-Release version. The project is not finished yet}:
+\\~\\
+\centerline{\url{https://github.com/hitimr/SelectedTopicsCompElectronics}}
+
+
 \subsection{Hardware setup}
 The benchmark is performed on a single node of a scientific cluster provided by TU Wien. 
 The node consists of the devices listed in Tab. \ref{tab:hardware} which are both used for the benchmark.
@@ -33,8 +38,8 @@ Furthermore both platforms are marketed towards scientific computing.
 
 
 \begin{table}[H]
-\caption{Hardware used for the benchmark. Prices may fluctuate due to current events. Power consumption according to absolute maximum ratings by the vendor}
-\label{tab:hardware}
+
+\caption{Hardware used for the benchmark. Prices may fluctuate due to current events. Power consumption represents the absolute maximum ratings according to the vendor}
 \centering
 \begin{tabular}{@{}llll@{}}
 	\toprule
@@ -42,7 +47,9 @@ Furthermore both platforms are marketed towards scientific computing.
 Intel Xeon 6248 & € 3.300         & 105W              & 20 Cores; 40 Threads \\
 NVIDIA Tesla T4 & € 2.500 - 3.000 & 70W               & 2.560 CUDA-Cores     \\ \bottomrule
 \end{tabular}
+\label{tab:hardware}
 \end{table}
+
 
 \subsection{Simulation environment}
 
@@ -53,9 +60,9 @@ To simplify the program and enforce a worst-case scenario the following modifica
 	\item Rays leaving the bounding box (i.e. shooting into the sky) are cheaper to compute but do not contribute to the simulation. 
 	In order to prevent these edge cases rays are cast onto the inner surface of a hollow sphere.
 	\item The point source is replaced with a volumetric source. Otherwise every ray would start within the same voxel which would lead to a beneficial memory access pattern.
-	\item Depending on the reflecting angle, rays may cover different distances. Therefore the inner sphere (ray source) is offset to enforce a distribution of distances.
+	\item Depending on the reflecting angle, rays may cover different distances. Therefore the inner sphere (ray source) is offset to create a distribution of distances.
 	\item Rays are shuffled in memory before being passed to the kernel to prevent beneficial memory access patterns.
-	\item Any ray reflection on the surface is equivalent to having 2 separate rays (inbound and outbound) at the intersection point. Therefore reflections are not modelled.
+	\item Any ray reflection on the surface is equivalent to having 2 separate rays (inbound and outbound) at the intersection point. Therefore reflections do not need to be modelled.
 \end{itemize}
 
 
@@ -75,13 +82,13 @@ To simplify the program and enforce a worst-case scenario the following modifica
 	%\label{fig:parallel-solution}
 \end{subfigure}
 
-\caption{Benchmark setup. Left: a typical problem in Semiconductor Process simulation. Light is being cast into a trench. Every ray has a chance of being reflected or absorbed.
-Right: Approximated setup used for the benchmark} 
+\caption{Benchmark setup. \textbf{a} Trench being illuminated by a light source. Every ray has a chance of being reflected or absorbed.
+\textbf{b} 2D cross-section of the modified setup. For the benchmark rays are distributed evenly across the surface of the inner sphere.} 
 \label{fig:benchmark_setup}
 \end{figure}
 
 
-Origin and direction of every ray along with a ground truth are precomputed and passed to three different kernels:
+Origin and direction of every ray along with a ground truth are precomputed and passed to three different ray intersection kernels:
 
 \begin{itemize}
 	\item OpenVDB (CPU)
@@ -89,15 +96,16 @@ Origin and direction of every ray along with a ground truth are precomputed and 
 	\item NanoVDB (GPU)
 \end{itemize}
 
-The OpenVDB kernel uses the algorithms and data structures published by Ken Musth et al. in 2013 and servers as a baseline for further comparison.
+The OpenVDB kernel servers as a baseline for comparison.
 Both NanoVDB kernels are identical but launched on different platforms.
 
-Only the time required to calculate intersections is measured. Memory management, data transfer, ray generation, result verification, etc. is not measured.
-After the benchmark is complete the number of calculated rays per second is calculated using 
+Only the time required to calculate intersections is measured. Memory management, data transfer, ray generation, result verification, etc. is not included.
+After the benchmark is complete the number of calculated rays per second is derived using 
 
 \begin{equation}
-	Rps = \frac{ray\_count}{time}
+	Rps = \frac{ray \: count}{time} = [\frac{1}{s}]
 \end{equation}
 
-The benchmark is repeated multiple times while increasing the number of rays until no further increases in Rps is observed.
+The benchmark is repeated while increasing the number of rays until no further increases in $Rps$ is observed. 
+After each iteration the resulting intersections are compared to a pre-computed ground truth to assure the correctness of the results.
 The asymptotic behaviour of the resulting performance curve is used to estimate a potential performance gain for switching to NanoVDB or GPUs.

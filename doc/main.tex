@@ -21,6 +21,7 @@
 %\usepackage{url}
 \usepackage{hyperref}
 \usepackage{booktabs}
+\usepackage{titling}
 
 \usepackage{tabularx}
 %\usepackage{subfigure}
@@ -79,11 +80,21 @@
 %%%%%%%%% TITLE PAGE %%%%%%%%%
 \maketitle
 
-\newpage
-\tableofcontents
-%\listoftodos
 
-\thispagestyle{empty}
+
+%\listoftodos
+\begin{abstract}
+OpenVDB and NanoVDB are data structures which were initially developed for image and movie rendering.
+However it is possible to use the provided frameworks within the context of semiconductor process simulation.
+This paper aims to benchmark the raytracing performance of NanoVDB and OpenVDB for said application in a worst-cast scenario on a scientific computing cluster.
+NanoVDB, which is a mini-version of OpenVDB, is also compatible with common graphics APIs. Therefore the behavior on GPUs is examined as well.
+\end{abstract}
+
+
+\tableofcontents
+
+
+
 \newpage
 \setcounter{page}{1}
 
@@ -94,6 +105,6 @@
 \include{3-results}
 %\include{2-conjugate-gradients}
 %\include{99-templateChapter}   
-\printbibliography
+
 
 \end{document}
