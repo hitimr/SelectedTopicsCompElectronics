@@ -82,6 +82,7 @@
     "latex-workshop.latex.outDir": "../build/doc",
     "cSpell.words": [
         "basicstyle",
+        "CUDA",
         "df_rps",
         "iloc",
         "keywordstyle",
