@@ -87,6 +87,7 @@ void Benchmarker::run_nanoVDB_GPU(nanovdb::GridHandle<nanovdb::CudaDeviceBuffer>
   if(options.count("calculate-error"))
   {
     std::cout << "Calculating Error for NanoVDB on GPU" << std::endl;
+    calculate_error(wResults, result_times);
   }
 
   // free up GPU Allocations

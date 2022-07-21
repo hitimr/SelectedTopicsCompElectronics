@@ -105,5 +105,7 @@ public:
   bool analyze_results(const std::vector<OVBD_Vec3T> &result_intersections,
                        const std::vector<OVBD_Vec3T> &reference_intersections);
 
+  void calculate_error(const std::vector<OVBD_Vec3T> &result_intersections, std::vector<FP_Type> & times);
+
   template <typename Vec3T> bool isClose_vec3(const Vec3T &a, const Vec3T &b);
 };

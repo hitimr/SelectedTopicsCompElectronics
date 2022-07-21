@@ -3,7 +3,8 @@
     "executable": "build/src/raytracing",
     "outfile_timings": "build/results.csv",
     "out_dir": "build/",
-    "grid_output_file": "build/grid.vdb"
+    "grid_output_file": "build/grid.vdb",
+    "error_output_file": "build/errors.csv"
   },
   "defaults": {
     "default_radius_inner": 3,

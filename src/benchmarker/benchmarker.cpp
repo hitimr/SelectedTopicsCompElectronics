@@ -288,7 +288,6 @@ void Benchmarker::run()
   init_result_file(result_file);
   PLOG_INFO << "Writing results to " << out_file_name << std::endl;
 
-
   // Run Benchmarks
   int counter = 0;
   for (size_t n_rays : ray_vals)
@@ -388,6 +387,22 @@ void Benchmarker::run_nanoVDB_CPU(nanovdb::GridHandle<nanovdb::HostBuffer> &leve
   analyze_results(wResults, reference_solution);
   write_results(result_file, "NanoVDB_CPU", n_rays, time, 1, omp_get_num_threads(),
                 options["cpu_price"].as<double>(), options["cpu_power"].as<double>());
+}
+
+
+void Benchmarker::calculate_error(const std::vector<OVBD_Vec3T> &wResults, std::vector<FP_Type> & times)
+{
+  std::string out_file_name = misc::abs_path(global_settings["paths"]["error_output_file"]);
+  std::ofstream file;
+  file.open(out_file_name);
+  assert(file.is_open());
+
+  file << "x;y;z" << std::endl;
+  for(size_t i = 0; i < wResults.size(); i++)
+  {
+    file << wResults[i][0] << ";" << wResults[i][1] << ";" << wResults[i][2] << ";" << times[i] << std::endl;
+  }
+  file.close();    
 }
 
 // verify results by comparing them to precomputed reference solutions
