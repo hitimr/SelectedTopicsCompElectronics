@@ -1,0 +1,18 @@
+\section{Discussion and Outlook}
+
+As shown in Fig. \ref{fig:results} NanoVDB does provide better performance compared to OpenVDB on both platforms.
+Since both frameworks use different data structures significant adaptations to the code base are required for a project to migrate to NanoVDB. 
+The expected increase in performance for CPU based systems can be considered too small to justify the amount of necessary work.
+
+However for machines with a dedicated GPU a switch to NanoVDB can be very attractive especially for large simulations.
+Furthermore no adaptations to the codebase are required to launch kernels on either CPUs or GPUs.
+This also allows to combine both platforms to perform calculations on both in parallel.
+
+With its current implementation the main limiting factor of NanoVDB seems to be the kernel for ray intersections which is not well optimized GPUs as it includes 4 branches (2 if and 2 while).
+Branches are usually no problem for CPUs due to their branch-prediction functionality.
+However on GPUs with a SIMT \footnote{Single Instruction Multiple Thread} Architecture 1 branch may force multiple threads to idle until all branches in a thread block are merged again.
+
+Since 2018 NVIDIA is also selling GPUs with hardware accelerated raytracing capabilities (RTX 20X0 and 30X0 series).
+Due to its proprietary license the exact functionality of this technology is not part of the public domain.
+But a recent analysis \cite{sanzharov2020survey} shows that a performance increase of up to one order of magnitude is possible in certain scenarios.
+However additional research and testing is required to determine of NanoVDB is compatible with this technology.
