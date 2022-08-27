@@ -68,9 +68,9 @@
     basicstyle=\footnotesize\ttfamily
 }
 
-\author{Santa Claus}
+\author{Mario R. Hiti}
 \date{\today}
-\title{Performance analysis of GPU accelerated raytracing for narrow-band level sets using NanoVDB}
+\title{Selected Topics for Computational Electronics}
 
 
 % double underline
@@ -84,10 +84,13 @@
 
 %\listoftodos
 \begin{abstract}
-OpenVDB and NanoVDB are data structures which were initially developed for image and movie rendering.
-However it is possible to use the provided frameworks within the context of semiconductor process simulation.
-This paper aims to benchmark the raytracing performance of NanoVDB and OpenVDB for said application in a worst-cast scenario on a scientific computing cluster.
-NanoVDB, which is a mini-version of OpenVDB, is also compatible with common graphics APIs. Therefore the behavior on GPUs is examined as well.
+    OpenVDB and NanoVDB are data structures which were initially developed for image and movie rendering.
+    However it is possible to use the provided frameworks within the context of semiconductor process simulation.
+    This paper aims to benchmark the raytracing performance of NanoVDB and OpenVDB for said application in a worst-case scenario on a small scientific computing cluster.
+    NanoVDB, which is a mini-version of OpenVDB, is also compatible with common graphics APIs.
+    Therefore it's behavior on GPUs and it's accuracy is examined as well.
+    The benchmarks shows that NanoVDB performs at least 6x faster on a GPU compared to OpenVDB on similarly priced hardware.
+    However the accuracy of NanoVDB is limited by the grid's voxel size.
 \end{abstract}
 
 
@@ -100,12 +103,13 @@ NanoVDB, which is a mini-version of OpenVDB, is also compatible with common grap
 
 
 %%%%%%%%% Begin Document %%%%%%%%%
-\include{1-introduction}
-\include{2-methology}
+\input{1-introduction}
+\input{2-methology}
 \include{3-results}
-\include{4-discussion}
-%\include{2-conjugate-gradients}
-%\include{99-templateChapter}   
+\input{4-discussion}
+\input{5-conclusions}
+\include{6-appendix}
+
 \printbibliography
 
 \end{document}

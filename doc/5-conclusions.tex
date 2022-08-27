@@ -1,0 +1,11 @@
+\section{Conclusions}
+The benchmark shows that NanoVDB runs approx. 1.5x as fast as OpenVDB on the same CPU in a hypothetical level-set raytracing scenario within the context of semiconductor process simulation.
+Launching the NanoVDB kernel on a comparable GPU achieves approx. 6.2x faster performance than OpenVDB.
+However in its current form NanoVDB is strictly limited to voxel-level accuracy and performs no additional steps to increase the accuracy of level set raytracing intersections.
+
+Migrating code from OpenVDB to NanoVDB requires significant changes to the codebase.
+Therefore if GPUs are to be utilize if might be more efficient to choose NanoVDB and only convert to OpenVDB when needed.
+
+A preliminary analysis of NanoVDBs code shows that improvements to performance are be possible.
+Furthermore recent benchmarks by independent researchers have shown that NVIDIAs new raytracing technology (RTX) may increase performance.
+However it is currently not known if NanoVDB is compatible with this technology.

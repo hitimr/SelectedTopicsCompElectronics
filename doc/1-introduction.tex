@@ -1,46 +1,56 @@
 \section{Introduction}
-
-Semiconductor processing steps may involve exposure of light or the implementation of atoms using focused beams of Ions.
-These processes often take place at the scale of nanometers which make both process design exceedingly difficult.
+\subsection{Background}
+The production of semiconductors has been one of the biggest growing markets during the last decades which resulted in significant advances in production capabilities and a wide range of possible production steps.
+These processes often take place at the scale of nanometers which make both process design, and the verification of results exceedingly difficult.
 The surface structure of semiconductors is often too complex for analytical models and quality control often requires expensive equipment such as electron microscopes.
 
-Due to the increase of computing power within the last decades it has now become feasible to simulate many steps of the production process.
+Due to the increase of computing power it has now become common practice to simulate many steps of the production process.
+Many simulations involve rays and ray-casting of some sort which is a very common problem encountered in the gaming and movie industry.
+These types of computations are in fact so important that many computers include dedicated graphical processing units (GPUs) to accelerate such calculations.
 However modern hardware is still far from being able to simulate every single atom in a focused ion beam or every single photon from a light source.
-Therefore simulations usually resemble an approximation using a limited amount of virtual rays or atoms. 
+Therefore simulations usually resemble an approximation using a limited amount of virtual rays or atoms.
 However in general simulations usually benefit from an increase in computed elements (i.e. the more the better).
 
-Many simulations involve rays and ray-casting of some sort which is a very common technique in the gaming and movie industry.
-These types of computations are in fact so important that many devices offer dedicated graphical processing units (GPUs) for those problems.
-
-
-
-An important part of every simulation is the choice of underlying data structure. 
-One option is OpenVDB which can be used to efficiently store high resolution volumes. \cite{openvdb}
-
-
+An important part of every simulation is the choice of underlying data structure.
+One option is OpenVDB which can be used to efficiently store high resolution volumes and level sets. \cite{openvdb}
 OpenVDB was initially developed for the CGI and movie industry. Due to it's flexibility it is also possible to adapt it for use in semiconductor process simulation \cite{manstetten2018efficient}.
-In a recent article  NVIDIA published a benchmark that presents a significant speed-up when using NanoVDV.
+
+In a recent article  NVIDIA published a benchmark that promises a significant speed-up when using NanoVDV.
+For process simulations the results for level-set raytracing are of significant importance.
+According to Tab. \ref{tab:nvidia_benchmark}, NanoVDB on a GPU should be 60x faster compared to a multithreaded implementation using OpenVDB. (Execution time of 2.427ms vs 148.182ms).
+
 
 \begin{table}[H]
-\caption{Benchmark results published by NVIDIA. The benchmark setup and source code are undisclosed. \cite{nanovdb_nvidia}}
-\centering
-\begin{tabular}{@{}lllll@{}}
-	\toprule
-			& OpenVDB (TBB) & NanoVDB (TBB) & NanoVDB (CUDA) & CUDA Speed-Up \\	\hline
-Level Set  & 148.182       & 11.554        & 2.427          & 5x            \\
-Fog Volume & 243.985       & 223.195       & 4.971          & 44x           \\
-Collision  & -             & 120.324       & 10.131         & 12x          \\ \bottomrule
-\end{tabular}
-\label{tab:nvidia_benchmark}
+	\caption{Benchmark results published by NVIDIA. The benchmark setup and source code are undisclosed. \cite{nanovdb_nvidia}}
+	\centering
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		           & OpenVDB (TBB) & NanoVDB (TBB) & NanoVDB (CUDA) & CUDA Speed-Up \\	\hline
+		Level Set  & 148.182       & 11.554        & 2.427          & 5x            \\
+		Fog Volume & 243.985       & 223.195       & 4.971          & 44x           \\
+		Collision  & -             & 120.324       & 10.131         & 12x           \\ \bottomrule
+	\end{tabular}
+	\label{tab:nvidia_benchmark}
 \end{table}
 
 
-However in 2021 the project introduced NanoVDB which is compatible with common graphics APIs such as CUDA, OpenCL, OptiX, etc. \cite{nanovdb}.
-
-
-For the process simulations the results for level-set raytracing are of significant importance. 
-According to Tab. \ref{tab:nvidia_benchmark} NanoVDB on a GPU should be 60x faster compared to a multithreaded implementation using OpenVDB. (Execution time of 2.427ms vs 148.182ms).
-
 However since the benchmark setup and source code are no published it is not clear if the same increase in performance can be achieved for other applications.
 Therefore the goal of this paper is to verify these results using a benchmark that is tailored to typical applications within the semiconductor process simulation.
+
+\newpage
+\subsection{Limitations of NanoVDB}
+\label{chap:limitations}
+
+NanoVDB is still in it's early development phase and therefore it is likely that not all features are implemented yet.
+Therefore NanoVDB currently comes with several limitations when used for simulations:
+
+\begin{description}
+	\item[static grids:] Modifications to the tree topology which are required for problems such as surface advection are not supported.
+	      However it is possible to perform an intermediate transformations to OpenVDB in order to make changes to the tree.
+	\item[accuracy:] Only the voxel containing the intersection is returned by NanoVDB's raytracing function (\texttt{nanovdb::ZeroCrossing}, see Alg. \ref{cod:nano_zero_crossing}).
+	      In contrast to OpenVDB, no further steps are performed to locate the intersection point within a voxel.
+\end{description}
+
+
+
 

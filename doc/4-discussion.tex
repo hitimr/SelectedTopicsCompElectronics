@@ -1,18 +1,80 @@
 \section{Discussion and Outlook}
-
+\subsection{Performance}
 As shown in Fig. \ref{fig:results} NanoVDB does provide better performance compared to OpenVDB on both platforms.
-Since both frameworks use different data structures significant adaptations to the code base are required for a project to migrate to NanoVDB. 
-The expected increase in performance for CPU based systems can be considered too small to justify the amount of necessary work.
+However this is most likely due to the fact that OpenVDB performs additional steps to increase it's accuracy as mentioned in section \ref{chap:limitations}.
 
-However for machines with a dedicated GPU a switch to NanoVDB can be very attractive especially for large simulations.
-Furthermore no adaptations to the codebase are required to launch kernels on either CPUs or GPUs.
-This also allows to combine both platforms to perform calculations on both in parallel.
+Only for small problem sizes the CPU delivers better results.
+Once the benchmark surpasses $10^5 - 10^6$ rays the GPU overtakes the CPU.
+This behaviour is very common for GPU benchmarks because CPUs usually have significantly higher single core performance and lower latencies.
+Below a certain threshold the GPU is often not even able to utilize it's full performance as more threads than rays are available.
+However within the context of semiconductor process simulation the only the high-end spectrum is relevant.
 
-With its current implementation the main limiting factor of NanoVDB seems to be the kernel for ray intersections which is not well optimized GPUs as it includes 4 branches (2 if and 2 while).
-Branches are usually no problem for CPUs due to their branch-prediction functionality.
-However on GPUs with a SIMT \footnote{Single Instruction Multiple Thread} Architecture 1 branch may force multiple threads to idle until all branches in a thread block are merged again.
+While NVIDIA promises an increase of performance of approx. 60x (see Tab. \ref{tab:nvidia_benchmark}), this benchmark is one order of magnitude slower.
+This is likely due to NVIDIA trying to sell best-case scenarios while this benchmark is aimed to be a worst-case scenario.
+Real world applications are most likely achieve performances between those values.
+
+Since both frameworks use different data structures and algorithms, significant adaptations to the code base are required for a project to migrate to NanoVDB.
+The expected increase in performance for CPU based systems may be considered too small to justify the amount of necessary work.
+However for machines with a dedicated GPU a switch to NanoVDB can be very attractive especially for large simulations using multiple GPUs.
+NanoVDB-Kernels can be used interchangeably on CPU and GPU, i.e. the target platform is determined at compile time.
+Therefore very little adaptations to the codebase are required to launch kernels on either CPUs or GPUs.
+This also allows to easily combine both platforms to perform calculations simultaneously thus effectively combining the performance of both platforms.
+
+In its current form NanoVDB only supports static grids.
+This means that the whole data structure must me re-computed if the level-set changes.
+Depending on the complexity of the transformation it might be easier to convert the grid to the OpenVDB format before applying the transformation as OpenVDB is a more feature-rich and mature frameworks.
+For example generating platonic solids in OpenVDB and transforming them to NanoVDB is significantly faster than generating them natively because only OpenVDBs generation functions are multi-threaded.
+Depending on the complexity of the simulation this process may require significant amounts of time.
+However within the context of semiconductor process simulation the majority of time is spent on calculating ray intersections as there is no need to finish all calculations within a given frame time.
+
+It should also be noted that a GPU's Video-RAM is usually much smaller than regular RAM.
+This not only limits the maximum grid size but also the number of rays that can be stored or buffered on GPU.
+NanoVDB's Ray-class has a memory-footprint of 56 bytes per ray.
+The GPU used for this benchmark has 16GB of memory and can therefore theoretically hold up to 285 million rays (omitting grid, kernels, etc.).
+Using the measured performance of 117 MRps the computation of all rays would complete within 2.5s.
+In order to go beyond that limit new rays need to be generated during the simulation.
+Performing this step on CPU would cause an additional load 6.4 GB/s on the PCI bus.
+This number also increases if more than one GPU is used.
+Therefore ray generation should be performed on GPU as well.
+However this is not covered by this benchmark as this problem was not considered in the design phase of the experiment.
+
+\subsection{Potential performance improvements}
+Nvidia GPUs follow a SIMT \footnote{Single Instruction Multiple Thread} hardware architecture where threads are grouped in 'warps'.
+Each warp usually contains 32 synchronized threads which all execute the same instruction.
+In order to execute \texttt{if-else}-statements both branches have to be evaluated by a warp consecutively while a mask is used to disable the the false-path in each thread. \cite[Chapter~3.6.3]{mccool}
+Therefore every branch is potentially wasteful and should be avoided by using branchless patterns.
+
+
+Alg. \ref{cod:nano_zero_crossing} shows the core loop if NanoVDB's raytracing function which contains 2 \texttt{if}-branches.
+Additional branches are present in various subroutines such as \texttt{RoundDown()} or \texttt{hdda.update()}.
+Furthermore two \texttt{while}-loops are present which in the context of warps behave just like branches.
+I.e.: Each warp must 'wait' until all 32 threads have finished the loop.
+The outer loop is used while the ray is outside the narrow band. Once the ray enters a narrow band the inner loop is active and the value of each voxel is evaluated to detect an intersection.
+Therefore as long as any ray of a warp remains within a narrow-band, the computation of all other rays is essentially halted.
+
+Modern compilers are likely able to optimize simple conditions such as \texttt{RoundDown()} to prevent branching.
+However more complex operations may increase the likelihood of wasteful branches.
+One way to achieve this could be by separating the nested while-loops such that only rays outside of the narrow band are processed.
+Once a ray enters the narrow-band it is handled by a different warp or kernel.
+
+As mentioned above, NanoVDBs Ray-Class has a memory footprint of 56 bytes \footnote{Measured using sizeof()}.
+A ray consists at minimum of a pair of 3D-vectors or a set of 6 floating point numbers.
+Using single precision floats (4 bytes) each ray requires at least 24 bytes.
+This means that NanoVDB rays require almost twice as much memory.
+Therefore a better data structure could be introduced to reduce the memory footprint.
+This new structure can also be used to make use of more efficient memory alignments.
+
 
 Since 2018 NVIDIA is also selling GPUs with hardware accelerated raytracing capabilities (RTX 20X0 and 30X0 series).
-Due to its proprietary license the exact functionality of this technology is not part of the public domain.
-But a recent analysis \cite{sanzharov2020survey} shows that a performance increase of up to one order of magnitude is possible in certain scenarios.
-However additional research and testing is required to determine of NanoVDB is compatible with this technology.
+Due to its proprietary license the exact functionality of this technology is not part of the public domain but the technology seems to be a hardware implementation of NVIDIA's OptiX pipeline.
+A recent analysis \cite{sanzharov2020survey} also shows that a performance increase of up to one order of magnitude is possible in certain raytracing scenarios.
+However additional research and testing is required to determine if NanoVDB is compatible with this technology.
+It should be noted that the GPU used for this benchmark also contains 40 RT cores.
+Therefore it should be possible to repeat this benchmark on the same platform.
+
+
+
+
+
+
+

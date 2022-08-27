@@ -1,0 +1,42 @@
+\section{Appendix}
+
+\begin{lstlisting}[caption={NanoVDBs Coord class. Note that datatypes are hardcoded to integers}]
+    // NanoVDB.h Line 859
+    class Coord
+    {
+        int32_t mVec[3]; // private member data - three signed index coordinates
+    public:
+        using ValueType = int32_t;
+        using IndexType = uint32_t;
+        ...
+\end{lstlisting}
+\label{cod:nano_coords}
+
+\begin{lstlisting}[caption={NanoVDBs raytracing implementation. }]  
+template<typename RayT, typename AccT>
+inline __hostdev__ bool ZeroCrossing(RayT& ray, AccT& acc, Coord& ijk, typename AccT::ValueType& v, float& t)
+{
+    if (!ray.clip(acc.root().bbox()) || ray.t1() > 1e20)
+        return false; // clip ray to bbox
+    static const float Delta = 1.0001f;
+    ijk = RoundDown<Coord>(ray.start()); // first hit of bbox
+    HDDA<RayT, Coord> hdda(ray, acc.getDim(ijk, ray));
+    const auto        v0 = acc.getValue(ijk);
+    while (hdda.step()) {
+        ijk = RoundDown<Coord>(ray(hdda.time() + Delta));
+        hdda.update(ray, acc.getDim(ijk, ray));
+        if (hdda.dim() > 1 || !acc.isActive(ijk))
+            continue; // either a tile value or an inactive voxel
+        while (hdda.step() && acc.isActive(hdda.voxel())) { // in the narrow band
+            v = acc.getValue(hdda.voxel());
+            if (v * v0 < 0) { // zero crossing
+                ijk = hdda.voxel();
+                t = hdda.time();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+\end{lstlisting}
+\label{cod:nano_zero_crossing}

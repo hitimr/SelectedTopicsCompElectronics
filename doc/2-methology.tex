@@ -1,53 +1,28 @@
-\setcounter{section}{1}
 \section{Methodology}
+\label{sec:methodology}
 
-% Rendering images is usually achieved by casting a set amount of rays onto a 3D object and calculating all intersection points.
-% Once an intersection is found a ray may spawn one or more rays at the intersection point in order to simulate effects such as reflections, glossy surfaces, semi-transparent materials, etc.
-% It is also possible that no intersection is found if the ray leaves the bounding box. This is the equivalent of a ray "shooting into the sky".
-% These rays do not contribute to the result and are usually discarded. 
-% Since the exact point of exit is not required and no additional rays are spawned theses rays are cheaper to compute.
-
-
-% \begin{figure}[H]
-% 	\centering
-% 	\includegraphics[width=0.5\textwidth]{res/rendered_image_turner.jpg}
-% 	\caption{One of the first rendered digitally rendered images \cite{rendering_turner}. Approximately half of the rendered area represents the sky. Rays casted there can be discarded}
-% 	\label{fig::rendered_image_turner}
-% \end{figure}
-
-
-% The main difference between image rendering and applications in Semiconductor Process Simulation is that there are usually no skyboxes.
-% Furthermore it is undesirable to discard rays since they do not contribute to the simulation and are therefore wasted computing power.
-
-The benchmark is designed to be baseline for future applications that are using NanoVDB for narrow-band level-sets and raytracing within the context of Semiconductor process simulation.
-Therefore no specific problem is chosen but the worst-case scenario in a typical application is modelled. 
-
-
-Source code, build instructions and measurement data are available at \footnote{Pre-Release version. The project is not finished yet}:
-\\~\\
-\centerline{\url{https://github.com/hitimr/SelectedTopicsCompElectronics}}
-
+The benchmark is designed to be baseline for future applications that are using NanoVDB for narrow-band level-sets and raytracing within the context of semiconductor process simulation.
+Therefore no specific problem is chosen but the worst-case scenario in a typical application is modelled.
 
 \subsection{Hardware setup}
-The benchmark is performed on a single node of a scientific cluster provided by TU Wien. 
+The benchmark is performed on a single node of a scientific cluster provided by TU Wien.
 The node consists of the devices listed in Tab. \ref{tab:hardware} which are both used for the benchmark.
 
 CPUs and GPUs are different platforms in terms of architecture and design which makes a fair comparison with regards to their technical aspects difficult.
-However both devices are similar in cost of acquisition and operating expenses (i.e. power usage). 
+However both devices are similar in cost of acquisition and operating expenses (i.e. power usage).
 Furthermore both platforms are marketed towards scientific computing.
 
 
 \begin{table}[H]
-
-\caption{Hardware used for the benchmark. Prices may fluctuate due to current events. Power consumption represents the absolute maximum ratings according to the vendor}
-\centering
-\begin{tabular}{@{}llll@{}}
-	\toprule
-	& Price           & Power Consumption & Cores                \\ \hline
-Intel Xeon 6248 & € 3.300         & 105W              & 20 Cores; 40 Threads \\
-NVIDIA Tesla T4 & € 2.500 - 3.000 & 70W               & 2.560 CUDA-Cores     \\ \bottomrule
-\end{tabular}
-\label{tab:hardware}
+	\caption{Hardware used for the benchmark. Prices may fluctuate due to current events. Power consumption represents the absolute maximum ratings according to the vendor}
+	\centering
+	\begin{tabular}{@{}llll@{}}
+		\toprule
+		                & Price           & Power Consumption & Cores                \\ \hline
+		Intel Xeon 6248 & € 3.300         & 105W              & 20 Cores; 40 Threads \\
+		NVIDIA Tesla T4 & € 2.500 - 3.000 & 70W               & 2.560 CUDA-Cores     \\ \bottomrule
+	\end{tabular}
+	\label{tab:hardware}
 \end{table}
 
 
@@ -57,8 +32,9 @@ A common problem in Semiconductor process simulation is light being cast into a 
 To simplify the program and enforce a worst-case scenario the following modifications are performed:
 
 \begin{itemize}
-	\item Rays leaving the bounding box (i.e. shooting into the sky) are cheaper to compute but do not contribute to the simulation. 
-	In order to prevent these edge cases rays are cast onto the inner surface of a hollow sphere.
+	\item All calculations are performed using 32-bit floating point numbers (\texttt{float}) as single-precision arithmetics have been shown to be sufficiently accurate \cite[Chapter 5.1]{manstetten2018efficient}
+	\item Rays leaving the bounding box (i.e. shooting into the sky) are cheaper to compute but do not contribute to the simulation.
+	      In order to prevent these edge cases rays are cast onto the inner surface of a hollow sphere.
 	\item The point source is replaced with a volumetric source. Otherwise every ray would start within the same voxel which would lead to a beneficial memory access pattern.
 	\item Depending on the reflecting angle, rays may cover different distances. Therefore the inner sphere (ray source) is offset to create a distribution of distances.
 	\item Rays are shuffled in memory before being passed to the kernel to prevent beneficial memory access patterns.
@@ -66,25 +42,23 @@ To simplify the program and enforce a worst-case scenario the following modifica
 \end{itemize}
 
 
-\begin{figure}[H]
-	\centering
-	% Rigth image
-	\begin{subfigure}{0.35\textwidth}
-	\includegraphics[width=1\linewidth]{res/trench_with_rays.png} 
-	\caption{}
-	%\label{fig:trench_with_rays}
-	
-\end{subfigure}
-	% left image
-	\begin{subfigure}{0.35\textwidth}
-	\includegraphics[width=1\linewidth]{res/benchmark_setup.png}
-	\caption{}
-	%\label{fig:parallel-solution}
-\end{subfigure}
+\begin{figure}[!htb]
+	\minipage{0.32\textwidth}
+	\includegraphics[width=\linewidth]{res/trench_with_rays.png}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}
+	\includegraphics[width=\linewidth]{res/benchmark_setup.png}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}
+	\includegraphics[width=\linewidth]{res/rays_on_sphere.png}
+	\endminipage
 
-\caption{Benchmark setup. \textbf{a} Trench being illuminated by a light source. Every ray has a chance of being reflected or absorbed.
-\textbf{b} 2D cross-section of the modified setup. For the benchmark rays are distributed evenly across the surface of the inner sphere.} 
-\label{fig:benchmark_setup}
+	\caption{Benchmark setup.
+		\textbf{left} Trench being illuminated by a light source. Every ray has a chance of being reflected or absorbed.
+		\textbf{center} 2D cross-section of the modified setup.
+		\textbf{right} Setup for determining accuracy of the calculation
+	}
+	\label{fig:benchmark_setup}
 \end{figure}
 
 
@@ -96,16 +70,55 @@ Origin and direction of every ray along with a ground truth are precomputed and 
 	\item NanoVDB (GPU)
 \end{itemize}
 
-The OpenVDB kernel servers as a baseline for comparison.
+The OpenVDB kernel serves as a baseline for comparison.
 Both NanoVDB kernels are identical but launched on different platforms.
+CPU based benchmarks are performed using all 40 threads.
 
 Only the time required to calculate intersections is measured. Memory management, data transfer, ray generation, result verification, etc. is not included.
-After the benchmark is complete the number of calculated rays per second is derived using 
+After the benchmark is complete the number of calculated rays per second is derived using
 
 \begin{equation}
 	Rps = \frac{ray \: count}{time} = [\frac{1}{s}]
 \end{equation}
 
-The benchmark is repeated while increasing the number of rays until no further increases in $Rps$ is observed. 
-After each iteration the resulting intersections are compared to a pre-computed ground truth to assure the correctness of the results.
+The benchmark is repeated as the number of rays is increased until the measured performance starts to plateau.
+If the benchmark requires more rays than RAM or VRAM can store, then pre-generated rays are recycled.
+This has the same effect as increasing the memory of a device as the set of rays is big enough (100s of millions) such that no beneficial memory access patterns emerge.
 The asymptotic behaviour of the resulting performance curve is used to estimate a potential performance gain for switching to NanoVDB or GPUs.
+
+\subsection{Intersection accuracy}
+
+After each iteration the resulting intersections ($\mathbf{r}_{calc}$) are compared to a pre-computed ground truth ($\mathbf{r}_{gt}$) to assure the correctness of the results.
+As mentioned in chapter \ref{chap:limitations}, NanoVDB does not compute intersections within a voxel.
+Therefore results are considered correct if the following condition is satisfied for each ray
+\footnote{While the intersection can be located anywhere between a bounding cube, a sphere is used as it is simpler to compute}:
+
+\begin{equation}
+	\lVert \mathbf{r}_{calc} - \mathbf{r}_{gt} \lVert _2 \:  \leq \sqrt{3} \cdot VOXEL\_SIZE
+\end{equation}
+
+
+The difference between OpenVDB and NanoVDB in terms of accuracy can be illustrated by projecting parallel rays onto a sphere as shown in Fig. \ref{fig:benchmark_setup} (right).
+While OpenVDB is able to accurately find intersections within a given voxel, NanoVDB only returns the position of the voxel center containing the intersection.
+Therefore the only way to increase accuracy without performing further calculations is to increase the grid resolution i.e. decrease voxel size.
+
+\begin{figure}[h]
+	\minipage{0.32\textwidth}
+	\includegraphics[width=\linewidth]{res/intersection.pdf}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}
+	\includegraphics[width=\linewidth]{res/intersection_time.pdf}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}
+	\includegraphics[width=\linewidth]{res/intersection_values.pdf}
+	\endminipage
+	\caption{Difference in terms of accuracy of OpenVDB and NanoVDB. The grid lines resemble voxels. In total 100 rays are used but many results overlap because the accuracy is reduced to voxel-level
+		\textbf{left:} Calculated intersection points compared to analytical solution
+		\textbf{center:} Intersection time/distance
+		\textbf{right:} Voxel value at intersection point. (NanoVDB only)
+	}
+	\label{fig:results_accuracy}
+\end{figure}
+
+
+
